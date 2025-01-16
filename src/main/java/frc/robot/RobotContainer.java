@@ -29,9 +29,6 @@ import frc.robot.commands.notePipeline.ShooterRevCommand;
 import frc.robot.controllers.DriverController;
 import frc.robot.controllers.OperatorController;
 import frc.robot.subsystems.drive.DriveSubsystem;
-import frc.robot.subsystems.notePipeline.FeederSubsystem;
-import frc.robot.subsystems.notePipeline.IntakeSubsystem;
-import frc.robot.subsystems.notePipeline.ShooterSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
 public class RobotContainer {
@@ -40,9 +37,6 @@ public class RobotContainer {
   public final class subsystems {
     public static final DriveSubsystem drive = DriveSubsystem.getInstance();
     public static final VisionSubsystem vision = VisionSubsystem.getInstance();
-    public static final FeederSubsystem feeder = FeederSubsystem.getInstance();
-    public  static final ShooterSubsystem shooter = ShooterSubsystem.getInstance();
-    public  static final IntakeSubsystem intake = IntakeSubsystem.getInstance();
   }
 
   public final class controllers {
@@ -63,23 +57,6 @@ public class RobotContainer {
     SmartDashboard.putData("Auto Chooser", autoChooser);
     autoChooser.setDefaultOption("DefaultAuto", AutoBuilder.buildAuto("DefaultAuto"));
 
-    NamedCommands.registerCommand("intake", new IntakeCommand());
-    NamedCommands.registerCommand("startRevShooter", new FunctionalCommand(
-      () -> { subsystems.shooter.set(MotorSpeeds.shooterRev); },
-      () -> {},
-      ignore -> {},
-      () -> { return true; },
-      subsystems.shooter
-    ));
-    NamedCommands.registerCommand("endRevShooter", new FunctionalCommand(
-      () -> { subsystems.shooter.stop(); },
-      () -> {},
-      ignore -> {},
-      () -> { return true; },
-      subsystems.shooter
-    ));
-    NamedCommands.registerCommand("feedShooter", new FeedShooterCommand());
-
     configureBindings();
   }
 
@@ -90,25 +67,6 @@ public class RobotContainer {
         controllers.driver::getYVelocity, 
         controllers.driver::getRotationalVelocity)
     );
-
-    controllers.operator.getIntakeTrigger().whileTrue(new IntakeCommand()
-      .andThen(
-        new AlignNoteCommand().withTimeout(0.2)
-      ).andThen(
-        new EjectNoteCommand().withTimeout(0.3)
-      ) 
-    );
-    controllers.operator.getIntakeTrigger().onFalse(
-      new InstantCommand(() -> {subsystems.intake.stop();})
-    );
-
-    // controllers.operator.getFeedingShooter().whileTrue(new FeedShooterCommand());
-
-    controllers.operator.getRevingTrigger().whileTrue(new ShooterRevCommand())
-      .onFalse(new FeedShooterCommand().withTimeout(1)
-      .alongWith(new ShooterRevCommand()).withTimeout(2));
-
-    controllers.operator.getEjectTrigger().whileTrue(new EjectNoteCommand());
   }
 
   public Command getAutonomousCommand() {
