@@ -148,56 +148,6 @@ public class Constants {
       public static final Measure<Angle> pitch = Units.Degrees.of(-28.125);
       public static final Measure<Angle> yawOffset = Units.Degrees.of(30);
 
-      // public static final Transform3d kFrontLeft = new Transform3d(
-      //   lengthWidth.in(Units.Meters),
-      //   lengthWidth.in(Units.Meters),
-      //   height.in(Units.Meters), 
-      //   new Rotation3d(0, pitch.in(Units.Radians), yawOffset.in(Units.Radians))
-      // );
-      // public static final Transform3d kFrontRight = new Transform3d(
-      //   lengthWidth.in(Units.Meters),
-      //   -lengthWidth.in(Units.Meters),
-      //   height.in(Units.Meters), 
-      //   new Rotation3d(0, pitch.in(Units.Radians), - yawOffset.in(Units.Radians))
-      // );
-      // public static final Transform3d kBackLeft = new Transform3d(
-      //   -lengthWidth.in(Units.Meters),
-      //   lengthWidth.in(Units.Meters),
-      //   height.in(Units.Meters), 
-      //   new Rotation3d(0, pitch.in(Units.Radians), Math.PI - yawOffset.in(Units.Radians))
-      // );
-      // public static final Transform3d kBackRight = new Transform3d(
-      //   -lengthWidth.in(Units.Meters),
-      //   -lengthWidth.in(Units.Meters),
-      //   height.in(Units.Meters), 
-      //   new Rotation3d(0, pitch.in(Units.Radians), - Math.PI + yawOffset.in(Units.Radians))
-      // );
-
-      // public static final Transform3d kFrontLeft = new Transform3d(
-      //   lengthWidth.in(Units.Meters),
-      //   lengthWidth.in(Units.Meters),
-      //   height.in(Units.Meters), 
-      //   new Rotation3d(0, pitch.in(Units.Radians), yawOffset.in(Units.Radians))
-      // );
-      // public static final Transform3d kFrontRight = new Transform3d(
-      //   lengthWidth.in(Units.Meters),
-      //   -lengthWidth.in(Units.Meters),
-      //   height.in(Units.Meters), 
-      //   new Rotation3d(0, pitch.in(Units.Radians), - yawOffset.in(Units.Radians))
-      // );
-      // public static final Transform3d kBackLeft = new Transform3d(
-      //   -lengthWidth.in(Units.Meters),
-      //   lengthWidth.in(Units.Meters),
-      //   height.in(Units.Meters), 
-      //   new Rotation3d(0, pitch.in(Units.Radians), Math.PI - yawOffset.in(Units.Radians))
-      // );
-      // public static final Transform3d kBackRight = new Transform3d(
-      //   -lengthWidth.in(Units.Meters),
-      //   -lengthWidth.in(Units.Meters),
-      //   height.in(Units.Meters), 
-      //   new Rotation3d(0, pitch.in(Units.Radians), - Math.PI + yawOffset.in(Units.Radians))
-      // );
-
       public static final Transform3d kFrontLeft = new Transform3d(
         -lengthWidth.in(Units.Meters),
         -lengthWidth.in(Units.Meters),
@@ -256,70 +206,32 @@ public class Constants {
     }
   }
 
-  public static final class NotePipelineConstants {
+  public static final double kFlyWheelRadius = 0.05;
+  public static final double kFeederWheelRadius = 0.025;
+  public static final double kIntakeWheelRadius = 0.019;
+  
+  public static final double kShooterPositionFactor = 2 * Math.PI * kFlyWheelRadius;
+  public static final double kShooterVelocityFactor = kShooterPositionFactor / 60;
 
-    public static final double kFlyWheelRadius = 0.05;
-    public static final double kFeederWheelRadius = 0.025;
-    public static final double kIntakeWheelRadius = 0.019;
+  public static final double kFeederPositionFactor = 2 * Math.PI * kFeederWheelRadius;
+  public static final double kFeederVelocityFactor = kFeederPositionFactor / 60;
+
+  public static final double kIntakePositionFactor = 2 * Math.PI * kIntakeWheelRadius;
+  public static final double kIntakeVelocityFactor = kIntakePositionFactor / 60;
+
+  public static final class CANIDs {
+    public static final int coralArm;
+  }
+
+  public static final class PID {
+    public static final class CoralArm {
+      public static final double kP = 0;
+      public static final double kI = 0;
+      public static final double kD = 0;
+    }
+  }
+
+  public static final class MotorSpeeds {
     
-    public static final double kShooterPositionFactor = 2 * Math.PI * kFlyWheelRadius;
-    public static final double kShooterVelocityFactor = kShooterPositionFactor / 60;
-
-    public static final double kFeederPositionFactor = 2 * Math.PI * kFeederWheelRadius;
-    public static final double kFeederVelocityFactor = kFeederPositionFactor / 60;
-
-    public static final double kIntakePositionFactor = 2 * Math.PI * kIntakeWheelRadius;
-    public static final double kIntakeVelocityFactor = kIntakePositionFactor / 60;
-
-    public static final class Sensor {
-      public static final double noteRange = 250; // distance in which a note will be detected, in millimeters
-      public static final double checkTime = 75; // how frequently the sensor updates, in milliseconds
-    }
-
-    public static final class CANIDs {
-      public static final int kShooterLeft = 20;
-      public static final int kShooterRight = 21;
-      public static final int kIntake = 31;
-      public static final int kFeeder = 30;
-      public static final int kSensor = 40;
-    }
-
-    public static final class PID {
-      public static final class Shooter {
-        public static final double kP = 0.1;
-        public static final double kI = 0.0;
-        public static final double kD = 0.0;
-        public static final double kFF = 0.03;
-      }
-
-      public static final class Feeder {
-        public static final double kP = 0.1;
-        public static final double kI = 0.0;
-        public static final double kD = 0.0;
-        public static final double kFF = 0.077;
-      }
-
-      public static final class Intake {
-        public static final double kP = 0.1;
-        public static final double kI = 0.0;
-        public static final double kD = 0.0;
-        public static final double kFF = 0.105;
-      }
-    }
-
-    public static final class MotorSpeeds {
-      public static final double shooterFeed = 3;
-      public static final double shooterRev = 25;
-      public static final double alignNote = 4;
-
-      public static final double intake = 3;
-      public static final double feeder = 1.5;
-      
-
-      public static final class ShooterEject {
-        public static final double intake = 3;
-        public static final double feeder = 3;
-      }
-    }
   }
 }
