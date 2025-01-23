@@ -3,10 +3,8 @@ package frc.robot.subsystems.drive;
 import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkPIDController;
-
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.RelativeEncoder;
-
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.SparkAbsoluteEncoder.Type;
 import com.revrobotics.CANSparkBase.IdleMode;
@@ -14,14 +12,12 @@ import com.revrobotics.CANSparkBase.IdleMode;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.networktables.StructTopic;
+import edu.wpi.first.units.Units;
 
-import edu.wpi.first.units.*;
-
-import frc.robot.Constants.SwerveConstants;
+import frc.robot.constants.DriveConstants;
 
 public class SwerveModule {
 
@@ -106,8 +102,8 @@ public class SwerveModule {
     m_turningMotor.setIdleMode(IdleMode.kCoast);
 
     // go from rotations or rotations per minute to meters or meters per second
-    m_drivingEncoder.setPositionConversionFactor(SwerveConstants.kDrivingEncoderPositionFactor);
-    m_drivingEncoder.setVelocityConversionFactor(SwerveConstants.kDrivingEncoderPositionFactor / 60);
+    m_drivingEncoder.setPositionConversionFactor(DriveConstants.SwerveCalculations.kDrivingEncoderPositionFactor);
+    m_drivingEncoder.setVelocityConversionFactor(DriveConstants.SwerveCalculations.kDrivingEncoderPositionFactor / 60);
 
     // go from rotations or rotations per minute to meters or meters per second
     m_turningEncoder.setPositionConversionFactor(2 * Math.PI);
@@ -117,21 +113,21 @@ public class SwerveModule {
     m_turningEncoder.setInverted(true);
 
     // set up pid controllers
-    m_drivingPID.setP(SwerveConstants.DrivingPID.kP);
-    m_drivingPID.setI(SwerveConstants.DrivingPID.kI);
-    m_drivingPID.setD(SwerveConstants.DrivingPID.kD);
-    m_drivingPID.setFF(SwerveConstants.DrivingPID.kFF);
+    m_drivingPID.setP(DriveConstants.DrivingPID.kP);
+    m_drivingPID.setI(DriveConstants.DrivingPID.kI);
+    m_drivingPID.setD(DriveConstants.DrivingPID.kD);
+    m_drivingPID.setFF(DriveConstants.DrivingPID.kFF);
     m_drivingPID.setOutputRange(-1, 1);
 
-    m_turningPID.setP(SwerveConstants.TurningPID.kP);
-    m_turningPID.setI(SwerveConstants.TurningPID.kI);
-    m_turningPID.setD(SwerveConstants.TurningPID.kD);
-    m_turningPID.setFF(SwerveConstants.TurningPID.kFF);
+    m_turningPID.setP(DriveConstants.TurningPID.kP);
+    m_turningPID.setI(DriveConstants.TurningPID.kI);
+    m_turningPID.setD(DriveConstants.TurningPID.kD);
+    m_turningPID.setFF(DriveConstants.TurningPID.kFF);
     m_turningPID.setOutputRange(-1, 1);
 
     // current limits
-    m_driveMotor.setSmartCurrentLimit((int) SwerveConstants.kDrivingMotorCurrentLimit.in(Units.Volts));
-    m_turningMotor.setSmartCurrentLimit((int) SwerveConstants.kTurningMotorCurrentLimit.in(Units.Volts));
+    m_driveMotor.setSmartCurrentLimit((int) DriveConstants.kDrivingMotorCurrentLimit.in(Units.Volts));
+    m_turningMotor.setSmartCurrentLimit((int) DriveConstants.kTurningMotorCurrentLimit.in(Units.Volts));
 
     m_driveMotor.setInverted(drivingMotorInverted);
     m_turningMotor.setInverted(turningMotorInverted);

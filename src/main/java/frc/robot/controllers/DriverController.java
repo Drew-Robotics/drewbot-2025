@@ -3,6 +3,7 @@ package frc.robot.controllers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.math.MathUtil;
 import frc.robot.Constants.OIConstants;
+import frc.robot.constants.IOConstants;
 
 public class DriverController extends Controller{
 
@@ -10,7 +11,7 @@ public class DriverController extends Controller{
 
   public static DriverController getInstance(){
     if (m_intance == null){
-        m_intance = new DriverController(OIConstants.DriverController.kPort);
+        m_intance = new DriverController(IOConstants.DriverController.kPort);
     }
     return m_intance;
   }
@@ -20,15 +21,15 @@ public class DriverController extends Controller{
   }
 
   public double getXVelocity(){
-    return -MathUtil.applyDeadband(getLeftY(), OIConstants.DriverController.kDriveDeadband);
+    return MathUtil.applyDeadband(getLeftY(), IOConstants.DriverController.kDeadband);
   }
 
   public double getYVelocity(){
-    return -MathUtil.applyDeadband(getLeftX(), OIConstants.DriverController.kDriveDeadband);
+    return MathUtil.applyDeadband(getLeftX(), IOConstants.DriverController.kDeadband);
   }
 
   public double getRotationalVelocity(){
-    return -MathUtil.applyDeadband(getRightX(), OIConstants.DriverController.kDriveDeadband);
+    return MathUtil.applyDeadband(getRightX(), IOConstants.DriverController.kDeadband);
   }
 
   public Trigger getTurnToZeroButton(){

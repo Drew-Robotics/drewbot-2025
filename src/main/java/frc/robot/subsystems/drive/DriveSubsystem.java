@@ -17,7 +17,6 @@ import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -29,19 +28,18 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.StructPublisher;
 
 import edu.wpi.first.units.*;
-import frc.robot.Constants.AutoConstants;
-import frc.robot.Constants.DriveConstants;
-import frc.robot.Constants.SwerveConstants;
-import frc.robot.Constants.VisionConstants;
+import frc.robot.constants.AutoConstants;
+import frc.robot.constants.DriveConstants;
+import frc.robot.constants.VisionConstants;
 import frc.robot.RobotContainer.subsystems;
 import frc.robot.subsystems.Subsystem;
 
 public class DriveSubsystem extends Subsystem {
+
   private final AHRS m_gyro;
   private boolean m_isFieldOriented = DriveConstants.kFieldOriented;
 
@@ -78,40 +76,40 @@ public class DriveSubsystem extends Subsystem {
 
     m_frontLeft = new SwerveModule(
       "Front Left",
-      DriveConstants.CanIDs.kFrontLeftDriving,
-      DriveConstants.CanIDs.kFrontLeftTurning,
+      DriveConstants.DriveCANIDs.kFrontLeftDriving,
+      DriveConstants.DriveCANIDs.kFrontLeftTurning,
       DriveConstants.AngularOffsets.kFrontLeft,
       m_table.getSubTable("SwerveModules"),
-      SwerveConstants.DrivingInverted.kFrontLeft,
-      SwerveConstants.TurningInverted.kFrontLeft
+      DriveConstants.DrivingInverted.kFrontLeft,
+      DriveConstants.TurningInverted.kFrontLeft
     );
     m_frontRight = new SwerveModule(
       "Front Right",
-      DriveConstants.CanIDs.kFrontRightDriving,
-      DriveConstants.CanIDs.kFrontRightTurning,
+      DriveConstants.DriveCANIDs.kFrontRightDriving,
+      DriveConstants.DriveCANIDs.kFrontRightTurning,
       DriveConstants.AngularOffsets.kFrontRight,
       m_table.getSubTable("SwerveModules"),
-      SwerveConstants.DrivingInverted.kFrontRight,
-      SwerveConstants.TurningInverted.kFrontRight
+      DriveConstants.DrivingInverted.kFrontRight,
+      DriveConstants.TurningInverted.kFrontRight
 
     );
     m_backLeft = new SwerveModule(
       "Back Left",
-      DriveConstants.CanIDs.kBackLeftDriving,
-      DriveConstants.CanIDs.kBackLeftTurning,
+      DriveConstants.DriveCANIDs.kBackLeftDriving,
+      DriveConstants.DriveCANIDs.kBackLeftTurning,
       DriveConstants.AngularOffsets.kBackLeft,
       m_table.getSubTable("SwerveModules"),
-      SwerveConstants.DrivingInverted.kBackLeft,
-      SwerveConstants.TurningInverted.kBackLeft
+      DriveConstants.DrivingInverted.kBackLeft,
+      DriveConstants.TurningInverted.kBackLeft
     );
     m_backRight = new SwerveModule(
       "Back Right",
-      DriveConstants.CanIDs.kBackRightDriving,
-      DriveConstants.CanIDs.kBackRightTurning,
+      DriveConstants.DriveCANIDs.kBackRightDriving,
+      DriveConstants.DriveCANIDs.kBackRightTurning,
       DriveConstants.AngularOffsets.kBackRight,
       m_table.getSubTable("SwerveModules"),
-      SwerveConstants.DrivingInverted.kBackRight,
-      SwerveConstants.TurningInverted.kBackRight
+      DriveConstants.DrivingInverted.kBackRight,
+      DriveConstants.TurningInverted.kBackRight
     );
 
     m_modules = new SwerveModule[] {m_frontLeft, m_frontRight, m_backLeft, m_backRight};
@@ -132,9 +130,6 @@ public class DriveSubsystem extends Subsystem {
     updateVisionPoseEstimation();
   }
 
-  /**
-   * Run once to initialize
-   */
   @Override
   public void dashboardInit() {
     SmartDashboard.putData("Reset Yaw",
@@ -142,9 +137,6 @@ public class DriveSubsystem extends Subsystem {
     );
   }
 
-  /**
-   * 
-   */
   @Override
   public void dashboardPeriodic() {
     // NavX
@@ -153,15 +145,9 @@ public class DriveSubsystem extends Subsystem {
     SmartDashboard.putNumber("Yaw Degrees", getGyroYaw().getDegrees());
   }
 
-  /**
-   * 
-   */
   @Override
   protected void publishInit() {}
 
-  /**
-   * 
-   */
   @Override
   protected void publishPeriodic() {
     m_logger.poseEstimPublisher.set(getPose());
@@ -170,9 +156,8 @@ public class DriveSubsystem extends Subsystem {
     m_logger.gyroYawPublisher.set(getGyroYaw().getRotations());
   }
 
-  /**
-   * 
-   */
+  /* ----- AUTONOMOUS ----- */
+
   public void pathPlannerConfig() {
     double robotRadius = Math.sqrt(
       Math.pow(DriveConstants.kTrackWidth.in(Units.Meters), 2) + 
@@ -208,11 +193,6 @@ public class DriveSubsystem extends Subsystem {
 
   /* ------ GYRO ------ */
 
-  /**
-   * Get the yaw from the Navx gyro.
-   * 
-   * @return Yaw of the Navx Gyro
-   */
   public Rotation2d getGyroYaw() {
     Measure<Angle> angleMeasure = Units.Degrees.of(
       m_gyro.getYaw() * (DriveConstants.kGyroReversed ? -1.0 : 1.0)
@@ -220,17 +200,10 @@ public class DriveSubsystem extends Subsystem {
     return new Rotation2d(angleMeasure);
   }
 
-  /**
-   * Sets the current yaw of the gyro to be 0.
-   */
   public void resetGyroYaw() {
     m_gyro.zeroYaw(); 
   }
 
-  /**
-   * 
-   * @param offset
-   */
   public void setGyroOffset(Rotation2d offset) {
     m_gyro.setAngleAdjustment(offset.getDegrees());
   }
@@ -238,7 +211,7 @@ public class DriveSubsystem extends Subsystem {
   /* ----- POSE ESTIMATION ----- */
 
   /**
-   * 
+   * Gets the position estimations and feeds them into the pose estimator.
    */
   public void updateVisionPoseEstimation() {
     List<Optional<EstimatedRobotPose>> estimatedPoses = subsystems.vision.getCameraEstimatedPoses();
@@ -259,12 +232,13 @@ public class DriveSubsystem extends Subsystem {
   }
 
   /**
+   * Adds a position to the pose esitmate given a position and the confidence that that position is accurite.
    * 
    * @param pose
    * @param timestamp
    * @param stdDevs
    */
-  public void addVisionMeasurement(Pose2d pose, double timestamp, Matrix<N3, N1> stdDevs) {
+  public void addVisionMeasurement(Pose2d pose, double timeStamp, Matrix<N3, N1> stdDevs) {
     pose = new Pose2d(pose.getTranslation(), pose.getRotation().rotateBy(Rotation2d.fromDegrees(180)));
 
     if(pose.getX() < 0 || pose.getY() < 0)
@@ -272,40 +246,24 @@ public class DriveSubsystem extends Subsystem {
     if(pose.getX() > VisionConstants.kAprilTagLayout.getFieldLength() || pose.getY() > VisionConstants.kAprilTagLayout.getFieldWidth())
       return;
 
-    m_poseEstimator.addVisionMeasurement(pose, timestamp, stdDevs);
+    m_poseEstimator.addVisionMeasurement(pose, timeStamp, stdDevs);
   }
 
-  /**
-   * 
-   * @return
-   */
   public Pose2d getPose() {
     return m_poseEstimator.getEstimatedPosition();
   }
 
   /* ----- SWERVE ----- */
 
-  /**
-   * 
-   * @param pose2d
-   */
   public void setPoseEstimator(Pose2d pose2d) {
     m_poseEstimator.resetPosition(getGyroYaw(), getModulePositions(), pose2d);
   }
 
-  /**
-   * 
-   * @return
-   */
   public ChassisSpeeds getChassisSpeeds() {
     ChassisSpeeds chassisSpeeds = DriveConstants.kDriveKinematics.toChassisSpeeds(getModuleStates());
     return chassisSpeeds;
   }
   
-  /**
-   * 
-   * @param chassisSpeeds
-   */
   public void setChassisSpeeds(ChassisSpeeds chassisSpeeds) {
     SwerveModuleState[] swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(chassisSpeeds);
     setModuleStates(swerveModuleStates);
@@ -399,63 +357,4 @@ public class DriveSubsystem extends Subsystem {
 
     setChassisSpeeds(commandedChassisSpeeds);
   }
-
-  // private void rateLimit() {
-
-  //   double translationVelMagnitude = 
-  //     Math.sqrt(Math.pow(m_xVelocity.in(Units.MetersPerSecond), 2) + Math.pow(m_yVelocity.in(Units.MetersPerSecond), 2));
-
-  //   double translationVelDirection = 
-  //     Math.atan2(m_xVelocity.in(Units.MetersPerSecond), m_yVelocity.in(Units.MetersPerSecond)); // arctan(y / x)
-
-  //   double rotationalVel = m_rotationalVelocity.in(Units.RadiansPerSecond);
-
-  //   double lastTranslationVelMagnitude = m_translationVelMagnitude.in(Units.MetersPerSecond);
-  //   double lastTranslationVelDirection = m_translationVelDirection.in(Units.RadiansPerSecond);
-  //   double lastRotationalVel = m_rotationalVelocity.in(Units.RadiansPerSecond);
-
-  //   double newTranslationVelMagnitude;
-  //   double newTranslationVelDirection;
-  //   double newRotationalVel;
-
-  //     // Calculate the direction slew rate based on an estimate of the lateral acceleration
-  //     double directionSlewRate;
-  //     if (lastTranslationVelMagnitude != 0.0) {
-  //       directionSlewRate = Math.abs(DriveConstants.kDirectionSlewRate / m_translationVelMagnitude);
-  //     } else {
-  //       directionSlewRate = 500.0; // Some high number that means the slew rate is effectively instantaneous
-  //     }
-
-  //     double currentTime = WPIUtilJNI.now() * 1e-6;
-  //     double elapsedTime = currentTime - m_prevTime;
-      
-  //     double angularAccel = Math.abs(translationVelDirection - lastTranslationVelMagnitude); // acceleration estimate
-  //     angularAccel = angularAccel > Math.PI ? (2 * Math.PI) - angularAccel : angularAccel;
-
-  //     if (angularAccel < 0.45 * Math.PI) { // if the angular accel is small enough
-  //       newTranslationVelMagnitude = m_magnitudeLimiter.calculate(lastTranslationVelMagnitude);
-  //       newTranslationVelDirection = SwerveUtils.StepTowardsCircular(lastTranslationVelDirection, translationVelDirection, directionSlewRate * elapsedTime);
-  //     }
-  //     else if (angularAccel > 0.85 * Math.PI && lastTranslationVelMagnitude > 1e-4) {
-  //       newTranslationVelMagnitude = m_magnitudeLimiter.calculate(0.0);
-  //       newTranslationVelDirection = lastTranslationVelDirection;
-  //     }
-  //     else if (angularAccel > 0.85 * Math.PI) {
-  //       newTranslationVelMagnitude = m_magnitudeLimiter.calculate(translationVelMagnitude);
-  //       newTranslationVelDirection = SwerveUtils.WrapAngle(lastTranslationVelDirection + Math.PI);
-  //     }
-  //     else {
-  //       newTranslationVelMagnitude = m_magnitudeLimiter.calculate(0.0);
-  //       newTranslationVelDirection = SwerveUtils.StepTowardsCircular(lastTranslationVelDirection, translationVelDirection, directionSlewRate * elapsedTime);
-  //     }
-  //     m_prevTime = currentTime;
-      
-  //     m_translationVelMagnitude = Units.MetersPerSecond.of(newTranslationVelMagnitude);
-  //     m_translationVelDirection = Units.RadiansPerSecond.of(newTranslationVelDirection);
-
-  //     m_xVelocity = Units.MetersPerSecond.of(lastTranslationVelMagnitude * Math.cos(newTranslationVelDirection));
-  //     m_yVelocity = Units.MetersPerSecond.of(lastTranslationVelMagnitude * Math.sin(newTranslationVelDirection));
-  //     m_rotationalVelocity = Units.RadiansPerSecond.of(m_rotationLimiter.calculate(rotationalVel));
-  // }
-
 }

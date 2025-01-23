@@ -15,15 +15,14 @@ import java.util.Optional;
 
 import org.photonvision.EstimatedRobotPose;
 
-import frc.robot.Constants;
-import frc.robot.Constants.VisionConstants;
+import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.Subsystem;
 
 public class VisionSubsystem extends Subsystem {
   private final Camera m_frontLeft, m_frontRight, m_backLeft, m_backRight;
   private final List<Camera> m_cameras;
 
-  AprilTag[] m_tags = Constants.VisionConstants.AprilTags.kTags.toArray(AprilTag[]::new);;
+  AprilTag[] m_tags = VisionConstants.AprilTags.kTags.toArray(AprilTag[]::new);;
   Pose3d[] m_testPoeses;
 
   private final List<String> m_cameraNames = List.of(

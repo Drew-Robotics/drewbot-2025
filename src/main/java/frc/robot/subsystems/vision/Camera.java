@@ -20,7 +20,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Timer;
-import frc.robot.Constants.VisionConstants;
+import frc.robot.constants.VisionConstants;
 
 public class Camera {
   
