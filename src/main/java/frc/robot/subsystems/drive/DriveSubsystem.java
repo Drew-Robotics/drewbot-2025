@@ -70,7 +70,7 @@ public class DriveSubsystem extends Subsystem {
   }
 
   protected DriveSubsystem() {
-    super(DriveSubsystem.class.getSimpleName());    
+    super();
     m_logger = new DriveSubsystemLogger();
     m_gyro = new AHRS(SerialPort.Port.kMXP, AHRS.SerialDataType.kProcessedData, (byte) 50);
 
@@ -130,14 +130,12 @@ public class DriveSubsystem extends Subsystem {
     updateVisionPoseEstimation();
   }
 
-  @Override
   public void dashboardInit() {
     SmartDashboard.putData("Reset Yaw",
       new InstantCommand((this::resetGyroYaw), this)
     );
   }
 
-  @Override
   public void dashboardPeriodic() {
     // NavX
     SmartDashboard.putBoolean("NavX Connected", m_gyro.isConnected());
@@ -145,11 +143,7 @@ public class DriveSubsystem extends Subsystem {
     SmartDashboard.putNumber("Yaw Degrees", getGyroYaw().getDegrees());
   }
 
-  @Override
-  protected void publishInit() {}
-
-  @Override
-  protected void publishPeriodic() {
+  public void publishPeriodic() {
     m_logger.poseEstimPublisher.set(getPose());
     m_logger.commandedChassisSpeedsPublisher.set(new ChassisSpeeds(m_xVelocity, m_yVelocity, m_rotationalVelocity));
     m_logger.measuredChassisSpeedsPublisher.set(getChassisSpeeds());

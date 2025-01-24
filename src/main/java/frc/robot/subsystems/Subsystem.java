@@ -9,26 +9,25 @@ public abstract class Subsystem extends SubsystemBase {
     protected final String m_name;
     protected final NetworkTable m_table;
 
-    protected static Subsystem m_instance;
+    protected abstract void dashboardInit();
+    protected abstract void dashboardPeriodic();
+
+    protected abstract void publishInit();
+    protected abstract void publishPeriodic();
 
     protected Subsystem() {
-        m_name = this.getSimpleName();
+        m_name = this.getClass().getSimpleName();
         m_table = NetworkTableInstance.getDefault().getTable(m_name);
 
         publishInit();
         dashboardInit();
     }
 
-    public static Subsystem getInstance() {
-        if (m_instance == null)
-            m_instance = new this();
-        return m_instance;
-    }
-
     @Override
     public void periodic() {
         super.periodic();
-        publishPeriodic();
+
+        publishPeriodic(); 
         dashboardPeriodic();
     }
 }

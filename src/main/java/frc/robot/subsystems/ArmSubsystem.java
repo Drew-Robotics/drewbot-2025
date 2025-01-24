@@ -8,6 +8,7 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 import frc.robot.constants.ArmConstants;
 
 public class ArmSubsystem extends Subsystem {
@@ -18,8 +19,15 @@ public class ArmSubsystem extends Subsystem {
   private CANSparkMax m_armMotorController;
   private SparkAbsoluteEncoder m_armEncoder;
 
+  protected static ArmSubsystem m_instance;
+  public static ArmSubsystem getInstance() {
+      if (m_instance == null)
+          m_instance = new ArmSubsystem();
+      return m_instance;
+  }
+
   public ArmSubsystem() {
-    super(ArmSubsystem.class.getSimpleName());
+    super();
 
     m_armMotorController = new CANSparkMax(ArmConstants.ArmCANIDs.kArm, MotorType.kBrushless);
 
@@ -54,18 +62,14 @@ public class ArmSubsystem extends Subsystem {
     m_armDesiredAngle = angle;
   }
 
-  @Override
   protected void dashboardPeriodic() {
     SmartDashboard.putNumber("Desired Arm Angle (degrees)", m_armDesiredAngle.getDegrees());
     SmartDashboard.putNumber("Measured Arm Angle (degrees)", m_armMeasuredAngle.getDegrees());
   }
 
-  @Override
   protected void dashboardInit() {}
 
-  @Override
   protected void publishInit() {}
-
-  @Override
+  
   protected void publishPeriodic() {}
 }
