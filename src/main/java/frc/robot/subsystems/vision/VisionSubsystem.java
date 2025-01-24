@@ -46,7 +46,7 @@ public class VisionSubsystem extends Subsystem {
   }
 
   private VisionSubsystem() {
-    super(VisionSubsystem.class.getSimpleName());
+    super();
 
     m_frontLeft = new Camera(VisionConstants.CameraNames.kFrontLeft, VisionConstants.CameraTransforms.kFrontLeft);  
     m_frontRight = new Camera(VisionConstants.CameraNames.kFrontRight, VisionConstants.CameraTransforms.kFrontRight);

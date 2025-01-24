@@ -2,7 +2,6 @@ package frc.robot.controllers;
 
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.math.MathUtil;
-import frc.robot.Constants.OIConstants;
 import frc.robot.constants.IOConstants;
 
 public class DriverController extends Controller{

@@ -351,4 +351,6 @@ public class DriveSubsystem extends Subsystem {
 
     setChassisSpeeds(commandedChassisSpeeds);
   }
+
+  protected void publishInit() {}
 }
