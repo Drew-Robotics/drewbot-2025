@@ -49,6 +49,8 @@ public class ArmSubsystem extends Subsystem {
 
   @Override
   public void periodic() {
+    super.periodic();
+
     setMotor(m_armPID.calculate());
   }
 
