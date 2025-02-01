@@ -10,19 +10,21 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.math.controller.PIDController;
 import frc.robot.constants.ElevatorConstants;
 import frc.robot.constants.ElevatorConstants.Measurements;
+import frc.robot.controller.CustomPIDController;
 
 public class ElevatorSubsystem extends Subsystem {
 
     private final SparkMax m_elevatorMotorController;
+    private 
 
-    private final PIDController pidController;
+    private final CustomPIDController pidController;
 
     public ElevatorSubsystem() {
         super();
 
         m_elevatorMotorController = new SparkMax(ElevatorConstants.ElevatorCANIDs.kElevator, MotorType.kBrushless);
 
-
+        
     }
 
     public enum ElevatorLevels {

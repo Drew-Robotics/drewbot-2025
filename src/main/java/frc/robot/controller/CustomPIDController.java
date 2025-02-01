@@ -56,7 +56,7 @@ public class CustomPIDController extends GenericController<PIDController, Double
         double calculatedVal;
 
         if (m_desired.isEmpty()) {
-            calculatedVal = m_getCurrentValue.get(); // if no desired value then calculates to current value
+            calculatedVal = m_getCurrentValue.get(); // if no desired value then calculates to current value (im not sure about this)
         } else {
             calculatedVal = m_controller.calculate(m_getCurrentValue.get(), m_desired.get());
         }
