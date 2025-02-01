@@ -15,31 +15,12 @@ public abstract class GenericController<T, U extends Comparable<U>> {
      */
     protected abstract U getOutput();
 
-    public GenericController(T controller, Supplier<U> getCurrentValue, U desired) {
-        m_controller = controller;
-
-        m_clamp = Optional.empty();
-        
-        m_getCurrentValue = getCurrentValue;
-        m_desired = Optional.of(desired);
-    }
-
-    public GenericController(T controller, Supplier<U> getCurrentValue, U desired, Clamp<U> clamp) {
-        m_controller = controller;
-
-        m_clamp = Optional.of(clamp);
-        
-        m_getCurrentValue = getCurrentValue;
-        m_desired = Optional.of(desired);
-    }
-
     public GenericController(T controller, Supplier<U> getCurrentValue) {
         m_controller = controller;
 
         m_clamp = Optional.empty();
         
         m_getCurrentValue = getCurrentValue;
-        m_desired = Optional.empty();
     }
 
     public GenericController(T controller, Supplier<U> getCurrentValue, Clamp<U> clamp) {
@@ -48,7 +29,6 @@ public abstract class GenericController<T, U extends Comparable<U>> {
         m_clamp = Optional.of(clamp);
         
         m_getCurrentValue = getCurrentValue;
-        m_desired = Optional.empty();
     }
 
     public void setDesiredValue(U desired) {

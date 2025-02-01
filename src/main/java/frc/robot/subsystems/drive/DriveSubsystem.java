@@ -171,7 +171,7 @@ public class DriveSubsystem extends Subsystem {
       this::getChassisSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
       (speeds, ignore) -> setChassisSpeeds(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
       AutoConstants.autoDriveController,
-      config,
+      AutoConstants.robotConfig,
       () -> {
         // Boolean supplier that controls when the path will be mirrored for the red alliance
         // This will flip the path being followed to the red side of the field.

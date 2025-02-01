@@ -8,26 +8,27 @@ import edu.wpi.first.math.controller.PIDController;
 /** implementation of GenericController for PID */
 public class CustomPIDController extends GenericController<PIDController, Double> {
     private final Optional<Double> m_feedForward; // not sure about this...
+    private final Optional<Double> m_desired;
 
     public CustomPIDController(PIDConstants pidConstants, Supplier<Double> getCurrentValue, double desired) {
         super(
             new PIDController(pidConstants.kP, pidConstants.kI, pidConstants.kD),
-            getCurrentValue,
-            desired
+            getCurrentValue
         );
 
         m_feedForward = pidConstants.kFF;
+        m_desired = Optional.of(desired);
     }
 
     public CustomPIDController(PIDConstants pidConstants, Supplier<Double> getCurrentValue, double desired, Clamp<Double> clamp) {
         super(
             new PIDController(pidConstants.kP, pidConstants.kI, pidConstants.kD),
             getCurrentValue,
-            desired,
             clamp
         );
 
         m_feedForward = pidConstants.kFF;
+        m_desired = Optional.of(desired);
     }
 
     public CustomPIDController(PIDConstants pidConstants, Supplier<Double> getCurrentValue) {
@@ -37,6 +38,7 @@ public class CustomPIDController extends GenericController<PIDController, Double
         );
 
         m_feedForward = pidConstants.kFF;
+        m_desired = Optional.empty();
     }
 
     public CustomPIDController(PIDConstants pidConstants, Supplier<Double> getCurrentValue, Clamp<Double> clamp) {
@@ -47,13 +49,14 @@ public class CustomPIDController extends GenericController<PIDController, Double
         );
 
         m_feedForward = pidConstants.kFF;
+        m_desired = Optional.empty();
     }
 
     protected Double getOutput() {
         double calculatedVal;
 
         if (m_desired.isEmpty()) {
-            calculatedVal = m_getCurrentValue.get();
+            calculatedVal = m_getCurrentValue.get(); // if no desired value then calculates to current value
         } else {
             calculatedVal = m_controller.calculate(m_getCurrentValue.get(), m_desired.get());
         }
