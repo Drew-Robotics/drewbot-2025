@@ -4,18 +4,36 @@
   // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
+<<<<<<< HEAD
 
+=======
+    {
+      "type": "java",
+      "name": "Main",
+      "request": "launch",
+      "mainClass": "frc.robot.Main",
+      "projectName": "offseason-2024"
+    },
+>>>>>>> aea341aa536bc3a7c0ebd9de60d95c17a96bddfa
     {
       "type": "wpilib",
       "name": "WPILib Desktop Debug",
       "request": "launch",
+<<<<<<< HEAD
       "desktop": true,
+=======
+      "desktop": true
+>>>>>>> aea341aa536bc3a7c0ebd9de60d95c17a96bddfa
     },
     {
       "type": "wpilib",
       "name": "WPILib roboRIO Debug",
       "request": "launch",
+<<<<<<< HEAD
       "desktop": false,
+=======
+      "desktop": false
+>>>>>>> aea341aa536bc3a7c0ebd9de60d95c17a96bddfa
     }
   ]
 }

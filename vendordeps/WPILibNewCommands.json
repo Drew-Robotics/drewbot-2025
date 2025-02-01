@@ -3,7 +3,11 @@
   "name": "WPILib-New-Commands",
   "version": "1.0.0",
   "uuid": "111e20f7-815e-48f8-9dd6-e675ce75b266",
+<<<<<<< HEAD
   "frcYear": "2025",
+=======
+  "frcYear": "2024",
+>>>>>>> aea341aa536bc3a7c0ebd9de60d95c17a96bddfa
   "mavenUrls": [],
   "jsonUrl": "",
   "javaDependencies": [
