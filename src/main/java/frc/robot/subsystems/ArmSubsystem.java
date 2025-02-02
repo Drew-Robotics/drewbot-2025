@@ -14,7 +14,6 @@ import frc.robot.controller.PIDConstants;
 
 public class ArmSubsystem extends Subsystem {
   private final CustomPIDController m_armPID;
-  private Rotation2d m_armMeasuredAngle;
   private Rotation2d m_armDesiredAngle;
 
   private SparkMax m_armMotorController;
@@ -39,7 +38,7 @@ public class ArmSubsystem extends Subsystem {
         ArmConstants.ArmPID.kI,
         ArmConstants.ArmPID.kD
       ),
-      () -> Rotation2d.fromRotations(m_armEncoder.getPosition()).getRadians(),
+      () -> getAngle().getRadians(),
       new Clamp<Double>(
         ArmConstants.kArmMinPosition.getRadians(), 
         ArmConstants.kArmMaxPosition.getRadians()
@@ -54,6 +53,10 @@ public class ArmSubsystem extends Subsystem {
     setMotor(m_armPID.calculate());
   }
 
+  private Rotation2d getAngle() {
+    return Rotation2d.fromRotations(m_armEncoder.getPosition());
+  }
+
   private void setMotor(double speed) {
     m_armMotorController.set(speed);
   }
@@ -65,7 +68,7 @@ public class ArmSubsystem extends Subsystem {
   // Dashboard Fluff //
   protected void dashboardPeriodic() {
     SmartDashboard.putNumber("Desired Arm Angle (degrees)", m_armDesiredAngle.getDegrees());
-    SmartDashboard.putNumber("Measured Arm Angle (degrees)", m_armMeasuredAngle.getDegrees());
+    SmartDashboard.putNumber("Measured Arm Angle (degrees)", getAngle().getDegrees());
   }
 
   protected void dashboardInit() {}
