@@ -2,6 +2,7 @@ package frc.robot.constants;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Radian;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import com.studica.frc.AHRS.NavXUpdateRate;
@@ -11,6 +12,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
@@ -41,9 +43,17 @@ public class DriveConstants {
     // 45 teeth on the wheels bevel gear and 15 teeth on the bevel pinion
     public static final double kDrivingMotorReduction = (double) (45d * kSpurGearTeeth) / (double) (kDrivingMotorPinionTeeth * 15d);
 
-    public static final Velocity kDriveWheelFreeSpeed = Units.MetersPerSecond(kDriveMotorFreeSpeed.in(Units.RevolutionsPerSecond) * kWheelCircumference.in(Units.Meters)) / kDrivingMotorReduction;
-    // convert from rotations to meters
-    public static final double kDrivingEncoderPositionFactor = kWheelCircumference.in(Units.Meters) / kDrivingMotorReduction;
+    public static final LinearVelocity kDriveWheelFreeSpeed = Units.MetersPerSecond.of(
+      kDriveMotorFreeSpeed.in(Units.RevolutionsPerSecond) * kWheelCircumference.in(Units.Meters) / kDrivingMotorReduction
+    );
+  }
+
+  public static final class EncoderConversions {
+    public static final Distance kDrivingEncoderPositionFactor = SwerveCalculations.kWheelCircumference.div(SwerveCalculations.kDrivingMotorReduction);
+    public static final LinearVelocity kDrivingEncoderVelocityFactor = kDrivingEncoderPositionFactor.per(Units.Minute);
+
+    public static final Angle kTurningEncoderPositionFactor = Units.Radians.of(2 * Math.PI);
+    public static final AngularVelocity kTurningEncoderVelocityFactor = kTurningEncoderPositionFactor.per(Units.Minute);
   }
   
   public static final SwerveDriveKinematics kDriveKinematics = new SwerveDriveKinematics(
@@ -102,19 +112,15 @@ public class DriveConstants {
     public static final double kP = 0.05;
     public static final double kI = 0;
     public static final double kD = 0;
-    public static final double kFF = 1 / SwerveCalculations.kDriveWheelFreeSpeed;
+    public static final double kFF = 1 / SwerveCalculations.kDriveWheelFreeSpeed.in(MetersPerSecond);
   }
 
   public static final class TurningPID {
     public static final double kP = 1;
     public static final double kI = 0;
     public static final double kD = 0;
-    public static final double kFF = 0;
   }
 
   public static final Current kDrivingMotorCurrentLimit = Amps.of(50);
   public static final Current kTurningMotorCurrentLimit = Amps.of(20);
-
-  // go from rotations or rotations per minute to meters or meters per second
-  public static final double kDrivingEncoderPositionFactor = SwerveCalculations.kDrivingEncoderPositionFactor;
 }

@@ -31,41 +31,36 @@ public class Camera {
 
   public Camera(String name, Transform3d robotToCamera) {
     m_photonCamera = new PhotonCamera(name);
-
     m_poseEstimator = new PhotonPoseEstimator(
       VisionConstants.kAprilTagLayout,
       PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-      m_photonCamera, 
       robotToCamera
     );
   }
 
-  public PhotonPipelineResult getLatestResult() {
-    PhotonPipelineResult m_latestResult = m_photonCamera.getLatestResult();
+  public PhotonPipelineResult getLastestCameraResult() {
+    double now = Timer.getFPGATimestamp(); // seconds
+    boolean isNewResult = Math.abs(now - m_latestResult.getTimestampSeconds()) > 1e-3; // ask Drew about all this stuff
+
+    if(!isNewResult)
+      return m_latestResult;
+    
+    List<PhotonPipelineResult> cameraResults = m_photonCamera.getAllUnreadResults();
+    if (cameraResults.size() > 0){
+      m_latestResult = cameraResults.get(0);
+    }
+
     return m_latestResult;
   }
 
   public Optional<EstimatedRobotPose> getEstimatedGlobalPose() {
-    Optional<EstimatedRobotPose> visionEst = m_poseEstimator.update();
-
-    // Update m_lastEstimationTimestamp
-    double latestTimestamp = m_photonCamera.getLatestResult().getTimestampSeconds();
-
-    double now = Timer.getFPGATimestamp();
-    if (latestTimestamp > now)
-      latestTimestamp = now;
-
-    boolean isNewResult = Math.abs(latestTimestamp - m_lastEstimationTimestamp) > 1e-5;
-
-    if(isNewResult)
-      m_lastEstimationTimestamp = latestTimestamp;
-
+    Optional<EstimatedRobotPose> visionEst = m_poseEstimator.update(getLastestCameraResult());
     return visionEst;
   }
 
   public Matrix<N3, N1> getEstimationStdDevs(Pose2d estimatedPose) {
     Matrix<N3, N1> estStdDevs = VisionConstants.StdDevs.kSingleTag;
-    List<PhotonTrackedTarget> targets = getLatestResult().getTargets();
+    List<PhotonTrackedTarget> targets = getLastestCameraResult().getTargets();
       
     int numTags = 0;
     double avgDist = 0;
