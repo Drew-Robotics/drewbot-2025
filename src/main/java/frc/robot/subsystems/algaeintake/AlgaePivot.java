@@ -4,6 +4,7 @@ import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import com.revrobotics.spark.SparkMax;
 
@@ -18,6 +19,8 @@ public class AlgaePivot extends Subsystem {
 
     private final AbsoluteEncoder m_algaePivotEncoder;
     private final CustomPIDController m_algaePivotPID;
+
+    private double m_currentDesiredAngle = 0;
 
     protected static ArmSubsystem m_instance;
     public static ArmSubsystem getInstance() {
@@ -38,7 +41,7 @@ public class AlgaePivot extends Subsystem {
 
         m_algaePivotPID = new CustomPIDController(
             AlgaePivotConstants.PivotPID.pidConstants, 
-            () -> Rotation2d.fromRotations(m_algaePivotEncoder.getPosition()).getRadians(),
+            () -> getAngle().getRadians(),
             new Clamp<Double>(
                 AlgaePivotConstants.kPivotMinPosition.getRadians(), 
                 AlgaePivotConstants.kPivotMinPosition.getRadians()
@@ -47,8 +50,13 @@ public class AlgaePivot extends Subsystem {
     }
 
     public void setDesiredAngle(Rotation2d angle) {
+        m_currentDesiredAngle = angle.getDegrees();
         m_algaePivotPID.setDesiredValue(angle.getRadians());
     }
+
+    public Rotation2d getAngle() {
+        return Rotation2d.fromRotations(m_algaePivotEncoder.getPosition());
+    } 
 
     private void setMotor(double speed) {
         m_algaePivotMotorController.set(speed);
@@ -63,7 +71,12 @@ public class AlgaePivot extends Subsystem {
 
     // Dashboard Fluff //
     protected void dashboardInit() {}
-    protected void dashboardPeriodic() {}
+
+    protected void dashboardPeriodic() {
+        SmartDashboard.putNumber("Current Angle", getAngle().getDegrees());
+        SmartDashboard.putNumber("Desired Angle", m_currentDesiredAngle);
+    }
+
     protected void publishInit() {}
     protected void publishPeriodic() {}
 }
