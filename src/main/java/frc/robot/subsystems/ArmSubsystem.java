@@ -8,9 +8,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import frc.robot.constants.ArmConstants;
-import frc.robot.controller.Clamp;
-import frc.robot.controller.CustomPIDController;
-import frc.robot.controller.PIDConstants;
 
 public class ArmSubsystem extends Subsystem {
   private final CustomPIDController m_armPID;

@@ -10,18 +10,19 @@ import static java.util.Map.entry;
 
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.constants.ElevatorConstants;
 import frc.robot.constants.ElevatorConstants.Measurements;
-import frc.robot.controller.Clamp;
-import frc.robot.controller.CustomPIDController;
+
+import lib.LibFuncs;
 
 public class ElevatorSubsystem extends Subsystem {
 
     private final SparkMax m_elevatorMotorController;
     private final AbsoluteEncoder m_elevatorEncoder;
-
-    private final CustomPIDController m_elevatorPID;
 
     private String m_elevatorLevelString = "RESTING";
 
@@ -37,15 +38,9 @@ public class ElevatorSubsystem extends Subsystem {
 
         m_elevatorMotorController = new SparkMax(ElevatorConstants.ElevatorCANIDs.kElevator, MotorType.kBrushless);
         m_elevatorEncoder = m_elevatorMotorController.getAbsoluteEncoder();
+
         
-        m_elevatorPID = new CustomPIDController(
-            ElevatorConstants.ElevatorPID.pidConstants, 
-            this::getHeight,
-            new Clamp<Double>(
-                ElevatorConstants.kElevatorMinHeight.in(Meters), 
-                ElevatorConstants.kElevatorMaxHeight.in(Meters)
-            )
-        );
+        
     }
 
     public void setLevel(ElevatorLevels level) {
@@ -59,7 +54,24 @@ public class ElevatorSubsystem extends Subsystem {
     }
 
     private double getHeight() {
-        return m_elevatorEncoder.getPosition() * 2 * Math.PI; // idk what to do here ngl (hopefully this is somewhat close?)
+        Angle angularDistance = ElevatorConstants.kMaxRotations.plus(
+            ElevatorConstants.kMinRotations.times(-1)
+        );
+
+        Distance heightDistance = ElevatorConstants.kElevatorMaxHeight.plus(
+            ElevatorConstants.kElevatorMinHeight.times(-1)
+        );
+
+        return LibFuncs.sum( 
+            LibFuncs.mult(
+                LibFuncs.sum( 
+                    m_elevatorEncoder.getPosition(),
+                    -ElevatorConstants.kMinRotations.in(Units.Radians)
+                ) / angularDistance.in(Units.Radians),
+                heightDistance.in(Meters)
+            ),
+            ElevatorConstants.kElevatorMinHeight.in(Meters)
+        );
     }
 
     @Override

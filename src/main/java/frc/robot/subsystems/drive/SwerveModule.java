@@ -2,7 +2,6 @@ package frc.robot.subsystems.drive;
 
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
@@ -10,7 +9,6 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.AbsoluteEncoderConfig;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
@@ -108,7 +106,7 @@ public class SwerveModule {
       .outputRange(-1,1);
 
     turningConfig
-      .inverted(drivingMotorInverted)
+      .inverted(turningMotorInverted)
       .idleMode(IdleMode.kCoast)
       .smartCurrentLimit((int) DriveConstants.kTurningMotorCurrentLimit.in(Units.Amps));
     turningConfig.encoder
@@ -117,9 +115,9 @@ public class SwerveModule {
     turningConfig.closedLoop
       .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
       .pid(
-        DriveConstants.DrivingPID.kP, 
-        DriveConstants.DrivingPID.kI, 
-        DriveConstants.DrivingPID.kD
+        DriveConstants.TurningPID.kP, 
+        DriveConstants.TurningPID.kI, 
+        DriveConstants.TurningPID.kD
       )
       .outputRange(-1,1)
       .positionWrappingEnabled(true)
@@ -177,6 +175,7 @@ public class SwerveModule {
     // SwerveModuleState optimizedDesiredState = SwerveModuleState.optimize(correctedState, m_commandedState.angle.minus(m_angularOffset)); // module relative -> robot relative
     SwerveModuleState optimizedDesiredState = SwerveModuleState.optimize(correctedState, new Rotation2d(m_turningEncoder.getPosition()));
     m_commandedState = optimizedDesiredState;
+    optimizedDesiredState.
 
     m_drivingClosedLoopController.setReference(m_commandedState.speedMetersPerSecond, SparkFlex.ControlType.kVelocity);
     m_turningClosedLoopController.setReference(m_commandedState.angle.getRadians(), SparkMax.ControlType.kPosition);

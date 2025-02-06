@@ -12,6 +12,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import org.photonvision.EstimatedRobotPose;
 
@@ -22,8 +24,7 @@ public class VisionSubsystem extends Subsystem {
   private final Camera m_frontLeft, m_frontRight, m_backLeft, m_backRight;
   private final List<Camera> m_cameras;
 
-  AprilTag[] m_tags = VisionConstants.AprilTags.kTags.toArray(AprilTag[]::new);;
-  Pose3d[] m_testPoeses;
+  private AprilTag[] m_fieldTags = VisionConstants.AprilTags.kTags.toArray(AprilTag[]::new);
 
   private final List<String> m_cameraNames = List.of(
     VisionConstants.CameraNames.kFrontLeft, 
@@ -73,14 +74,23 @@ public class VisionSubsystem extends Subsystem {
   @Override
   public void publishPeriodic() {
     // m_logger.seenTagsPublisher.accept(); // todo : finish this
-    m_logger.fieldTagsPublisher.accept(m_tags);
+    m_logger.fieldTagsPublisher.accept(m_fieldTags);
   }
 
   /* ----- VISION ------ */
 
+  public List<AprilTag> getSeenTags(){
+    return new ArrayList<AprilTag>(m_cameras.stream()
+      .flatMap((Camera cam) -> Arrays.stream(cam.getSeenTags()))
+      .collect(Collectors.toMap(
+        tag -> tag.ID,
+        tag -> tag,
+        (e, r) -> e // discards any repeating tags
+      )).values());
+  }
+
   public List<Optional<EstimatedRobotPose>> getCameraEstimatedPoses() {
     ArrayList<Optional<EstimatedRobotPose>> retVal = new ArrayList<Optional<EstimatedRobotPose>>();
-
     for(Camera camera : m_cameras) {
       retVal.add(camera.getEstimatedGlobalPose());
     }

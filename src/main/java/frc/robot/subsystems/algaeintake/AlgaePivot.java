@@ -1,26 +1,34 @@
 package frc.robot.subsystems.algaeintake;
 
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.config.SparkFlexConfig;
+import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 
-import frc.robot.controller.Clamp;
-import frc.robot.controller.CustomPIDController;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.Subsystem;
-import frc.robot.constants.AlgaeIntakeConstants.AlgaePivotConstants;
+import frc.robot.constants.AlgaeConstants;
+import frc.robot.constants.AlgaeConstants.AlgaePivotConstants;
+import frc.robot.constants.AlgaeConstants.AlgaePivotConstants.PivotPID;
+import frc.robot.constants.DriveConstants;
 
 public class AlgaePivot extends Subsystem {
     private final SparkMax m_algaePivotMotorController;
-
     private final AbsoluteEncoder m_algaePivotEncoder;
-    private final CustomPIDController m_algaePivotPID;
 
-    private double m_currentDesiredAngle = 0;
+    private final SparkClosedLoopController m_algaePivotClosedLoopController;
+
+    private Rotation2d m_currentDesiredAngle;
 
     protected static ArmSubsystem m_instance;
     public static ArmSubsystem getInstance() {
@@ -36,22 +44,30 @@ public class AlgaePivot extends Subsystem {
             AlgaePivotConstants.AlgaePivotCANIDs.kPivot,
             MotorType.kBrushless
         );
-        
         m_algaePivotEncoder = m_algaePivotMotorController.getAbsoluteEncoder();
+        m_algaePivotClosedLoopController = m_algaePivotMotorController.getClosedLoopController();
 
-        m_algaePivotPID = new CustomPIDController(
-            AlgaePivotConstants.PivotPID.pidConstants, 
-            () -> getAngle().getRadians(),
-            new Clamp<Double>(
-                AlgaePivotConstants.kPivotMinPosition.getRadians(), 
-                AlgaePivotConstants.kPivotMinPosition.getRadians()
+        SparkFlexConfig algaePivotMotorConfig = new SparkFlexConfig();
+
+        algaePivotMotorConfig
+            .smartCurrentLimit(AlgaePivotConstants.kMaxAmps);
+    
+        algaePivotMotorConfig
+            .closedLoop      
+            .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
+            .pidf(
+                AlgaePivotConstants.PivotPID.kP, 
+                AlgaePivotConstants.PivotPID.kI, 
+                AlgaePivotConstants.PivotPID.kD, 
+                AlgaePivotConstants.PivotPID.kFF
             )
-        );
+            .outputRange(-1,1);
+
+        m_algaePivotMotorController.configure(algaePivotMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     public void setDesiredAngle(Rotation2d angle) {
-        m_currentDesiredAngle = angle.getDegrees();
-        m_algaePivotPID.setDesiredValue(angle.getRadians());
+        m_currentDesiredAngle = angle;
     }
 
     public Rotation2d getAngle() {
@@ -66,7 +82,15 @@ public class AlgaePivot extends Subsystem {
     public void periodic() {
         super.periodic();
 
-        setMotor(m_algaePivotPID.calculate());
+        if (m_currentDesiredAngle != null) {
+            double clampedRefrenceRot = MathUtil.clamp(
+                m_currentDesiredAngle.getRotations(), 
+                AlgaePivotConstants.kPivotMinPosition.getRotations(),
+                AlgaePivotConstants.kPivotMaxPosition.getRotations()
+            );
+
+            m_algaePivotClosedLoopController.setReference(clampedRefrenceRot, SparkMax.ControlType.kPosition);
+        }   
     }
 
     // Dashboard Fluff //

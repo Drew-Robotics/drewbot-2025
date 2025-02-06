@@ -29,6 +29,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.StructPublisher;
 
@@ -144,6 +145,8 @@ public class DriveSubsystem extends Subsystem {
     SmartDashboard.putNumber("Yaw Degrees", getGyroYaw().getDegrees());
   }
 
+  protected void publishInit() {}
+
   public void publishPeriodic() {
     m_logger.poseEstimPublisher.set(getPose());
     m_logger.commandedChassisSpeedsPublisher.set(new ChassisSpeeds(m_xVelocity, m_yVelocity, m_rotationalVelocity));
@@ -154,30 +157,16 @@ public class DriveSubsystem extends Subsystem {
   /* ----- AUTONOMOUS ----- */
 
   public void pathPlannerConfig() {
-    double robotRadius = Math.sqrt(
-      Math.pow(DriveConstants.kTrackWidth.in(Meters), 2) + 
-      Math.pow(DriveConstants.kWheelBase.in(Meters), 2)
-    );
-    
     AutoBuilder.configure(
-      this::getPose, // Robot pose supplier
-      this::setPoseEstimator, // Method to reset odometry
-      this::getChassisSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-      (speeds, ignore) -> setChassisSpeeds(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
+      this::getPose, this::setPoseEstimator, this::getChassisSpeeds,
+      (speeds, ignore) -> setChassisSpeeds(speeds),
       AutoConstants.autoDriveController,
       AutoConstants.robotConfig,
       () -> {
-        // Boolean supplier that controls when the path will be mirrored for the red alliance
-        // This will flip the path being followed to the red side of the field.
-        // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
-
         Optional<Alliance> alliance = DriverStation.getAlliance();
-        if (alliance.isPresent()) {
-          return alliance.get() == DriverStation.Alliance.Red;
-        }
-        return false;
+        return alliance.isPresent() ? alliance.get() == DriverStation.Alliance.Red : false;
       },
-      this // Reference to this subsystem to set requirements
+      this
     );
   }
 
@@ -242,6 +231,10 @@ public class DriveSubsystem extends Subsystem {
   public Pose2d getPose() {
     return m_poseEstimator.getEstimatedPosition();
   }
+
+  /* ----- PATHING ----- */
+
+  
 
   /* ----- SWERVE ----- */
 
@@ -312,29 +305,29 @@ public class DriveSubsystem extends Subsystem {
 
     // // convert to polar
 
-    // double xv, yv, rv, mv, dv;
+    double xv, yv, rv, mv, dv;
   
-    // xv = DriveConstants.MaxVels.kTranslationalVelocity.times(x).in(Units.MetersPerSecond);
-    // yv = DriveConstants.MaxVels.kTranslationalVelocity.times(y).in(Units.MetersPerSecond);
-    // rv = DriveConstants.MaxVels.kRotationalVelocity.times(rot).in(Units.RadiansPerSecond);
-
-    // mv = Math.sqrt(Math.pow(xv, 2) + Math.pow(yv, 2));
-    // dv = Math.atan2(yv, xv);
-
-    // // rate limit
-
-    // mv = m_magnitudeLimiter.calculate(mv);
-    // dv = m_directionalLimiter.calculate(dv);
-    // rv = m_rotationLimiter.calculate(rv);
-
-    // // convert back and store units
-
-    // xv = mv * Math.cos(dv);
-    // yv = mv * Math.sin(dv);
+    xv = DriveConstants.MaxVels.kTranslationalVelocity.times(x).in(MetersPerSecond);
+    yv = DriveConstants.MaxVels.kTranslationalVelocity.times(y).in(MetersPerSecond);
+    rv = DriveConstants.MaxVels.kRotationalVelocity.times(rot).in(RadiansPerSecond);
     
-    // m_xVelocity = Units.MetersPerSecond.of(xv);
-    // m_yVelocity = Units.MetersPerSecond.of(xv);
-    // m_rotationalVelocity = Units.RadiansPerSecond.of(xv);
+    mv = Math.sqrt(Math.pow(xv, 2) + Math.pow(yv, 2));
+    dv = Math.atan2(yv, xv);
+
+    // rate limit
+
+    mv = m_magnitudeLimiter.calculate(mv);
+    dv = m_directionalLimiter.calculate(dv);
+    rv = m_rotationLimiter.calculate(rv);
+
+    // convert back and store units
+
+    xv = mv * Math.cos(dv);
+    yv = mv * Math.sin(dv);
+    
+    // m_xVelocity = MetersPerSecond.of(xv);
+    // m_yVelocity = MetersPerSecond.of(xv);
+    // m_rotationalVelocity = RadiansPerSecond.of(xv);
 
     // get chassis speeds
 
@@ -347,6 +340,4 @@ public class DriveSubsystem extends Subsystem {
 
     setChassisSpeeds(commandedChassisSpeeds);
   }
-
-  protected void publishInit() {}
 }

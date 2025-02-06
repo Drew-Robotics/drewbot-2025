@@ -1,8 +1,8 @@
 package frc.robot.constants;
 
 import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
-import frc.robot.controller.PIDConstants;
 
 public class ElevatorConstants {
 
@@ -15,11 +15,6 @@ public class ElevatorConstants {
         public static final double kI = 0;
         public static final double kD = 0;
         
-        public static final PIDConstants pidConstants = new PIDConstants(
-            kP,
-            kI,
-            kD
-        );
     }
 
     public static final class Measurements {
@@ -31,4 +26,7 @@ public class ElevatorConstants {
 
     public static final Distance kElevatorMinHeight = Units.Meters.of(0);
     public static final Distance kElevatorMaxHeight = Units.Meters.of(0);
+
+    public static final Angle kMinRotations = Units.Rotations.of(0);
+    public static final Angle kMaxRotations = Units.Rotations.of(0);
 }
