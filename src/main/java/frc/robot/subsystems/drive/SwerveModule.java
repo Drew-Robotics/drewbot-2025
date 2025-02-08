@@ -173,9 +173,7 @@ public class SwerveModule {
 
     // avoid spining more than 90 degrees
     // SwerveModuleState optimizedDesiredState = SwerveModuleState.optimize(correctedState, m_commandedState.angle.minus(m_angularOffset)); // module relative -> robot relative
-    SwerveModuleState optimizedDesiredState = SwerveModuleState.optimize(correctedState, new Rotation2d(m_turningEncoder.getPosition()));
-    m_commandedState = optimizedDesiredState;
-    optimizedDesiredState.
+    correctedState.optimize(new Rotation2d(m_turningEncoder.getPosition()));
 
     m_drivingClosedLoopController.setReference(m_commandedState.speedMetersPerSecond, SparkFlex.ControlType.kVelocity);
     m_turningClosedLoopController.setReference(m_commandedState.angle.getRadians(), SparkMax.ControlType.kPosition);

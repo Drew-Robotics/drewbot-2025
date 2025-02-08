@@ -9,13 +9,13 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 
-import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.Subsystem;
 import frc.robot.constants.AlgaeConstants;
 import frc.robot.constants.AlgaeConstants.AlgaePivotConstants;
@@ -23,17 +23,17 @@ import frc.robot.constants.AlgaeConstants.AlgaePivotConstants.PivotPID;
 import frc.robot.constants.DriveConstants;
 
 public class AlgaePivot extends Subsystem {
-    private final SparkMax m_algaePivotMotorController;
+    private final SparkFlex m_algaePivotMotorController;
     private final AbsoluteEncoder m_algaePivotEncoder;
 
     private final SparkClosedLoopController m_algaePivotClosedLoopController;
 
     private Rotation2d m_currentDesiredAngle;
 
-    protected static ArmSubsystem m_instance;
-    public static ArmSubsystem getInstance() {
+    protected static AlgaePivot m_instance;
+    public static AlgaePivot getInstance() {
         if (m_instance == null)
-            m_instance = new ArmSubsystem();
+            m_instance = new AlgaePivot();
         return m_instance;
     }
 

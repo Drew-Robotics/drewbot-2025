@@ -14,7 +14,7 @@ public class ElevatorConstants {
         public static final double kP = 0.05;
         public static final double kI = 0;
         public static final double kD = 0;
-        
+        public static final double kFF = 0.05;
     }
 
     public static final class Measurements {
@@ -26,6 +26,8 @@ public class ElevatorConstants {
 
     public static final Distance kElevatorMinHeight = Units.Meters.of(0);
     public static final Distance kElevatorMaxHeight = Units.Meters.of(0);
+
+    public static final int kCurrentLimit = 50;
 
     public static final Angle kMinRotations = Units.Rotations.of(0);
     public static final Angle kMaxRotations = Units.Rotations.of(0);

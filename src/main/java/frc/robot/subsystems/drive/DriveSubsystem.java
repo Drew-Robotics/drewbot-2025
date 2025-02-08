@@ -1,9 +1,5 @@
 package frc.robot.subsystems.drive;
 
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,15 +21,18 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.StructPublisher;
 
 import edu.wpi.first.units.measure.*;
+import static edu.wpi.first.units.Units.*;
 import frc.robot.constants.AutoConstants;
 import frc.robot.constants.DriveConstants;
 import frc.robot.constants.VisionConstants;
@@ -41,7 +40,6 @@ import frc.robot.RobotContainer.subsystems;
 import frc.robot.subsystems.Subsystem;
 
 public class DriveSubsystem extends Subsystem {
-
   private final AHRS m_gyro;
   private boolean m_isFieldOriented = DriveConstants.kFieldOriented;
 
@@ -54,6 +52,8 @@ public class DriveSubsystem extends Subsystem {
   private LinearVelocity m_xVelocity = MetersPerSecond.of(0);
   private LinearVelocity m_yVelocity = MetersPerSecond.of(0);
   private AngularVelocity m_rotationalVelocity = RadiansPerSecond.of(0);
+
+  private PIDController m_rotationController = new PIDController(0, 0, 0, 0);
 
   private DriveSubsystemLogger m_logger;
   private class DriveSubsystemLogger {
@@ -117,6 +117,8 @@ public class DriveSubsystem extends Subsystem {
     m_modules = new SwerveModule[] {m_frontLeft, m_frontRight, m_backLeft, m_backRight};
 
     m_poseEstimator = new SwerveDrivePoseEstimator(DriveConstants.kDriveKinematics, getGyroYaw(), getModulePositions(), new Pose2d());
+
+    m_rotationController.enableContinuousInput(0, 2 * Math.PI);
 
     m_magnitudeLimiter = new SlewRateLimiter(DriveConstants.SlewRate.kMag);
     m_directionalLimiter = new SlewRateLimiter(DriveConstants.SlewRate.kDir);
@@ -232,6 +234,15 @@ public class DriveSubsystem extends Subsystem {
     return m_poseEstimator.getEstimatedPosition();
   }
 
+  public Pose3d getPose3d() {
+    return new Pose3d(
+      getPose().getMeasureX(),
+      getPose().getMeasureY(),
+      Meters.zero(),
+      new Rotation3d(getPose().getRotation())
+    );
+  }
+
   /* ----- PATHING ----- */
 
   
@@ -293,6 +304,36 @@ public class DriveSubsystem extends Subsystem {
    * @param rot The rotational velocity, unitless on the range -1 to 1
    */
   public void drive(double x, double y, double rot) {
+    setChassisSpeeds(getChassisSpeeds(x, y, rot));
+  }
+
+  /**
+   * Edit a given chassis speed 
+   * 
+   * @return
+   */
+  public ChassisSpeeds getChassisSpeedOnRotationControl(double x, double y, Rotation2d rotationalSetpoint) {
+    ChassisSpeeds chassisSpeeds = getChassisSpeeds(x, y, 0);
+    return new ChassisSpeeds(
+      chassisSpeeds.vxMetersPerSecond,
+      chassisSpeeds.vyMetersPerSecond,
+      m_rotationController.calculate(
+        getGyroYaw().getRadians(), 
+        rotationalSetpoint.getRadians()
+      )
+    );
+
+  }
+
+  /**
+   * Given the drive controls return a chassis speed.
+   * 
+   * @param x
+   * @param y
+   * @param rot
+   * @return
+   */
+  public ChassisSpeeds getChassisSpeeds(double x, double y, double rot) {
 
     x = Math.max(-1, Math.min(1, x));
     y = Math.max(-1, Math.min(1, y));
@@ -338,6 +379,6 @@ public class DriveSubsystem extends Subsystem {
     else
       commandedChassisSpeeds = new ChassisSpeeds(m_xVelocity, m_yVelocity, m_rotationalVelocity);
 
-    setChassisSpeeds(commandedChassisSpeeds);
+    return commandedChassisSpeeds;
   }
 }
