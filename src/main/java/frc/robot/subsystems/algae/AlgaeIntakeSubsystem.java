@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems.algaeintake;
+package frc.robot.subsystems.algae;
 
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkMax;
@@ -14,16 +14,16 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import frc.robot.constants.AlgaeConstants;
 import frc.robot.subsystems.Subsystem;
 
-public class AlgaeIntake extends Subsystem {
+public class AlgaeIntakeSubsystem extends Subsystem {
   private final SparkMax m_algaeIntakeMotorController;
   private final RelativeEncoder m_algaeIntakeEncoder;
 
   private LinearVelocity m_currentVelocity;
 
-  public AlgaeIntake() {
+  public AlgaeIntakeSubsystem() {
     super();
 
-    m_algaeIntakeMotorController = new SparkMax(AlgaeConstants.AlgaeIntakeCANIDs.kIntake, MotorType.kBrushless);
+    m_algaeIntakeMotorController = new SparkMax(AlgaeConstants.Can.kIntake, MotorType.kBrushless);
     m_algaeIntakeEncoder = m_algaeIntakeMotorController.getEncoder();
 
     

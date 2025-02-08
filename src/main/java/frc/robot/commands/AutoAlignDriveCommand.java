@@ -1,6 +1,5 @@
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -14,7 +13,7 @@ import java.util.Optional;
 import java.util.function.DoubleSupplier;
 import java.util.Comparator;
 
-public class AutoAlignDriveCommand extends DriveCommand{
+public class AutoAlignDriveCommand extends DriveCommand {
   List<Integer> m_acceptedTagsIDs = List.of(0, 1, 2, 3);
     
   public AutoAlignDriveCommand(DoubleSupplier xVel, DoubleSupplier yVel, DoubleSupplier rot){
@@ -52,7 +51,7 @@ public class AutoAlignDriveCommand extends DriveCommand{
 
     if (tags.size() == 0){
       // this is why it's in its own method; returning from execute is bad practice.
-      return Optional.ofNullable(null);
+      return Optional.empty();
     }
 
     Translation3d robotTranslation3d = subsystems.drive.getPose3d().getTranslation();

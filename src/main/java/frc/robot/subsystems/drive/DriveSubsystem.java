@@ -33,7 +33,7 @@ import edu.wpi.first.networktables.StructPublisher;
 
 import edu.wpi.first.units.measure.*;
 import static edu.wpi.first.units.Units.*;
-import frc.robot.constants.AutoConstants;
+import frc.robot.constants.DriveAutoConstants;
 import frc.robot.constants.DriveConstants;
 import frc.robot.constants.VisionConstants;
 import frc.robot.RobotContainer.subsystems;
@@ -117,8 +117,8 @@ public class DriveSubsystem extends Subsystem {
     m_modules = new SwerveModule[] {m_frontLeft, m_frontRight, m_backLeft, m_backRight};
 
     m_poseEstimator = new SwerveDrivePoseEstimator(DriveConstants.kDriveKinematics, getGyroYaw(), getModulePositions(), new Pose2d());
-
-    m_rotationController.enableContinuousInput(0, 2 * Math.PI);
+    
+    m_rotationController.enableContinuousInput(0, 2 * Math.PI); // TODO add pid constants for this
 
     m_magnitudeLimiter = new SlewRateLimiter(DriveConstants.SlewRate.kMag);
     m_directionalLimiter = new SlewRateLimiter(DriveConstants.SlewRate.kDir);
@@ -162,8 +162,8 @@ public class DriveSubsystem extends Subsystem {
     AutoBuilder.configure(
       this::getPose, this::setPoseEstimator, this::getChassisSpeeds,
       (speeds, ignore) -> setChassisSpeeds(speeds),
-      AutoConstants.autoDriveController,
-      AutoConstants.robotConfig,
+      DriveAutoConstants.autoDriveController,
+      DriveAutoConstants.robotConfig,
       () -> {
         Optional<Alliance> alliance = DriverStation.getAlliance();
         return alliance.isPresent() ? alliance.get() == DriverStation.Alliance.Red : false;
@@ -314,6 +314,7 @@ public class DriveSubsystem extends Subsystem {
    */
   public ChassisSpeeds getChassisSpeedOnRotationControl(double x, double y, Rotation2d rotationalSetpoint) {
     ChassisSpeeds chassisSpeeds = getChassisSpeeds(x, y, 0);
+    
     return new ChassisSpeeds(
       chassisSpeeds.vxMetersPerSecond,
       chassisSpeeds.vyMetersPerSecond,
@@ -359,6 +360,7 @@ public class DriveSubsystem extends Subsystem {
 
     mv = m_magnitudeLimiter.calculate(mv);
     dv = m_directionalLimiter.calculate(dv);
+
     rv = m_rotationLimiter.calculate(rv);
 
     // convert back and store units
@@ -366,9 +368,9 @@ public class DriveSubsystem extends Subsystem {
     xv = mv * Math.cos(dv);
     yv = mv * Math.sin(dv);
     
-    // m_xVelocity = MetersPerSecond.of(xv);
-    // m_yVelocity = MetersPerSecond.of(xv);
-    // m_rotationalVelocity = RadiansPerSecond.of(xv);
+    m_xVelocity = MetersPerSecond.of(xv);
+    m_yVelocity = MetersPerSecond.of(xv);
+    m_rotationalVelocity = RadiansPerSecond.of(xv);
 
     // get chassis speeds
 

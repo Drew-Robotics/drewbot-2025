@@ -9,13 +9,13 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
-public class AutoConstants {
+public class DriveAutoConstants {
   
   public static final LinearVelocity kMaxSpeed = Units.MetersPerSecond.of(4.5);
 
   public static final PPHolonomicDriveController autoDriveController = new PPHolonomicDriveController(
-    new PIDConstants(AutoConstants.DrivingPID.kP, AutoConstants.DrivingPID.kI, AutoConstants.DrivingPID.kD), // Translation PID constants
-    new PIDConstants(AutoConstants.TurningPID.kP, AutoConstants.TurningPID.kI, AutoConstants.TurningPID.kD) // Rotation PID constants
+    new PIDConstants(DriveAutoConstants.DrivingPID.kP, DriveAutoConstants.DrivingPID.kI, DriveAutoConstants.DrivingPID.kD), // Translation PID constants
+    new PIDConstants(DriveAutoConstants.TurningPID.kP, DriveAutoConstants.TurningPID.kI, DriveAutoConstants.TurningPID.kD) // Rotation PID constants
   );
 
 

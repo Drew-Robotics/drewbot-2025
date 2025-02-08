@@ -26,7 +26,6 @@ public class Camera {
   
   private final PhotonCamera m_photonCamera;
   private final PhotonPoseEstimator m_poseEstimator;
-  private double m_lastEstimationTimestamp = 0;
   private PhotonPipelineResult m_latestResult;
 
   public Camera(String name, Transform3d robotToCamera) {
@@ -61,7 +60,7 @@ public class Camera {
   public Matrix<N3, N1> getEstimationStdDevs(Pose2d estimatedPose) {
     Matrix<N3, N1> estStdDevs = VisionConstants.StdDevs.kSingleTag;
     List<PhotonTrackedTarget> targets = getLastestCameraResult().getTargets();
-      
+
     int numTags = 0;
     double avgDist = 0;
 
@@ -101,6 +100,7 @@ public class Camera {
     int i = 0;
     for (PhotonTrackedTarget target : m_latestResult.targets) {
       Optional<Pose3d> tagPose = m_poseEstimator.getFieldTags().getTagPose(target.getFiducialId());
+      
       tags[i] = new AprilTag(target.getFiducialId(), 
         tagPose.isEmpty() ? new Pose3d() : tagPose.get()
       );

@@ -1,4 +1,4 @@
-package frc.robot.subsystems.coral.arm;
+package frc.robot.subsystems.coral;
 
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkAbsoluteEncoder;
@@ -11,21 +11,21 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.constants.CoralArmConstants;
 import frc.robot.subsystems.Subsystem;
 
-public class CoralPivot extends Subsystem {
+public class CoralArmSubsystem extends Subsystem {
   private final SparkMax m_coralPivotMotorController;
   private final SparkAbsoluteEncoder m_coralPivotEncoder;
   private final SparkClosedLoopController m_coralPivotClosedLoopController;
 
   private Rotation2d m_armDesiredAngle;
 
-  protected static CoralPivot m_instance;
-  public static CoralPivot getInstance() {
+  protected static CoralArmSubsystem m_instance;
+  public static CoralArmSubsystem getInstance() {
       if (m_instance == null)
-          m_instance = new CoralPivot();
+          m_instance = new CoralArmSubsystem();
       return m_instance;
   }
 
-  public CoralPivot() {
+  public CoralArmSubsystem() {
     super();
 
     m_coralPivotMotorController = new SparkMax(CoralArmConstants.ArmCANIDs.kArm, MotorType.kBrushless);

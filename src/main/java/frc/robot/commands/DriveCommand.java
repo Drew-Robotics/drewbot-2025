@@ -29,7 +29,6 @@ public class DriveCommand extends Command{
       m_yVelocity.getAsDouble(), 
       m_rot.getAsDouble()
     );
-
   }
 
   @Override

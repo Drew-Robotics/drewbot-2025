@@ -1,4 +1,4 @@
-package frc.robot.subsystems.algaeintake;
+package frc.robot.subsystems.algae;
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.revrobotics.AbsoluteEncoder;
@@ -22,7 +22,7 @@ import frc.robot.constants.AlgaeConstants.AlgaePivotConstants;
 import frc.robot.constants.AlgaeConstants.AlgaePivotConstants.PivotPID;
 import frc.robot.constants.DriveConstants;
 
-public class AlgaePivot extends Subsystem {
+public class AlgaeArmSubsystem extends Subsystem {
     private final SparkFlex m_algaePivotMotorController;
     private final AbsoluteEncoder m_algaePivotEncoder;
 
@@ -30,18 +30,18 @@ public class AlgaePivot extends Subsystem {
 
     private Rotation2d m_currentDesiredAngle;
 
-    protected static AlgaePivot m_instance;
-    public static AlgaePivot getInstance() {
+    protected static AlgaeArmSubsystem m_instance;
+    public static AlgaeArmSubsystem getInstance() {
         if (m_instance == null)
-            m_instance = new AlgaePivot();
+            m_instance = new AlgaeArmSubsystem();
         return m_instance;
     }
 
-    public AlgaePivot() {
+    public AlgaeArmSubsystem() {
         super();
         
-        m_algaePivotMotorController = new SparkMax(
-            AlgaePivotConstants.AlgaePivotCANIDs.kPivot,
+        m_algaePivotMotorController = new SparkFlex(
+            AlgaeConstants.CANIDs.kPivot,
             MotorType.kBrushless
         );
         m_algaePivotEncoder = m_algaePivotMotorController.getAbsoluteEncoder();
@@ -56,7 +56,7 @@ public class AlgaePivot extends Subsystem {
             .closedLoop      
             .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
             .pidf(
-                AlgaePivotConstants.PivotPID.kP, 
+                AlgaeConstants.PID.kP, 
                 AlgaePivotConstants.PivotPID.kI, 
                 AlgaePivotConstants.PivotPID.kD, 
                 AlgaePivotConstants.PivotPID.kFF
