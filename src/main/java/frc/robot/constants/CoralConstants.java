@@ -14,13 +14,12 @@ public class CoralConstants {
         public static final int kCoralIntake = 0;
     }
 
-    public static final class PID{
+    public static final class PID {
         public static final class Elevator {
             public static final double kP = 0.05;
             public static final double kI = 0;
             public static final double kD = 0;
             public static final double kFF = 0.05;
-
         }
     
         public static final class CoralArm {
@@ -44,10 +43,10 @@ public class CoralConstants {
 
 
     public static final class ReefHeights {
-        public static final Distance L1 = Units.Inches.of(0);
-        public static final Distance L2 = Units.Inches.of(0);
-        public static final Distance L3 = Units.Inches.of(0);
-        public static final Distance L4 = Units.Inches.of(0);
+        public static final Distance L1 = Units.Meters.of(0);
+        public static final Distance L2 = Units.Meters.of(0);
+        public static final Distance L3 = Units.Meters.of(0);
+        public static final Distance L4 = Units.Meters.of(0);
     }
 
     public static final class ArmHeightConversion {

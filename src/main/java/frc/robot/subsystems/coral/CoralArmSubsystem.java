@@ -1,6 +1,7 @@
 package frc.robot.subsystems.coral;
 
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkAbsoluteEncoder;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -8,8 +9,8 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-import frc.robot.constants.CoralArmConstants;
 import frc.robot.subsystems.Subsystem;
+import frc.robot.constants.CoralConstants;
 
 public class CoralArmSubsystem extends Subsystem {
   private final SparkMax m_coralPivotMotorController;
@@ -28,7 +29,7 @@ public class CoralArmSubsystem extends Subsystem {
   public CoralArmSubsystem() {
     super();
 
-    m_coralPivotMotorController = new SparkMax(CoralArmConstants.ArmCANIDs.kArm, MotorType.kBrushless);
+    m_coralPivotMotorController = new SparkMax(CoralConstants.CANIDs.kCoralArm, MotorType.kBrushless);
     m_coralPivotEncoder = m_coralPivotMotorController.getAbsoluteEncoder();
     m_coralPivotClosedLoopController = m_coralPivotMotorController.getClosedLoopController();
   }
@@ -42,7 +43,7 @@ public class CoralArmSubsystem extends Subsystem {
   }
 
   public void setDesiredAngle(Rotation2d angle) {
-    m_coralPivotClosedLoopController.setDesiredValue(angle.getRadians());
+    m_coralPivotClosedLoopController.setReference(angle.getRadians(), ControlType.kPosition);
   }
 
   // Dashboard Fluff //

@@ -8,7 +8,9 @@ import com.revrobotics.spark.config.LimitSwitchConfig.Type;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
 import java.util.Map;
+import java.util.stream.Stream;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Meters;
 import static java.util.Map.entry;
 
@@ -20,17 +22,21 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.constants.ElevatorConstants;
-import frc.robot.constants.ElevatorConstants.Measurements;
+import frc.robot.constants.CoralConstants;
 import frc.robot.subsystems.Subsystem;
 
-import lib.LibFuncs;
+import frc.lib.LibFuncs;
 
 public class ElevatorSubsystem extends Subsystem {
 
-    private final SparkMax m_elevatorMotorController;
-    private final AbsoluteEncoder m_elevatorEncoder;
-    private final SparkClosedLoopController m_elevatorClosedLoopController;
+    private final SparkMax m_elevatorMotorControllerLeft;
+    private final AbsoluteEncoder m_elevatorEncoderLeft;
+
+    private final SparkMax m_elevatorMotorControllerRight;
+    private final AbsoluteEncoder m_elevatorEncoderRight;
+
+    private final SparkClosedLoopController m_elevatorClosedLoopControllerLeft;
+    private final SparkClosedLoopController m_elevatorClosedLoopControllerRight;
 
     private String m_elevatorLevelString = "RESTING";
 
@@ -46,77 +52,127 @@ public class ElevatorSubsystem extends Subsystem {
     public ElevatorSubsystem() {
         super();
 
-        m_elevatorMotorController = new SparkMax(ElevatorConstants.ElevatorCANIDs.kElevator, MotorType.kBrushless);
-        m_elevatorEncoder = m_elevatorMotorController.getAbsoluteEncoder();
-        m_elevatorClosedLoopController = m_elevatorMotorController.getClosedLoopController();
-        
-        SparkFlexConfig elevatorMotorControllerConfig = new SparkFlexConfig();
+        m_elevatorMotorControllerLeft = new SparkMax(CoralConstants.CANIDs.kElevatorLeft, MotorType.kBrushless);
+        m_elevatorMotorControllerRight = new SparkMax(CoralConstants.CANIDs.kElevatorRight, MotorType.kBrushless);
 
-        elevatorMotorControllerConfig
-            .smartCurrentLimit(ElevatorConstants.kCurrentLimit)
-            .idleMode(IdleMode.kCoast)
-            .voltageCompensation(12);
+        m_elevatorEncoderLeft = m_elevatorMotorControllerRight.getAbsoluteEncoder();
+        m_elevatorEncoderRight = m_elevatorMotorControllerRight.getAbsoluteEncoder();
+
+        m_elevatorClosedLoopControllerLeft = m_elevatorMotorControllerLeft.getClosedLoopController();
+        m_elevatorClosedLoopControllerRight = m_elevatorMotorControllerRight.getClosedLoopController();
         
-        elevatorMotorControllerConfig
+        SparkFlexConfig elevatorMotorControllerConfigLeft = new SparkFlexConfig();
+        SparkFlexConfig elevatorMotorControllerConfigRight = new SparkFlexConfig();
+
+        elevatorMotorControllerConfigLeft
+            .smartCurrentLimit((int) CoralConstants.kElevatorCurrentLimit.in(Amps))
+            .idleMode(IdleMode.kCoast)
+            .voltageCompensation(12)
+            .inverted(true);
+        
+        elevatorMotorControllerConfigLeft
             .limitSwitch
             .reverseLimitSwitchEnabled(true)
             .reverseLimitSwitchType(Type.kNormallyOpen);
 
-        elevatorMotorControllerConfig
+        elevatorMotorControllerConfigLeft
             .closedLoop
             .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
             .pidf(
-                ElevatorConstants.ElevatorPID.kP,
-                ElevatorConstants.ElevatorPID.kI,
-                ElevatorConstants.ElevatorPID.kD,
-                ElevatorConstants.ElevatorPID.kFF
+                CoralConstants.PID.Elevator.kP,
+                CoralConstants.PID.Elevator.kI,
+                CoralConstants.PID.Elevator.kD,
+                CoralConstants.PID.Elevator.kFF
+            )
+            .outputRange(-1,1);
+
+        elevatorMotorControllerConfigRight
+            .smartCurrentLimit((int) CoralConstants.kElevatorCurrentLimit.in(Amps))
+            .idleMode(IdleMode.kCoast)
+            .voltageCompensation(12)
+            .inverted(false);
+        
+        elevatorMotorControllerConfigRight
+            .limitSwitch
+            .reverseLimitSwitchEnabled(true)
+            .reverseLimitSwitchType(Type.kNormallyOpen);
+
+        elevatorMotorControllerConfigRight
+            .closedLoop
+            .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
+            .pidf(
+                CoralConstants.PID.Elevator.kP,
+                CoralConstants.PID.Elevator.kI,
+                CoralConstants.PID.Elevator.kD,
+                CoralConstants.PID.Elevator.kFF
             )
             .outputRange(-1,1);
     }
 
     public void setLevel(ElevatorLevels level) {
-        m_desiredHeight = levelHeights.get(level);
+        m_desiredHeight = levelHeights.get(level).in(Meters);
 
         m_elevatorLevelString = level.toString();
     }
 
-    private void setMotor(double speed) {
-        m_elevatorMotorController.set(speed);
+    private void setMotorLeft(double speed) {
+        m_elevatorMotorControllerLeft.set(speed);
+    }
+
+    private void setMotorRight(double speed) {
+        m_elevatorMotorControllerLeft.set(speed);
     }
 
     private double getHeight() {
-        Angle angularDistance = ElevatorConstants.kMaxRotations.plus(
-            ElevatorConstants.kMinRotations.times(-1)
+        Angle angularDistance = CoralConstants.ArmHeightConversion.kMaxRotations.plus(
+            CoralConstants.ArmHeightConversion.kMinRotations.times(-1)
         );
 
-        Distance heightDistance = ElevatorConstants.kElevatorMaxHeight.plus(
-            ElevatorConstants.kElevatorMinHeight.times(-1)
+        Distance heightDistance = CoralConstants.ArmHeightConversion.kElevatorMaxHeight.plus(
+            CoralConstants.ArmHeightConversion.kElevatorMinHeight.times(-1)
         );
 
-        return LibFuncs.sum( 
+        double leftHeight = LibFuncs.sum( 
             LibFuncs.mult(
                 LibFuncs.sum( 
-                    m_elevatorEncoder.getPosition(),
-                    -ElevatorConstants.kMinRotations.in(Units.Radians)
+                    m_elevatorEncoderLeft.getPosition(),
+                    -CoralConstants.ArmHeightConversion.kMinRotations.in(Units.Radians)
                 ) / angularDistance.in(Units.Radians),
                 heightDistance.in(Meters)
             ),
-            ElevatorConstants.kElevatorMinHeight.in(Meters)
+            CoralConstants.ArmHeightConversion.kElevatorMinHeight.in(Meters)
         );
+
+        double rightHeight = LibFuncs.sum( 
+            LibFuncs.mult(
+                LibFuncs.sum( 
+                    m_elevatorEncoderRight.getPosition(),
+                    -CoralConstants.ArmHeightConversion.kMinRotations.in(Units.Radians)
+                ) / angularDistance.in(Units.Radians),
+                heightDistance.in(Meters)
+            ),
+            CoralConstants.ArmHeightConversion.kElevatorMinHeight.in(Meters)
+        );
+
+        return (rightHeight + leftHeight) / 2; // getting average height
     }
 
     @Override
     public void periodic() {
         super.periodic();
 
-        if (m_desiredHeight != null) {
+        if (m_desiredHeight != null) { // wth
             double clampedRefrenceRot = MathUtil.clamp(
                 m_desiredHeight, 
-                ElevatorConstants.kElevatorMinHeight,
-                ElevatorConstants.kElevatorMaxHeight
+                CoralConstants.ArmHeightConversion.kElevatorMinHeight.in(Meters),
+                CoralConstants.ArmHeightConversion.kElevatorMaxHeight.in(Meters)
             );
 
-            m_algaePivotClosedLoopController.setReference(clampedRefrenceRot, SparkMax.ControlType.kPosition);
+            Stream.of(
+                m_elevatorClosedLoopControllerLeft,
+                m_elevatorClosedLoopControllerRight
+            ).forEach(controller -> 
+                controller.setReference(clampedRefrenceRot, SparkMax.ControlType.kPosition));
         }   
     }
 
@@ -127,11 +183,11 @@ public class ElevatorSubsystem extends Subsystem {
         L4,
     }
 
-    public static final Map<ElevatorLevels, Double> levelHeights = Map.ofEntries(
-        entry(ElevatorLevels.L1, Measurements.L1),
-        entry(ElevatorLevels.L2, Measurements.L2),
-        entry(ElevatorLevels.L3, Measurements.L3),
-        entry(ElevatorLevels.L4, Measurements.L4)
+    public static final Map<ElevatorLevels, Distance> levelHeights = Map.ofEntries(
+        entry(ElevatorLevels.L1, CoralConstants.ReefHeights.L1),
+        entry(ElevatorLevels.L2, CoralConstants.ReefHeights.L2),
+        entry(ElevatorLevels.L3, CoralConstants.ReefHeights.L3),
+        entry(ElevatorLevels.L4, CoralConstants.ReefHeights.L4)
     );
 
     // Dashboard Fluff //
@@ -139,7 +195,7 @@ public class ElevatorSubsystem extends Subsystem {
 
     protected void dashboardPeriodic() {
         SmartDashboard.putString("Current Elevator Level", m_elevatorLevelString);
-        SmartDashboard.putNumber("Current Height", getHeight());
+        SmartDashboard.putNumber("Current Height (Meters)", getHeight());
     }
 
     protected void publishInit() {}
