@@ -1,19 +1,24 @@
 package frc.robot.subsystems.coral;
 
-import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
+import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkAbsoluteEncoder;
 import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkBase.PersistMode;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import frc.robot.subsystems.Subsystem;
 import frc.robot.constants.CoralConstants;
 
 public class CoralArmSubsystem extends Subsystem {
-  private final SparkMax m_coralPivotMotorController;
+  private final SparkFlex m_coralPivotMotorController;
   private final SparkAbsoluteEncoder m_coralPivotEncoder;
   private final SparkClosedLoopController m_coralPivotClosedLoopController;
 
@@ -29,9 +34,27 @@ public class CoralArmSubsystem extends Subsystem {
   public CoralArmSubsystem() {
     super();
 
-    m_coralPivotMotorController = new SparkMax(CoralConstants.CANIDs.kCoralArm, MotorType.kBrushless);
+    m_coralPivotMotorController = new SparkFlex(CoralConstants.CANIDs.kCoralArm, MotorType.kBrushless);
     m_coralPivotEncoder = m_coralPivotMotorController.getAbsoluteEncoder();
     m_coralPivotClosedLoopController = m_coralPivotMotorController.getClosedLoopController();
+
+    SparkFlexConfig coralPivotConfig = new SparkFlexConfig();
+
+    coralPivotConfig
+      .smartCurrentLimit((int) CoralConstants.kArmCurrentLimit.in(Units.Amps));
+
+    coralPivotConfig
+      .closedLoop
+      .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
+      .pidf( 
+        CoralConstants.PID.CoralArm.kP,
+        CoralConstants.PID.CoralArm.kI,
+        CoralConstants.PID.CoralArm.kD,
+        CoralConstants.PID.CoralArm.kFF
+      )
+      .outputRange(-1, 1);
+
+      m_coralPivotMotorController.configure(coralPivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
   private Rotation2d getAngle() {

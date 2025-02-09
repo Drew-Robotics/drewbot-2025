@@ -97,28 +97,28 @@ public class VisionSubsystem extends Subsystem {
     return retVal;
   }
 
-    public List<Optional<Matrix<N3, N1>>> getPoseStdDevs(List<Optional<EstimatedRobotPose>> poses) {
-      ArrayList<Optional<Matrix<N3, N1>>> poseStdDevs = new ArrayList<Optional<Matrix<N3, N1>>>();
+  public List<Optional<Matrix<N3, N1>>> getPoseStdDevs(List<Optional<EstimatedRobotPose>> poses) {
+    ArrayList<Optional<Matrix<N3, N1>>> poseStdDevs = new ArrayList<Optional<Matrix<N3, N1>>>();
 
-      for (int cameraIndex = 0; cameraIndex < m_cameras.size(); cameraIndex++) {
-        Camera camera = m_cameras.get(cameraIndex);
+    for (int cameraIndex = 0; cameraIndex < m_cameras.size(); cameraIndex++) {
+      Camera camera = m_cameras.get(cameraIndex);
 
-        Optional<EstimatedRobotPose> poseOptional = poses.get(cameraIndex);
+      Optional<EstimatedRobotPose> poseOptional = poses.get(cameraIndex);
 
-        SmartDashboard.putBoolean(m_cameraNames.get(cameraIndex) + " Present", poseOptional.isPresent());
-
+      SmartDashboard.putBoolean(m_cameraNames.get(cameraIndex) + " Present", poseOptional.isPresent());
+      
+      if(poseOptional.isPresent()){
+        Pose2d pos = poseOptional.get().estimatedPose.toPose2d();
+        SmartDashboard.putString(m_cameraNames.get(cameraIndex) + " Pose", pos.toString());
         
-        if(poseOptional.isPresent()){
-          Pose2d pos = poseOptional.get().estimatedPose.toPose2d();
-          SmartDashboard.putString(m_cameraNames.get(cameraIndex) + " Pose", pos.toString());
-          poseStdDevs.add(Optional.ofNullable(camera.getEstimationStdDevs(
-            poseOptional.get().estimatedPose.toPose2d()
-          )));
-        }
-        else
-          poseStdDevs.add(Optional.empty());
+        poseStdDevs.add(Optional.ofNullable(camera.getEstimationStdDevs(
+          poseOptional.get().estimatedPose.toPose2d()
+        )));
       }
-      return poseStdDevs;
+      else
+        poseStdDevs.add(Optional.empty());
     }
+    return poseStdDevs;
+  }
 
 }

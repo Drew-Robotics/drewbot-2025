@@ -7,6 +7,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.units.Units;
 
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
@@ -18,8 +19,6 @@ import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 
 import frc.robot.subsystems.Subsystem;
 import frc.robot.constants.AlgaeConstants;
-import frc.robot.constants.AlgaeConstants.AlgaePivotConstants;
-import frc.robot.constants.AlgaeConstants.AlgaePivotConstants.PivotPID;
 import frc.robot.constants.DriveConstants;
 
 public class AlgaeArmSubsystem extends Subsystem {
@@ -50,16 +49,16 @@ public class AlgaeArmSubsystem extends Subsystem {
         SparkFlexConfig algaePivotMotorConfig = new SparkFlexConfig();
 
         algaePivotMotorConfig
-            .smartCurrentLimit(AlgaePivotConstants.kMaxAmps);
+            .smartCurrentLimit((int) AlgaeConstants.kArmCurrentLimit.in(Units.Amps));
     
         algaePivotMotorConfig
             .closedLoop      
             .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
             .pidf(
-                AlgaeConstants.PID.kP, 
-                AlgaePivotConstants.PivotPID.kI, 
-                AlgaePivotConstants.PivotPID.kD, 
-                AlgaePivotConstants.PivotPID.kFF
+                AlgaeConstants.PID.Arm.kP, 
+                AlgaeConstants.PID.Arm.kI, 
+                AlgaeConstants.PID.Arm.kD, 
+                AlgaeConstants.PID.Arm.kFF
             )
             .outputRange(-1,1);
 
@@ -85,8 +84,8 @@ public class AlgaeArmSubsystem extends Subsystem {
         if (m_currentDesiredAngle != null) {
             double clampedRefrenceRot = MathUtil.clamp(
                 m_currentDesiredAngle.getRotations(), 
-                AlgaePivotConstants.kPivotMinPosition.getRotations(),
-                AlgaePivotConstants.kPivotMaxPosition.getRotations()
+                AlgaeConstants.kPivotMinPosition.getRotations(),
+                AlgaeConstants.kPivotMaxPosition.getRotations()
             );
 
             m_algaePivotClosedLoopController.setReference(clampedRefrenceRot, SparkMax.ControlType.kPosition);

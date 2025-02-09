@@ -26,6 +26,7 @@ public class SwerveModule {
 
   private SwerveModuleState m_measuredState = new SwerveModuleState();
   private SwerveModuleState m_commandedState = new SwerveModuleState();
+  
   private SwerveModulePosition m_measuredPosition = new SwerveModulePosition();
 
   private final SparkFlex m_drivingMotor;
@@ -110,8 +111,8 @@ public class SwerveModule {
       .idleMode(IdleMode.kCoast)
       .smartCurrentLimit((int) DriveConstants.kTurningMotorCurrentLimit.in(Units.Amps));
     turningConfig.encoder
-    .positionConversionFactor(DriveConstants.EncoderConversions.kTurningEncoderPositionFactor.in(Units.Radians))
-    .velocityConversionFactor(DriveConstants.EncoderConversions.kTurningEncoderVelocityFactor.in(Units.RadiansPerSecond));
+      .positionConversionFactor(DriveConstants.EncoderConversions.kTurningEncoderPositionFactor.in(Units.Radians))
+      .velocityConversionFactor(DriveConstants.EncoderConversions.kTurningEncoderVelocityFactor.in(Units.RadiansPerSecond));
     turningConfig.closedLoop
       .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
       .pid(

@@ -23,7 +23,7 @@ public class AlgaeIntakeSubsystem extends Subsystem {
   public AlgaeIntakeSubsystem() {
     super();
 
-    m_algaeIntakeMotorController = new SparkMax(AlgaeConstants.Can.kIntake, MotorType.kBrushless);
+    m_algaeIntakeMotorController = new SparkMax(AlgaeConstants.CANIDs.kIntake, MotorType.kBrushless);
     m_algaeIntakeEncoder = m_algaeIntakeMotorController.getEncoder();
 
     

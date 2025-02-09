@@ -6,7 +6,6 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 
 public class CoralConstants {
-
     public static final class CANIDs {
         public static final int kElevatorLeft = 0;
         public static final int kElevatorRight = 0;
@@ -34,13 +33,14 @@ public class CoralConstants {
             public static final double kI = 0;
             public static final double kD = 0;
         }
-    
     }
     
     public static Current kElevatorCurrentLimit = Units.Amps.of(0);
     public static Current kArmCurrentLimit = Units.Amps.of(0);
     public static Current kIntakeCurrentLimit = Units.Amps.of(0);
 
+    public static boolean kInvertedLeft = true;
+    public static boolean kInvertedRight = true;
 
     public static final class ReefHeights {
         public static final Distance L1 = Units.Meters.of(0);

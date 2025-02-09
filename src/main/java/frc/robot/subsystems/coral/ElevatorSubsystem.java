@@ -1,5 +1,6 @@
 package frc.robot.subsystems.coral;
 
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
@@ -15,6 +16,7 @@ import static edu.wpi.first.units.Units.Meters;
 import static java.util.Map.entry;
 
 import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
@@ -29,11 +31,11 @@ import frc.lib.LibFuncs;
 
 public class ElevatorSubsystem extends Subsystem {
 
-    private final SparkMax m_elevatorMotorControllerLeft;
-    private final AbsoluteEncoder m_elevatorEncoderLeft;
+    private final SparkFlex m_elevatorMotorLeft;
+    private final SparkFlex m_elevatorMotorRight;
 
-    private final SparkMax m_elevatorMotorControllerRight;
-    private final AbsoluteEncoder m_elevatorEncoderRight;
+    private final SparkMax m_elevatorSparkMax;
+    private final AbsoluteEncoder m_elevatorEncoder;
 
     private final SparkClosedLoopController m_elevatorClosedLoopControllerLeft;
     private final SparkClosedLoopController m_elevatorClosedLoopControllerRight;
@@ -52,61 +54,62 @@ public class ElevatorSubsystem extends Subsystem {
     public ElevatorSubsystem() {
         super();
 
-        m_elevatorMotorControllerLeft = new SparkMax(CoralConstants.CANIDs.kElevatorLeft, MotorType.kBrushless);
-        m_elevatorMotorControllerRight = new SparkMax(CoralConstants.CANIDs.kElevatorRight, MotorType.kBrushless);
+        m_elevatorSparkMax = new SparkMax(CoralConstants.CANIDs.kSparkMax, MotorType.kBrushless);
+        m_elevatorEncoder = m_elevatorSparkMax.getAbsoluteEncoder();
 
-        m_elevatorEncoderLeft = m_elevatorMotorControllerRight.getAbsoluteEncoder();
-        m_elevatorEncoderRight = m_elevatorMotorControllerRight.getAbsoluteEncoder();
+        m_elevatorMotorLeft = new SparkFlex(CoralConstants.CANIDs.kElevatorLeft, MotorType.kBrushless);
+        m_elevatorMotorRight = new SparkFlex(CoralConstants.CANIDs.kElevatorRight, MotorType.kBrushless);
 
-        m_elevatorClosedLoopControllerLeft = m_elevatorMotorControllerLeft.getClosedLoopController();
-        m_elevatorClosedLoopControllerRight = m_elevatorMotorControllerRight.getClosedLoopController();
+        m_elevatorClosedLoopControllerLeft = m_elevatorMotorLeft.getClosedLoopController();
+        m_elevatorClosedLoopControllerRight = m_elevatorMotorRight.getClosedLoopController();
         
-        SparkFlexConfig elevatorMotorControllerConfigLeft = new SparkFlexConfig();
-        SparkFlexConfig elevatorMotorControllerConfigRight = new SparkFlexConfig();
+        SparkFlexConfig elevatorConfigLeft = new SparkFlexConfig();
+        SparkFlexConfig elevatorConfigRight = new SparkFlexConfig();
 
-        elevatorMotorControllerConfigLeft
+
+        elevatorConfigLeft
             .smartCurrentLimit((int) CoralConstants.kElevatorCurrentLimit.in(Amps))
             .idleMode(IdleMode.kCoast)
-            .voltageCompensation(12)
-            .inverted(true);
+            .inverted(CoralConstants.kElevatorInvertedLeft);
+ 
+
+        // elevatorMotorControllerConfigLeft
+        //     .limitSwitch
+        //     .reverseLimitSwitchEnabled(true)
+        //     .reverseLimitSwitchType(Type.kNormallyOpen);
+
+        // elevatorMotorControllerConfigLeft
+        //     .closedLoop
+        //     .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
+        //     .pidf(
+        //         CoralConstants.PID.Elevator.kP,
+        //         CoralConstants.PID.Elevator.kI,
+        //         CoralConstants.PID.Elevator.kD,
+        //         CoralConstants.PID.Elevator.kFF
+        //     )
+        //     .outputRange(-1,1);
+
+        // elevatorMotorControllerConfigRight
+        //     .smartCurrentLimit((int) CoralConstants.kElevatorCurrentLimit.in(Amps))
+        //     .idleMode(IdleMode.kCoast)
+        //     .voltageCompensation(12)
+        //     .inverted(false);
         
-        elevatorMotorControllerConfigLeft
-            .limitSwitch
-            .reverseLimitSwitchEnabled(true)
-            .reverseLimitSwitchType(Type.kNormallyOpen);
+        // elevatorMotorControllerConfigRight
+        //     .limitSwitch
+        //     .reverseLimitSwitchEnabled(true)
+        //     .reverseLimitSwitchType(Type.kNormallyOpen);
 
-        elevatorMotorControllerConfigLeft
-            .closedLoop
-            .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-            .pidf(
-                CoralConstants.PID.Elevator.kP,
-                CoralConstants.PID.Elevator.kI,
-                CoralConstants.PID.Elevator.kD,
-                CoralConstants.PID.Elevator.kFF
-            )
-            .outputRange(-1,1);
-
-        elevatorMotorControllerConfigRight
-            .smartCurrentLimit((int) CoralConstants.kElevatorCurrentLimit.in(Amps))
-            .idleMode(IdleMode.kCoast)
-            .voltageCompensation(12)
-            .inverted(false);
-        
-        elevatorMotorControllerConfigRight
-            .limitSwitch
-            .reverseLimitSwitchEnabled(true)
-            .reverseLimitSwitchType(Type.kNormallyOpen);
-
-        elevatorMotorControllerConfigRight
-            .closedLoop
-            .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-            .pidf(
-                CoralConstants.PID.Elevator.kP,
-                CoralConstants.PID.Elevator.kI,
-                CoralConstants.PID.Elevator.kD,
-                CoralConstants.PID.Elevator.kFF
-            )
-            .outputRange(-1,1);
+        // elevatorMotorControllerConfigRight
+        //     .closedLoop
+        //     .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
+        //     .pidf(
+        //         CoralConstants.PID.Elevator.kP,
+        //         CoralConstants.PID.Elevator.kI,
+        //         CoralConstants.PID.Elevator.kD,
+        //         CoralConstants.PID.Elevator.kFF
+        //     )
+        //     .outputRange(-1,1);
     }
 
     public void setLevel(ElevatorLevels level) {
