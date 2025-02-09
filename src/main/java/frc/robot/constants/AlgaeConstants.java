@@ -27,6 +27,19 @@ public class AlgaeConstants {
         }
     }
 
+    public static final class ConversionFactors {
+        public static final class Arm {
+            public static Angle kPositionConversionFactor = Units.Radians.of(2 * Math.PI);
+            public static AngularVelocity kVelocityConversionFactor = kPositionConversionFactor.per(Units.Minutes);
+        };
+
+        public static final class Intake {
+            public static Distance kWheelRadius = Units.Inches.of(0);
+            public static Distance kPositionConversionFactor = kWheelRadius.times(2 * Math.PI); 
+            public static LinearVelocity kVelocityConversionFactor = kPositionConversionFactor.per(Units.Minutes);
+        };
+    }
+
     public static Current kArmCurrentLimit = Units.Amps.of(0);
     public static Current kIntakeCurrentLimit = Units.Amps.of(0);
     

@@ -4,8 +4,17 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.AngularVelocity;
 
 public class CoralConstants {
+    public static Current kElevatorCurrentLimit = Units.Amps.of(0);
+    public static Current kArmCurrentLimit = Units.Amps.of(0);
+    public static Current kIntakeCurrentLimit = Units.Amps.of(0);
+
+    public static boolean kElevatorLeftMotorInverted = false;
+    public static boolean kElevatorRightMotorInverted = true;
+
     public static final class CANIDs {
         public static final int kElevatorLeft = 0;
         public static final int kElevatorRight = 0;
@@ -34,19 +43,44 @@ public class CoralConstants {
             public static final double kD = 0;
         }
     }
-    
-    public static Current kElevatorCurrentLimit = Units.Amps.of(0);
-    public static Current kArmCurrentLimit = Units.Amps.of(0);
-    public static Current kIntakeCurrentLimit = Units.Amps.of(0);
 
-    public static boolean kInvertedLeft = true;
-    public static boolean kInvertedRight = true;
-
-    public static final class ReefHeights {
-        public static final Distance L1 = Units.Meters.of(0);
-        public static final Distance L2 = Units.Meters.of(0);
-        public static final Distance L3 = Units.Meters.of(0);
-        public static final Distance L4 = Units.Meters.of(0);
+    public static final class ConversionFactors {
+        public static final class Arm {
+            public static Angle kPositionConversionFactor = Units.Radians.of(2 * Math.PI);
+            public static AngularVelocity kVelocityConversionFactor = kPositionConversionFactor.per(Units.Minutes);
+        };
+        /*
+        Say, can you see
+        By the dawn's early light
+        What so proudly we hailed
+        At the twilight's last gleaming?
+        Whose broad stripes and bright stars
+        Through the perilous fight
+        O'er the ramparts we watched
+        Were so gallantly, yeah, streaming?
+        And the rockets' red glare
+        The bombs bursting in air
+        Gave proof through the night
+        That our flag was still there
+        O say, does that star-spangled banner yet wave
+        O'er the land of the free and the home of the brave
+        * CAAAAAW WHAT THE FRICK IS A KILOMETER
+        * \\             //
+        *  \\\' ,      / //
+        *   \\\//,   _/ //,
+        *    \_-//' /  //,
+        *      \ ///  //`
+        *     /  ;  \\\`__/_
+        *    /,)-^ _\` \\\
+        *    (/   \\ //\\
+        *        // _//\\\\
+        *       ((` ((
+        */
+        public static final class Intake {
+            public static Distance kWheelRadius = Units.Inches.of(0);
+            public static Distance kPositionConversionFactor = kWheelRadius.times(2 * Math.PI); 
+            public static LinearVelocity kVelocityConversionFactor = kPositionConversionFactor.per(Units.Minutes);
+        };
     }
 
     public static final class ArmHeightConversion {

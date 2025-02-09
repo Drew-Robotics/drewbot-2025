@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.Subsystem;
 import frc.robot.constants.CoralConstants;
 
-public class CoralArmSubsystem extends Subsystem {
+public class CoralArmSubsystem extends Subsystem implements CoralSubsystemI{
   private final SparkFlex m_coralPivotMotorController;
   private final SparkAbsoluteEncoder m_coralPivotEncoder;
   private final SparkClosedLoopController m_coralPivotClosedLoopController;
@@ -44,6 +44,11 @@ public class CoralArmSubsystem extends Subsystem {
       .smartCurrentLimit((int) CoralConstants.kArmCurrentLimit.in(Units.Amps));
 
     coralPivotConfig
+      .absoluteEncoder
+      .positionConversionFactor(CoralConstants.ConversionFactors.Arm.kPositionConversionFactor.in(Units.Radians))
+      .velocityConversionFactor(CoralConstants.ConversionFactors.Arm.kVelocityConversionFactor.in(Units.RadiansPerSecond));
+
+    coralPivotConfig
       .closedLoop
       .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
       .pidf( 
@@ -66,7 +71,7 @@ public class CoralArmSubsystem extends Subsystem {
   }
 
   public void setDesiredAngle(Rotation2d angle) {
-    m_coralPivotClosedLoopController.setReference(angle.getRadians(), ControlType.kPosition);
+    m_coralPivotClosedLoopController.setReference(angle.getRotations(), ControlType.kPosition);
   }
 
   // Dashboard Fluff //

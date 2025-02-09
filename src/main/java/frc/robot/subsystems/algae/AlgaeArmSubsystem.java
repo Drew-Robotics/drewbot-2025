@@ -40,7 +40,7 @@ public class AlgaeArmSubsystem extends Subsystem {
         super();
         
         m_algaePivotMotorController = new SparkFlex(
-            AlgaeConstants.CANIDs.kPivot,
+            AlgaeConstants.CANIDs.kArm,
             MotorType.kBrushless
         );
         m_algaePivotEncoder = m_algaePivotMotorController.getAbsoluteEncoder();
@@ -50,6 +50,11 @@ public class AlgaeArmSubsystem extends Subsystem {
 
         algaePivotMotorConfig
             .smartCurrentLimit((int) AlgaeConstants.kArmCurrentLimit.in(Units.Amps));
+
+        algaePivotMotorConfig
+            .absoluteEncoder
+            .positionConversionFactor(AlgaeConstants.ConversionFactors.Arm.kPositionConversionFactor.in(Units.Radians))
+            .velocityConversionFactor(AlgaeConstants.ConversionFactors.Arm.kVelocityConversionFactor.in(Units.RadiansPerSecond));
     
         algaePivotMotorConfig
             .closedLoop      
@@ -97,7 +102,7 @@ public class AlgaeArmSubsystem extends Subsystem {
 
     protected void dashboardPeriodic() {
         SmartDashboard.putNumber("Current Angle", getAngle().getDegrees());
-        SmartDashboard.putNumber("Desired Angle", m_currentDesiredAngle);
+        SmartDashboard.putNumber("Desired Angle", m_currentDesiredAngle.getDegrees());
     }
 
     protected void publishInit() {}

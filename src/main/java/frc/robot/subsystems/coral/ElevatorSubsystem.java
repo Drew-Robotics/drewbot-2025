@@ -1,48 +1,39 @@
 package frc.robot.subsystems.coral;
 
-import com.ctre.phoenix.motorcontrol.FeedbackDevice;
-import com.revrobotics.AbsoluteEncoder;
-import com.revrobotics.spark.SparkMax;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.LimitSwitchConfig.Type;
 import com.revrobotics.spark.config.SparkFlexConfig;
-
-import java.util.Map;
-import java.util.stream.Stream;
-
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Meters;
-import static java.util.Map.entry;
-
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
-import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 import frc.robot.constants.CoralConstants;
 import frc.robot.subsystems.Subsystem;
 
-import frc.lib.LibFuncs;
+public class ElevatorSubsystem extends Subsystem implements CoralSubsystemI{
 
-public class ElevatorSubsystem extends Subsystem {
+    private final SparkFlex m_elevatorLeadMotor;
+    private final SparkFlex m_elevatorFollowerMotorRight;
 
-    private final SparkFlex m_elevatorMotorLeft;
-    private final SparkFlex m_elevatorMotorRight;
+    private final RelativeEncoder m_elevatorLeftEncoder;
+    private final RelativeEncoder m_elevatorRightEncoder;
 
-    private final SparkMax m_elevatorSparkMax;
-    private final AbsoluteEncoder m_elevatorEncoder;
+    private final SparkClosedLoopController m_elevatorClosedLoopController;
 
-    private final SparkClosedLoopController m_elevatorClosedLoopControllerLeft;
-    private final SparkClosedLoopController m_elevatorClosedLoopControllerRight;
+    private CoralState m_targetState;
 
-    private String m_elevatorLevelString = "RESTING";
-
-    private double m_desiredHeight;
+    private boolean m_switchReset = false;
 
     protected static ElevatorSubsystem m_instance;
     public static ElevatorSubsystem getInstance() {
@@ -53,80 +44,108 @@ public class ElevatorSubsystem extends Subsystem {
 
     public ElevatorSubsystem() {
         super();
+        m_elevatorLeadMotor = new SparkFlex(CoralConstants.CANIDs.kElevatorLeft, MotorType.kBrushless);
+        m_elevatorFollowerMotorRight = new SparkFlex(CoralConstants.CANIDs.kElevatorRight, MotorType.kBrushless);
 
-        m_elevatorSparkMax = new SparkMax(CoralConstants.CANIDs.kSparkMax, MotorType.kBrushless);
-        m_elevatorEncoder = m_elevatorSparkMax.getAbsoluteEncoder();
+        m_elevatorFollowerMotorRight.follow(m_elevatorFollowerMotorRight);
 
-        m_elevatorMotorLeft = new SparkFlex(CoralConstants.CANIDs.kElevatorLeft, MotorType.kBrushless);
-        m_elevatorMotorRight = new SparkFlex(CoralConstants.CANIDs.kElevatorRight, MotorType.kBrushless);
+        m_elevatorLeftEncoder = m_elevatorLeadMotor.getEncoder();
+        m_elevatorRightEncoder = m_elevatorFollowerMotorRight.getEncoder();
 
-        m_elevatorClosedLoopControllerLeft = m_elevatorMotorLeft.getClosedLoopController();
-        m_elevatorClosedLoopControllerRight = m_elevatorMotorRight.getClosedLoopController();
+        m_elevatorClosedLoopController = m_elevatorLeadMotor.getClosedLoopController();
         
-        SparkFlexConfig elevatorConfigLeft = new SparkFlexConfig();
-        SparkFlexConfig elevatorConfigRight = new SparkFlexConfig();
+        SparkFlexConfig elevatorConfigLeader = new SparkFlexConfig();
+        SparkFlexConfig elevatorConfigFollowerRight = new SparkFlexConfig();
 
-
-        elevatorConfigLeft
-            .smartCurrentLimit((int) CoralConstants.kElevatorCurrentLimit.in(Amps))
+        elevatorConfigLeader
+            .smartCurrentLimit((int) CoralConstants.kElevatorCurrentLimit.in(Units.Amps))
             .idleMode(IdleMode.kCoast)
-            .inverted(CoralConstants.kElevatorInvertedLeft);
- 
+            .inverted(CoralConstants.kElevatorLeftMotorInverted);
+        elevatorConfigLeader
+            .encoder
+            .positionConversionFactor(1) // we don't have a linear scaling system so we're doing something custom
+            .velocityConversionFactor(1);
+        elevatorConfigLeader
+            .limitSwitch
+            .reverseLimitSwitchEnabled(true)
+            .reverseLimitSwitchType(Type.kNormallyOpen);
+        elevatorConfigLeader
+            .closedLoop
+            .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+            .pidf(
+                CoralConstants.PID.Elevator.kP,
+                CoralConstants.PID.Elevator.kI,
+                CoralConstants.PID.Elevator.kD,
+                CoralConstants.PID.Elevator.kFF
+            )
+            .outputRange(-1,1);
+            
 
-        // elevatorMotorControllerConfigLeft
-        //     .limitSwitch
-        //     .reverseLimitSwitchEnabled(true)
-        //     .reverseLimitSwitchType(Type.kNormallyOpen);
+        elevatorConfigFollowerRight
+            .smartCurrentLimit((int) CoralConstants.kElevatorCurrentLimit.in(Units.Amps))
+            .idleMode(IdleMode.kCoast)
+            .inverted(CoralConstants.kElevatorRightMotorInverted);
 
-        // elevatorMotorControllerConfigLeft
-        //     .closedLoop
-        //     .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-        //     .pidf(
-        //         CoralConstants.PID.Elevator.kP,
-        //         CoralConstants.PID.Elevator.kI,
-        //         CoralConstants.PID.Elevator.kD,
-        //         CoralConstants.PID.Elevator.kFF
-        //     )
-        //     .outputRange(-1,1);
-
-        // elevatorMotorControllerConfigRight
-        //     .smartCurrentLimit((int) CoralConstants.kElevatorCurrentLimit.in(Amps))
-        //     .idleMode(IdleMode.kCoast)
-        //     .voltageCompensation(12)
-        //     .inverted(false);
+        m_elevatorLeadMotor.configure(elevatorConfigLeader, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        m_elevatorFollowerMotorRight.configure(elevatorConfigFollowerRight, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         
-        // elevatorMotorControllerConfigRight
-        //     .limitSwitch
-        //     .reverseLimitSwitchEnabled(true)
-        //     .reverseLimitSwitchType(Type.kNormallyOpen);
-
-        // elevatorMotorControllerConfigRight
-        //     .closedLoop
-        //     .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-        //     .pidf(
-        //         CoralConstants.PID.Elevator.kP,
-        //         CoralConstants.PID.Elevator.kI,
-        //         CoralConstants.PID.Elevator.kD,
-        //         CoralConstants.PID.Elevator.kFF
-        //     )
-        //     .outputRange(-1,1);
     }
 
-    public void setLevel(ElevatorLevels level) {
-        m_desiredHeight = levelHeights.get(level).in(Meters);
+    /* ----- OVERIDES ----- */
 
-        m_elevatorLevelString = level.toString();
+    @Override
+    public void periodic() {
+        super.periodic();
+        
+        // reset from limit switch
+        if (m_elevatorLeadMotor.getReverseLimitSwitch().isPressed() && !m_switchReset) {
+            m_switchReset = true;
+
+            m_elevatorLeftEncoder.setPosition(CoralConstants.ArmHeightConversion.kMaxRotations.in(Units.Rotations));
+            m_elevatorRightEncoder.setPosition(CoralConstants.ArmHeightConversion.kMaxRotations.in(Units.Rotations));
+        } 
+        else if (!m_elevatorLeadMotor.getReverseLimitSwitch().isPressed()) {
+            m_switchReset = false;
+        }
+
+
+        // set refrence and move the motor
+        m_elevatorClosedLoopController.setReference(
+            heightToRotations(m_targetState.getElevatorSetpoint()).getRotations(), // only time we're using rotations
+            ControlType.kPosition
+        );
     }
 
-    private void setMotorLeft(double speed) {
-        m_elevatorMotorControllerLeft.set(speed);
+    protected void dashboardInit() {}
+
+    protected void dashboardPeriodic() {
+        SmartDashboard.putNumber("Elevator Encoder Reading", getEncoderReading().getRotations());
+        SmartDashboard.putNumber("Elevator Height", getHeight().in(Units.Meters));
+        SmartDashboard.putBoolean("Limit Switch Pressed", m_elevatorLeadMotor.getReverseLimitSwitch().isPressed());
     }
 
-    private void setMotorRight(double speed) {
-        m_elevatorMotorControllerLeft.set(speed);
+    protected void publishInit() {}
+    protected void publishPeriodic() {}
+
+    public void setState(CoralState state) {
+        m_targetState = state;
     }
 
-    private double getHeight() {
+    public Rotation2d getEncoderReading() {
+        Rotation2d leftHeight = Rotation2d.fromRotations(m_elevatorLeftEncoder.getPosition());
+
+        Rotation2d rightHeight = Rotation2d.fromRotations(m_elevatorRightEncoder.getPosition());
+
+        return leftHeight.plus(rightHeight).times(0.5);
+    }
+
+    public Distance getHeight() {
+        return rotationsToHeight(getEncoderReading());
+    }
+
+    /* ----- CONVERSIONS ----- */
+
+    private Distance rotationsToHeight(Rotation2d rot) {
         Angle angularDistance = CoralConstants.ArmHeightConversion.kMaxRotations.plus(
             CoralConstants.ArmHeightConversion.kMinRotations.times(-1)
         );
@@ -135,72 +154,35 @@ public class ElevatorSubsystem extends Subsystem {
             CoralConstants.ArmHeightConversion.kElevatorMinHeight.times(-1)
         );
 
-        double leftHeight = LibFuncs.sum( 
-            LibFuncs.mult(
-                LibFuncs.sum( 
-                    m_elevatorEncoderLeft.getPosition(),
-                    -CoralConstants.ArmHeightConversion.kMinRotations.in(Units.Radians)
-                ) / angularDistance.in(Units.Radians),
-                heightDistance.in(Meters)
-            ),
-            CoralConstants.ArmHeightConversion.kElevatorMinHeight.in(Meters)
+        double progression = 
+            (rot.getRadians() - CoralConstants.ArmHeightConversion.kMinRotations.in(Units.Radians))
+                / angularDistance.in(Units.Radians);
+        
+
+        double heightMeters = progression * heightDistance.in(Units.Meters) 
+            + CoralConstants.ArmHeightConversion.kElevatorMinHeight.in(Units.Meters);
+
+        return Units.Meters.of(heightMeters);
+    }
+
+    private Rotation2d heightToRotations(Distance height) {
+        Angle angularDistance = CoralConstants.ArmHeightConversion.kMaxRotations.plus(
+            CoralConstants.ArmHeightConversion.kMinRotations.times(-1)
         );
 
-        double rightHeight = LibFuncs.sum( 
-            LibFuncs.mult(
-                LibFuncs.sum( 
-                    m_elevatorEncoderRight.getPosition(),
-                    -CoralConstants.ArmHeightConversion.kMinRotations.in(Units.Radians)
-                ) / angularDistance.in(Units.Radians),
-                heightDistance.in(Meters)
-            ),
-            CoralConstants.ArmHeightConversion.kElevatorMinHeight.in(Meters)
+        Distance heightDistance = CoralConstants.ArmHeightConversion.kElevatorMaxHeight.plus(
+            CoralConstants.ArmHeightConversion.kElevatorMinHeight.times(-1)
         );
 
-        return (rightHeight + leftHeight) / 2; // getting average height
+        double progression = 
+            (height.in(Units.Meters) - CoralConstants.ArmHeightConversion.kElevatorMinHeight.in(Units.Meters))
+                / heightDistance.in(Units.Meters);
+        
+
+        double angleRadians = progression * angularDistance.in(Units.Radians) 
+            + CoralConstants.ArmHeightConversion.kMinRotations.in(Units.Radians);
+
+        return Rotation2d.fromRadians(angleRadians);
     }
 
-    @Override
-    public void periodic() {
-        super.periodic();
-
-        if (m_desiredHeight != null) { // wth
-            double clampedRefrenceRot = MathUtil.clamp(
-                m_desiredHeight, 
-                CoralConstants.ArmHeightConversion.kElevatorMinHeight.in(Meters),
-                CoralConstants.ArmHeightConversion.kElevatorMaxHeight.in(Meters)
-            );
-
-            Stream.of(
-                m_elevatorClosedLoopControllerLeft,
-                m_elevatorClosedLoopControllerRight
-            ).forEach(controller -> 
-                controller.setReference(clampedRefrenceRot, SparkMax.ControlType.kPosition));
-        }   
-    }
-
-    public enum ElevatorLevels {
-        L1,
-        L2,
-        L3,
-        L4,
-    }
-
-    public static final Map<ElevatorLevels, Distance> levelHeights = Map.ofEntries(
-        entry(ElevatorLevels.L1, CoralConstants.ReefHeights.L1),
-        entry(ElevatorLevels.L2, CoralConstants.ReefHeights.L2),
-        entry(ElevatorLevels.L3, CoralConstants.ReefHeights.L3),
-        entry(ElevatorLevels.L4, CoralConstants.ReefHeights.L4)
-    );
-
-    // Dashboard Fluff //
-    protected void dashboardInit() {}
-
-    protected void dashboardPeriodic() {
-        SmartDashboard.putString("Current Elevator Level", m_elevatorLevelString);
-        SmartDashboard.putNumber("Current Height (Meters)", getHeight());
-    }
-
-    protected void publishInit() {}
-    protected void publishPeriodic() {}
 }

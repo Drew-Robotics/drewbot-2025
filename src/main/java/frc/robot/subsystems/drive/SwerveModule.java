@@ -74,7 +74,7 @@ public class SwerveModule {
     m_measuredStateTopic = m_moduleTable.getStructTopic(moduleName + " Measured State", SwerveModuleState.struct);
     m_measuredStatePublisher = m_measuredStateTopic.publish();
 
-    m_commandedPreOpStateTopic = m_moduleTable.getStructTopic(moduleName + " Commanded State Pre Optimization", SwerveModuleState.struct);
+    m_commandedPreOpStateTopic = m_moduleTable.getStructTopic(moduleName + " Commanded State Pre-Optimization", SwerveModuleState.struct);
     m_commandedPreOpStatePublisher = m_commandedPreOpStateTopic.publish();
 
     m_commandedStateTopic = m_moduleTable.getStructTopic(moduleName + " Commanded State", SwerveModuleState.struct);
