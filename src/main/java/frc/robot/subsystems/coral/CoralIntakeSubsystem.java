@@ -69,8 +69,9 @@ public class CoralIntakeSubsystem extends Subsystem implements CoralSubsystemI {
       m_coralIntakeMotor.configure(coralIntakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
-  public void setVelocity(LinearVelocity desiredVelocity) {     
-    m_coralIntakeClosedLoopController.setReference(desiredVelocity.in(Units.MetersPerSecond), ControlType.kVelocity);
+  public void setVelocity(LinearVelocity desiredVelocity) {
+    m_currentVelocity = desiredVelocity;
+    m_coralIntakeClosedLoopController.setReference(m_currentVelocity.in(Units.MetersPerSecond), ControlType.kVelocity);
   }
 
   public void setState(CoralState state) {
