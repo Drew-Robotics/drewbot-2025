@@ -15,6 +15,12 @@ public class CoralConstants {
     public static boolean kElevatorLeftMotorInverted = false;
     public static boolean kElevatorRightMotorInverted = true;
 
+
+    public static boolean kCoralArmMotorInverted = false;
+    public static boolean kCoralIntakeMotorInverted = false;
+
+    public static LinearVelocity kIntakeSurfaceVelocity = Units.MetersPerSecond.of(0);
+
     public static final class CANIDs {
         public static final int kElevatorLeft = 0;
         public static final int kElevatorRight = 0;

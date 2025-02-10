@@ -66,8 +66,8 @@ public class CoralArmSubsystem extends Subsystem implements CoralSubsystemI{
     return Rotation2d.fromRotations(m_coralPivotEncoder.getPosition());
   }
 
-  private void setMotor(double speed) {
-    m_coralPivotMotorController.set(speed);
+  public void setState(CoralState state) {
+    setDesiredAngle(state.getArmSetpoint());
   }
 
   public void setDesiredAngle(Rotation2d angle) {

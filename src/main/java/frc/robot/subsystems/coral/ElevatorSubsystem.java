@@ -47,8 +47,6 @@ public class ElevatorSubsystem extends Subsystem implements CoralSubsystemI{
         m_elevatorLeadMotor = new SparkFlex(CoralConstants.CANIDs.kElevatorLeft, MotorType.kBrushless);
         m_elevatorFollowerMotorRight = new SparkFlex(CoralConstants.CANIDs.kElevatorRight, MotorType.kBrushless);
 
-        m_elevatorFollowerMotorRight.follow(m_elevatorFollowerMotorRight);
-
         m_elevatorLeftEncoder = m_elevatorLeadMotor.getEncoder();
         m_elevatorRightEncoder = m_elevatorFollowerMotorRight.getEncoder();
 
@@ -84,7 +82,8 @@ public class ElevatorSubsystem extends Subsystem implements CoralSubsystemI{
         elevatorConfigFollowerRight
             .smartCurrentLimit((int) CoralConstants.kElevatorCurrentLimit.in(Units.Amps))
             .idleMode(IdleMode.kCoast)
-            .inverted(CoralConstants.kElevatorRightMotorInverted);
+            .inverted(CoralConstants.kElevatorRightMotorInverted)
+            .follow(m_elevatorLeadMotor);
 
         m_elevatorLeadMotor.configure(elevatorConfigLeader, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         m_elevatorFollowerMotorRight.configure(elevatorConfigFollowerRight, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);

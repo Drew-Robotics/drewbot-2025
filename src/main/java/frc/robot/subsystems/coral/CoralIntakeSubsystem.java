@@ -73,8 +73,10 @@ public class CoralIntakeSubsystem extends Subsystem implements CoralSubsystemI {
     m_coralIntakeClosedLoopController.setReference(desiredVelocity.in(Units.MetersPerSecond), ControlType.kVelocity);
   }
 
-  private void setMotor(double speed) {
-    m_coralIntakeMotor.set(speed);
+  public void setState(CoralState state) {
+    if (state.getIntakeRunning()){
+      setVelocity(CoralConstants.kIntakeSurfaceVelocity);
+    }
   }
 
   // Dashboard Fluff //
