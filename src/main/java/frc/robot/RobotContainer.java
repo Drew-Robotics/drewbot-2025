@@ -19,7 +19,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.commands.DriveCommand;
-import frc.robot.constants.CoralConstants.PID.CoralArm;
 import frc.robot.controllers.DriverController;
 import frc.robot.controllers.OperatorController;
 import frc.robot.subsystems.algae.AlgaeArmSubsystem;
