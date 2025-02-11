@@ -66,7 +66,7 @@ public class CoralArmSubsystem extends SubsystemAbstract implements CoralSubsyst
   private void setDesiredAngle(Rotation2d angle) {
     m_armDesiredAngle = angle;
 
-    m_coralPivotClosedLoopController.setReference(clampAngle(angle).getRotations(), ControlType.kPosition);
+    m_coralPivotClosedLoopController.setReference(clampAngle(angle).getRadians(), ControlType.kPosition);
   }
 
   private Rotation2d clampAngle(Rotation2d angle) {
