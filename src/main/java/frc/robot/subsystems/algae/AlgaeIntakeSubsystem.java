@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems.algae;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkFlexConfig;
@@ -22,11 +24,9 @@ import frc.robot.constants.AlgaeConstants;
 import frc.robot.subsystems.SubsystemAbstract;
 
 public class AlgaeIntakeSubsystem extends SubsystemAbstract {
-  private final SparkFlex m_AlgaeIntakeMotor;
-  private final RelativeEncoder m_AlgaeIntakeEncoder;
-  private final SparkClosedLoopController m_AlgaeIntakeClosedLoopController;
-
-  private LinearVelocity m_currentVelocity;
+  private final SparkFlex m_algaeIntakeMotor;
+  private final RelativeEncoder m_algaeIntakeEncoder;
+  private final SparkClosedLoopController m_algaeIntakeClosedLoopController;
 
   protected static AlgaeIntakeSubsystem m_instance;
   public static AlgaeIntakeSubsystem getInstance() {
@@ -38,16 +38,16 @@ public class AlgaeIntakeSubsystem extends SubsystemAbstract {
   public AlgaeIntakeSubsystem() {
     super();
 
-    m_AlgaeIntakeMotor = new SparkFlex(AlgaeConstants.CANIDs.kIntake, MotorType.kBrushless);
-    m_AlgaeIntakeEncoder = m_AlgaeIntakeMotor.getEncoder();
-    m_AlgaeIntakeClosedLoopController = m_AlgaeIntakeMotor.getClosedLoopController();
+    m_algaeIntakeMotor = new SparkFlex(AlgaeConstants.CANIDs.kIntake, MotorType.kBrushless);
+    m_algaeIntakeEncoder = m_algaeIntakeMotor.getEncoder();
+    m_algaeIntakeClosedLoopController = m_algaeIntakeMotor.getClosedLoopController();
 
-    SparkFlexConfig AlgaeIntakeConfig = new SparkFlexConfig();
+    SparkFlexConfig algaeIntakeConfig = new SparkFlexConfig();
 
-    AlgaeIntakeConfig
+    algaeIntakeConfig
       .smartCurrentLimit((int) AlgaeConstants.kArmCurrentLimit.in(Units.Amps));
 
-    AlgaeIntakeConfig
+    algaeIntakeConfig
       .encoder
       .positionConversionFactor(
         AlgaeConstants.ConversionFactors.Intake.kPositionConversionFactor.in(Units.Meters)
@@ -56,7 +56,7 @@ public class AlgaeIntakeSubsystem extends SubsystemAbstract {
         AlgaeConstants.ConversionFactors.Intake.kVelocityConversionFactor.in(Units.MetersPerSecond)
       );
     
-    AlgaeIntakeConfig
+    algaeIntakeConfig
       .closedLoop
       .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
       .pid(
@@ -66,13 +66,18 @@ public class AlgaeIntakeSubsystem extends SubsystemAbstract {
       )
       .outputRange(-1, 1);
 
-      m_AlgaeIntakeMotor.configure(AlgaeIntakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+      m_algaeIntakeMotor.configure(algaeIntakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
+
+  /* Getters and Setters */
   public void setVelocity(LinearVelocity desiredVelocity) {     
-    m_AlgaeIntakeClosedLoopController.setReference(desiredVelocity.in(Units.MetersPerSecond), ControlType.kVelocity);
+    m_algaeIntakeClosedLoopController.setReference(desiredVelocity.in(Units.MetersPerSecond), ControlType.kVelocity);
   }
 
+  public LinearVelocity getVelocity() {
+    return MetersPerSecond.of(m_algaeIntakeEncoder.getVelocity());
+  }
 
   /* Overrides */
   protected void dashboardInit() {}

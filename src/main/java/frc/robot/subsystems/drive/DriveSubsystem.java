@@ -28,8 +28,6 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.networktables.DoublePublisher;
-import edu.wpi.first.networktables.StructPublisher;
 
 import edu.wpi.first.units.measure.*;
 import static edu.wpi.first.units.Units.*;

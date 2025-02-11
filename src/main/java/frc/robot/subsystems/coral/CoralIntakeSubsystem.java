@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems.coral;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkFlexConfig;
@@ -73,6 +75,10 @@ public class CoralIntakeSubsystem extends SubsystemAbstract implements CoralSubs
   public void setVelocity(LinearVelocity desiredVelocity) {
     m_currentVelocity = desiredVelocity;
     m_coralIntakeClosedLoopController.setReference(desiredVelocity.in(Units.MetersPerSecond), ControlType.kVelocity);
+  }
+
+  public LinearVelocity getVelocity() {
+    return MetersPerSecond.of(m_coralIntakeEncoder.getVelocity());
   }
 
   public void setState(CoralState state) {
