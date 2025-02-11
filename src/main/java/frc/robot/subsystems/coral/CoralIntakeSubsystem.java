@@ -72,7 +72,7 @@ public class CoralIntakeSubsystem extends SubsystemAbstract implements CoralSubs
   /* Setters and Getters */
   public void setVelocity(LinearVelocity desiredVelocity) {
     m_currentVelocity = desiredVelocity;
-    m_coralIntakeClosedLoopController.setReference(m_currentVelocity.in(Units.MetersPerSecond), ControlType.kVelocity);
+    m_coralIntakeClosedLoopController.setReference(desiredVelocity.in(Units.MetersPerSecond), ControlType.kVelocity);
   }
 
   public void setState(CoralState state) {
