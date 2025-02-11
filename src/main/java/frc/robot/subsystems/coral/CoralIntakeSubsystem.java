@@ -28,8 +28,6 @@ public class CoralIntakeSubsystem extends SubsystemAbstract implements CoralSubs
   private final RelativeEncoder m_coralIntakeEncoder;
   private final SparkClosedLoopController m_coralIntakeClosedLoopController;
 
-  private LinearVelocity m_currentVelocity;
-
   protected static CoralIntakeSubsystem m_instance;
   public static CoralIntakeSubsystem getInstance() {
       if (m_instance == null)
