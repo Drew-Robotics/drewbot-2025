@@ -19,9 +19,9 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import frc.robot.constants.CoralConstants;
-import frc.robot.subsystems.Subsystem;
+import frc.robot.subsystems.SubsystemAbstract;
 
-public class ElevatorSubsystem extends Subsystem implements CoralSubsystemI{
+public class ElevatorSubsystem extends SubsystemAbstract implements CoralSubsystemI{
 
     private final SparkFlex m_elevatorLeadMotor;
     private final SparkFlex m_elevatorFollowerMotorRight;

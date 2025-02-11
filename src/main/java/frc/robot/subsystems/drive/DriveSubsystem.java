@@ -37,9 +37,11 @@ import frc.robot.constants.DriveAutoConstants;
 import frc.robot.constants.DriveConstants;
 import frc.robot.constants.VisionConstants;
 import frc.robot.RobotContainer.subsystems;
-import frc.robot.subsystems.Subsystem;
+import frc.robot.subsystems.SubsystemAbstract;
+import frc.robot.subsystems.topicSup.DoubleTopicSup;
+import frc.robot.subsystems.topicSup.StructTopicSup;
 
-public class DriveSubsystem extends Subsystem {
+public class DriveSubsystem extends SubsystemAbstract {
   private final AHRS m_gyro;
   private boolean m_isFieldOriented = DriveConstants.kFieldOriented;
 
@@ -49,20 +51,11 @@ public class DriveSubsystem extends Subsystem {
   private final SwerveDrivePoseEstimator m_poseEstimator;
   private final SlewRateLimiter m_magnitudeLimiter, m_directionalLimiter, m_rotationLimiter;
 
-  private LinearVelocity m_xVelocity = MetersPerSecond.of(0);
-  private LinearVelocity m_yVelocity = MetersPerSecond.of(0);
-  private AngularVelocity m_rotationalVelocity = RadiansPerSecond.of(0);
+  private LinearVelocity m_xVelocity = MetersPerSecond.zero();
+  private LinearVelocity m_yVelocity = MetersPerSecond.zero();
+  private AngularVelocity m_rotationalVelocity = RadiansPerSecond.zero();
 
   private PIDController m_rotationController = new PIDController(0, 0, 0, 0);
-
-  private DriveSubsystemLogger m_logger;
-  private class DriveSubsystemLogger {
-    private final StructPublisher<Pose2d> poseEstimPublisher = m_table.getStructTopic("PoseEstimation", Pose2d.struct).publish();
-    private final StructPublisher<Pose2d> visionPoseEstimPublisher = m_table.getStructTopic("VisionPoesEstimation", Pose2d.struct).publish(); // todo : get rid of this (janky but useful for debugging)
-    private final StructPublisher<ChassisSpeeds> commandedChassisSpeedsPublisher = m_table.getStructTopic("CommandedChassisSpeeds", ChassisSpeeds.struct).publish();
-    private final StructPublisher<ChassisSpeeds> measuredChassisSpeedsPublisher = m_table.getStructTopic("MeasuredChassisSpeeds", ChassisSpeeds.struct).publish();
-    private final DoublePublisher gyroYawPublisher = m_table.getDoubleTopic("GyroYawRotations").publish();
-  }
 
   private static DriveSubsystem m_instance;
   public static DriveSubsystem getInstance() {
@@ -73,7 +66,6 @@ public class DriveSubsystem extends Subsystem {
 
   protected DriveSubsystem() {
     super();
-    m_logger = new DriveSubsystemLogger();
     m_gyro = new AHRS(NavXComType.kUSB1, DriveConstants.kUpdateRate);
 
     m_frontLeft = new SwerveModule(
@@ -147,14 +139,44 @@ public class DriveSubsystem extends Subsystem {
     SmartDashboard.putNumber("Yaw Degrees", getGyroYaw().getDegrees());
   }
 
-  protected void publishInit() {}
+  protected void publishInit() {
+    addTopicSup(
+      new StructTopicSup<Pose2d>(
+        m_table.getStructTopic("Pose Estimation", Pose2d.struct).publish(),
+        this::getPose
+      )
+    );
 
-  public void publishPeriodic() {
-    m_logger.poseEstimPublisher.set(getPose());
-    m_logger.commandedChassisSpeedsPublisher.set(new ChassisSpeeds(m_xVelocity, m_yVelocity, m_rotationalVelocity));
-    m_logger.measuredChassisSpeedsPublisher.set(getChassisSpeeds());
-    m_logger.gyroYawPublisher.set(getGyroYaw().getRotations());
+    addTopicSup(
+      new StructTopicSup<ChassisSpeeds>(
+        m_table.getStructTopic("Commanded Chassis Speed", ChassisSpeeds.struct).publish(),
+        () -> new ChassisSpeeds(m_xVelocity, m_yVelocity, m_rotationalVelocity)
+      )
+    );
+
+    addTopicSup(
+      new StructTopicSup<ChassisSpeeds>(
+        m_table.getStructTopic("Commanded Chassis Speeds", ChassisSpeeds.struct).publish(),
+        () -> new ChassisSpeeds(m_xVelocity, m_yVelocity, m_rotationalVelocity)
+      )
+    );
+
+    addTopicSup(
+      new StructTopicSup<ChassisSpeeds>(
+        m_table.getStructTopic("Measured Chassis Speeds", ChassisSpeeds.struct).publish(),
+        () -> getChassisSpeeds()
+      )
+    );
+
+    addTopicSup(
+      new DoubleTopicSup(
+        m_table.getDoubleTopic("Yaw Rotations").publish(),
+        () -> getGyroYaw().getRotations()
+      )
+    );
   }
+
+  public void publishPeriodic() {}
 
   /* ----- AUTONOMOUS ----- */
 

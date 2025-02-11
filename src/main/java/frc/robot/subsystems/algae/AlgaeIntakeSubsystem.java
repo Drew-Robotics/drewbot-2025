@@ -19,9 +19,9 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import frc.robot.constants.AlgaeConstants;
-import frc.robot.subsystems.Subsystem;
+import frc.robot.subsystems.SubsystemAbstract;
 
-public class AlgaeIntakeSubsystem extends Subsystem {
+public class AlgaeIntakeSubsystem extends SubsystemAbstract {
   private final SparkFlex m_AlgaeIntakeMotor;
   private final RelativeEncoder m_AlgaeIntakeEncoder;
   private final SparkClosedLoopController m_AlgaeIntakeClosedLoopController;
@@ -73,11 +73,8 @@ public class AlgaeIntakeSubsystem extends Subsystem {
     m_AlgaeIntakeClosedLoopController.setReference(desiredVelocity.in(Units.MetersPerSecond), ControlType.kVelocity);
   }
 
-  private void setMotor(double speed) {
-    m_AlgaeIntakeMotor.set(speed);
-  }
 
-  // Dashboard Fluff //
+  /* Overrides */
   protected void dashboardInit() {}
 
   protected void dashboardPeriodic() {}

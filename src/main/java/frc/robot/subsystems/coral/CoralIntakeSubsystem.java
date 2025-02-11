@@ -19,9 +19,9 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import frc.robot.constants.CoralConstants;
-import frc.robot.subsystems.Subsystem;
+import frc.robot.subsystems.SubsystemAbstract;
 
-public class CoralIntakeSubsystem extends Subsystem implements CoralSubsystemI {
+public class CoralIntakeSubsystem extends SubsystemAbstract implements CoralSubsystemI {
   private final SparkFlex m_coralIntakeMotor;
   private final RelativeEncoder m_coralIntakeEncoder;
   private final SparkClosedLoopController m_coralIntakeClosedLoopController;
@@ -46,7 +46,7 @@ public class CoralIntakeSubsystem extends Subsystem implements CoralSubsystemI {
 
     coralIntakeConfig
       .smartCurrentLimit((int) CoralConstants.kArmCurrentLimit.in(Units.Amps));
-
+ 
     coralIntakeConfig
       .encoder
       .positionConversionFactor(
@@ -69,6 +69,7 @@ public class CoralIntakeSubsystem extends Subsystem implements CoralSubsystemI {
       m_coralIntakeMotor.configure(coralIntakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
+  /* Setters and Getters */
   public void setVelocity(LinearVelocity desiredVelocity) {
     m_currentVelocity = desiredVelocity;
     m_coralIntakeClosedLoopController.setReference(m_currentVelocity.in(Units.MetersPerSecond), ControlType.kVelocity);
@@ -80,7 +81,7 @@ public class CoralIntakeSubsystem extends Subsystem implements CoralSubsystemI {
     }
   }
 
-  // Dashboard Fluff //
+  /* Overrides */
   protected void dashboardInit() {}
 
   protected void dashboardPeriodic() {}

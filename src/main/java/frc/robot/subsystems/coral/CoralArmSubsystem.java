@@ -9,15 +9,16 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-import frc.robot.subsystems.Subsystem;
+import frc.robot.subsystems.SubsystemAbstract;
 import frc.robot.constants.CoralConstants;
 
-public class CoralArmSubsystem extends Subsystem implements CoralSubsystemI{
+public class CoralArmSubsystem extends SubsystemAbstract implements CoralSubsystemI{
   private final SparkFlex m_coralPivotMotorController;
   private final SparkAbsoluteEncoder m_coralPivotEncoder;
   private final SparkClosedLoopController m_coralPivotClosedLoopController;
@@ -62,7 +63,22 @@ public class CoralArmSubsystem extends Subsystem implements CoralSubsystemI{
       m_coralPivotMotorController.configure(coralPivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
-  private Rotation2d getAngle() {
+  private void setDesiredAngle(Rotation2d angle) {
+    m_coralPivotClosedLoopController.setReference(clampAngle(angle).getRotations(), ControlType.kPosition);
+  }
+
+  private Rotation2d clampAngle(Rotation2d angle) {
+    return Rotation2d.fromRadians(
+      MathUtil.clamp(
+        angle.getRadians(),
+        CoralConstants.kMinArmAngle.getRadians(),
+        CoralConstants.kMaxArmAngle.getRadians()
+      )
+    );
+  }
+
+  /* Getters and Setters */
+  public Rotation2d getAngle() {
     return Rotation2d.fromRotations(m_coralPivotEncoder.getPosition());
   }
 
@@ -70,11 +86,7 @@ public class CoralArmSubsystem extends Subsystem implements CoralSubsystemI{
     setDesiredAngle(state.getArmSetpoint());
   }
 
-  public void setDesiredAngle(Rotation2d angle) {
-    m_coralPivotClosedLoopController.setReference(angle.getRotations(), ControlType.kPosition);
-  }
-
-  // Dashboard Fluff //
+  /* Dashboard Fluff */
   protected void dashboardPeriodic() {
     SmartDashboard.putNumber("Desired Arm Angle (degrees)", m_armDesiredAngle.getDegrees());
     SmartDashboard.putNumber("Measured Arm Angle (degrees)", getAngle().getDegrees());

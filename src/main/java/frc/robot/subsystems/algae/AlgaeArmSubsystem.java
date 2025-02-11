@@ -1,6 +1,5 @@
 package frc.robot.subsystems.algae;
 
-import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
@@ -17,11 +16,10 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 
-import frc.robot.subsystems.Subsystem;
+import frc.robot.subsystems.SubsystemAbstract;
 import frc.robot.constants.AlgaeConstants;
-import frc.robot.constants.DriveConstants;
 
-public class AlgaeArmSubsystem extends Subsystem {
+public class AlgaeArmSubsystem extends SubsystemAbstract {
     private final SparkFlex m_algaePivotMotorController;
     private final AbsoluteEncoder m_algaePivotEncoder;
 
@@ -70,34 +68,26 @@ public class AlgaeArmSubsystem extends Subsystem {
         m_algaePivotMotorController.configure(algaePivotMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
+    /* Getters and Setters */
     public void setDesiredAngle(Rotation2d angle) {
-        m_currentDesiredAngle = angle;
+        m_algaePivotClosedLoopController.setReference(clampAngle(angle).getRadians(), SparkMax.ControlType.kPosition);
     }
 
     public Rotation2d getAngle() {
-        return Rotation2d.fromRotations(m_algaePivotEncoder.getPosition());
-    } 
-
-    private void setMotor(double speed) {
-        m_algaePivotMotorController.set(speed);
+        return Rotation2d.fromRadians(m_algaePivotEncoder.getPosition());
     }
 
-    @Override
-    public void periodic() {
-        super.periodic();
-
-        if (m_currentDesiredAngle != null) {
-            double clampedRefrenceRot = MathUtil.clamp(
-                m_currentDesiredAngle.getRotations(), 
-                AlgaeConstants.kPivotMinPosition.getRotations(),
-                AlgaeConstants.kPivotMaxPosition.getRotations()
-            );
-
-            m_algaePivotClosedLoopController.setReference(clampedRefrenceRot, SparkMax.ControlType.kPosition);
-        }   
+    public Rotation2d clampAngle(Rotation2d angle) {
+        return Rotation2d.fromRadians(
+            MathUtil.clamp(
+                m_currentDesiredAngle.getRadians(), 
+                AlgaeConstants.kPivotMinPosition.getRadians(),
+                AlgaeConstants.kPivotMaxPosition.getRadians()
+            )
+        );
     }
 
-    // Dashboard Fluff //
+    /* Overrides */
     protected void dashboardInit() {}
 
     protected void dashboardPeriodic() {

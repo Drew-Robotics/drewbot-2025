@@ -3,10 +3,8 @@ package frc.robot.subsystems.vision;
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import java.util.ArrayList;
@@ -18,9 +16,10 @@ import java.util.stream.Collectors;
 import org.photonvision.EstimatedRobotPose;
 
 import frc.robot.constants.VisionConstants;
-import frc.robot.subsystems.Subsystem;
+import frc.robot.subsystems.SubsystemAbstract;
+import frc.robot.subsystems.topicSup.StructArrayTopicSup;
 
-public class VisionSubsystem extends Subsystem {
+public class VisionSubsystem extends SubsystemAbstract {
   private final Camera m_frontLeft, m_frontRight, m_backLeft, m_backRight;
   private final List<Camera> m_cameras;
 
@@ -33,11 +32,7 @@ public class VisionSubsystem extends Subsystem {
     VisionConstants.CameraNames.kBackRight
   );
 
-  private VisionSubsystemLogger m_logger;
-  private class VisionSubsystemLogger {
-    private final StructArrayPublisher<AprilTag> fieldTagsPublisher = m_table.getStructArrayTopic("FieldTags", new AprilTagStruct()).publish();
-    // private final StructArrayPublisher<AprilTag> seenTagsPublisher = m_table.getStructArrayTopic("SeenTags", new AprilTagStruct()).publish();
-  }
+  private StructArrayTopicSup<AprilTag> m_seenTagsTopicSup;
 
   private static VisionSubsystem m_instance;
   public static VisionSubsystem getInstance() {
@@ -55,7 +50,6 @@ public class VisionSubsystem extends Subsystem {
     m_backRight = new Camera(VisionConstants.CameraNames.kBackRight, VisionConstants.CameraTransforms.kBackRight);
 
     m_cameras = List.of(m_frontLeft, m_frontRight, m_backLeft, m_backRight);
-    m_logger = new VisionSubsystemLogger();
   }
 
   /* ----- OVERRIDES ----- */
@@ -69,13 +63,26 @@ public class VisionSubsystem extends Subsystem {
   public void dashboardInit() {}
   @Override
   public void dashboardPeriodic() {}
+
   @Override
-  public void publishInit() {}
-  @Override
-  public void publishPeriodic() {
-    // m_logger.seenTagsPublisher.accept(); // todo : finish this
-    m_logger.fieldTagsPublisher.accept(m_fieldTags);
+  public void publishInit() {
+    // addTopicSup(
+    //   new StructArrayTopicSup<AprilTag>(
+    //     m_table.getStructArrayTopic("Field Tags", new AprilTagStruct()).publish(),
+    //     m_fieldTags
+    //   )
+    // );
+
+    // m_seenTagsTopicSup = (StructArrayTopicSup<AprilTag>) addTopicSup(
+    //   new StructArrayTopicSup<AprilTag>(
+    //     m_table.getStructArrayTopic("Seen Tags", new AprilTagStruct()).publish(),
+    //     this::getSeenTags
+    //   )
+    // );
   }
+
+  @Override
+  public void publishPeriodic() {}
 
   /* ----- VISION ------ */
 
