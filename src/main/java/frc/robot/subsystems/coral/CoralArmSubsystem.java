@@ -64,6 +64,8 @@ public class CoralArmSubsystem extends SubsystemAbstract implements CoralSubsyst
   }
 
   private void setDesiredAngle(Rotation2d angle) {
+    m_armDesiredAngle = angle;
+
     m_coralPivotClosedLoopController.setReference(clampAngle(angle).getRotations(), ControlType.kPosition);
   }
 
@@ -86,7 +88,7 @@ public class CoralArmSubsystem extends SubsystemAbstract implements CoralSubsyst
     setDesiredAngle(state.getArmSetpoint());
   }
 
-  /* Dashboard Fluff */
+  /* Overrides */
   protected void dashboardPeriodic() {
     SmartDashboard.putNumber("Desired Arm Angle (degrees)", m_armDesiredAngle.getDegrees());
     SmartDashboard.putNumber("Measured Arm Angle (degrees)", getAngle().getDegrees());

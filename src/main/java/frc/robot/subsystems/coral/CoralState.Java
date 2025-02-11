@@ -4,7 +4,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Distance;
 
 public class CoralState {
-
     private final Distance m_elevatorSetpoint;
     private final Rotation2d m_armSetpoint;
     private boolean m_intakeRunning;

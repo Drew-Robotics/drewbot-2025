@@ -70,6 +70,8 @@ public class AlgaeArmSubsystem extends SubsystemAbstract {
 
     /* Getters and Setters */
     public void setDesiredAngle(Rotation2d angle) {
+        m_currentDesiredAngle = angle;
+
         m_algaePivotClosedLoopController.setReference(clampAngle(angle).getRadians(), SparkMax.ControlType.kPosition);
     }
 
@@ -80,7 +82,7 @@ public class AlgaeArmSubsystem extends SubsystemAbstract {
     public Rotation2d clampAngle(Rotation2d angle) {
         return Rotation2d.fromRadians(
             MathUtil.clamp(
-                m_currentDesiredAngle.getRadians(), 
+                angle.getRadians(), 
                 AlgaeConstants.kPivotMinPosition.getRadians(),
                 AlgaeConstants.kPivotMaxPosition.getRadians()
             )
