@@ -34,4 +34,12 @@ public class DriverController extends Controller{
   public Trigger getTurnToZeroButton(){
     return y();
   }
+
+  public Trigger getToggleAutoRotate() {
+    return null;
+  }
+
+  public Trigger getResetGyro() {
+    return null;
+  }
 }
