@@ -1,16 +1,20 @@
-package frc.robot.commands;
+package frc.robot.commands.drivecommands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer.subsystems;
 
 import java.util.function.DoubleSupplier;
 
-public class DriveCommand extends Command{
+public class DriveCommand extends Command {
   private DoubleSupplier m_xVelocity;
   private DoubleSupplier m_yVelocity;
   private DoubleSupplier m_rot;
 
-  public DriveCommand(DoubleSupplier xVel, DoubleSupplier yVel, DoubleSupplier rot){
+  public DriveCommand(
+    DoubleSupplier xVel, 
+    DoubleSupplier yVel, 
+    DoubleSupplier rot
+  ) {
     m_xVelocity = xVel;
     m_yVelocity = yVel;
     m_rot = rot;

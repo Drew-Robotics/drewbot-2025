@@ -11,6 +11,8 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.PubSubOption;
 import edu.wpi.first.networktables.StringTopic;
@@ -18,7 +20,10 @@ import edu.wpi.first.networktables.StringTopic;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.commands.DriveCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.commands.drivecommands.AutoAlignDriveCommand;
+import frc.robot.commands.drivecommands.DriveCommand;
+import frc.robot.commands.drivecommands.TurnToAngleCommand;
 import frc.robot.controllers.DriverController;
 import frc.robot.controllers.OperatorController;
 import frc.robot.subsystems.algae.AlgaeArmSubsystem;
@@ -38,7 +43,6 @@ public class RobotContainer {
     public static final VisionSubsystem vision = VisionSubsystem.getInstance();
 
     public static final ElevatorSubsystem elevator = ElevatorSubsystem.getInstance();
-
     public static final CoralArmSubsystem coralArm = CoralArmSubsystem.getInstance();
     public static final CoralIntakeSubsystem coralIntake = CoralIntakeSubsystem.getInstance();
 
@@ -64,18 +68,36 @@ public class RobotContainer {
     SmartDashboard.putData("Auto Chooser", autoChooser);
     autoChooser.setDefaultOption("DefaultAuto", AutoBuilder.buildAuto("DefaultAuto"));
 
-    configureBindings();
+    configureDriverBindings();
   }
 
-  private void configureBindings() {
+  private void configureDriverBindings() {
     subsystems.drive.setDefaultCommand(
       new DriveCommand(
         controllers.driver::getXVelocity, 
         controllers.driver::getYVelocity, 
-        controllers.driver::getRotationalVelocity)
+        controllers.driver::getRotationalVelocity
+      )
     );
 
-    
+    controllers.driver.getToggleAutoRotate().onTrue(
+      new AutoAlignDriveCommand(
+        controllers.driver::getXVelocity,
+        controllers.driver::getYVelocity
+      )
+    );
+
+    controllers.driver.getTurnToZeroButton().onTrue(
+      new TurnToAngleCommand(
+        controllers.driver::getXVelocity,
+        controllers.driver::getYVelocity,
+        Rotation2d.fromDegrees(0)
+      )
+    );
+  }
+
+  private void configureOperatorBindings() {
+
   }
 
   public Command getAutonomousCommand() {

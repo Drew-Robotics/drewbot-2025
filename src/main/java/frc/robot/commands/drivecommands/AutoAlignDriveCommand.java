@@ -1,4 +1,4 @@
-package frc.robot.commands;
+package frc.robot.commands.drivecommands;
 
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -16,8 +16,8 @@ import java.util.Comparator;
 public class AutoAlignDriveCommand extends DriveCommand {
   List<Integer> m_acceptedTagsIDs = List.of(0, 1, 2, 3);
     
-  public AutoAlignDriveCommand(DoubleSupplier xVel, DoubleSupplier yVel, DoubleSupplier rot){
-    super(xVel, yVel, rot);
+  public AutoAlignDriveCommand(DoubleSupplier xVel, DoubleSupplier yVel) {
+    super(xVel, yVel, null);
     addRequirements(subsystems.drive);
   }
 
@@ -50,7 +50,7 @@ public class AutoAlignDriveCommand extends DriveCommand {
       .filter(tag -> m_acceptedTagsIDs.contains(tag.ID)).toList();
 
     if (tags.size() == 0){
-      // this is why it's in its own method; returning from execute is bad practice.
+      // this is why it's in its own method; returning from execute is bad practice. <- Reply: Your bad practice (GOTTEM ! ! ! !)
       return Optional.empty();
     }
 

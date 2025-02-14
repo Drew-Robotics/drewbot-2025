@@ -36,10 +36,10 @@ public class DriverController extends Controller{
   }
 
   public Trigger getToggleAutoRotate() {
-    return null;
+    return b();
   }
 
   public Trigger getResetGyro() {
-    return null;
+    return leftBumper();
   }
 }
