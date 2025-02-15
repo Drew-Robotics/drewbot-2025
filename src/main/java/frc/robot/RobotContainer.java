@@ -24,12 +24,17 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.drivecommands.AutoAlignDriveCommand;
 import frc.robot.commands.drivecommands.DriveCommand;
 import frc.robot.commands.drivecommands.TurnToAngleCommand;
+import frc.robot.constants.CoralConstants;
+import frc.robot.constants.CoralStates;
 import frc.robot.controllers.DriverController;
 import frc.robot.controllers.OperatorController;
 import frc.robot.subsystems.algae.AlgaeArmSubsystem;
 import frc.robot.subsystems.algae.AlgaeIntakeSubsystem;
+import frc.robot.subsystems.algae.AlgaeSensorSubsystem;
 import frc.robot.subsystems.coral.CoralArmSubsystem;
 import frc.robot.subsystems.coral.CoralIntakeSubsystem;
+import frc.robot.subsystems.coral.CoralState;
+import frc.robot.subsystems.coral.CoralStateManager;
 import frc.robot.subsystems.coral.ElevatorSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
@@ -45,9 +50,11 @@ public class RobotContainer {
     public static final ElevatorSubsystem elevator = ElevatorSubsystem.getInstance();
     public static final CoralArmSubsystem coralArm = CoralArmSubsystem.getInstance();
     public static final CoralIntakeSubsystem coralIntake = CoralIntakeSubsystem.getInstance();
+    public static final CoralStateManager coralStateManager = CoralStateManager.getInstance();
 
     public static final AlgaeArmSubsystem algaeArm = AlgaeArmSubsystem.getInstance();
     public static final AlgaeIntakeSubsystem algaeIntake = AlgaeIntakeSubsystem.getInstance();
+    public static final AlgaeSensorSubsystem algaeSensor = AlgaeSensorSubsystem.getInstance();
   }
 
   public final class controllers {
@@ -96,8 +103,40 @@ public class RobotContainer {
     );
   }
 
-  private void configureOperatorBindings() {
+  private void configureSetState() {
+    controllers.operator.getSetStateL1().onTrue(
+      getSetStateCommand(CoralStates.kRest)
+    );
 
+    controllers.operator.getSetStateL1().onTrue(
+      getSetStateCommand(CoralStates.kRest)
+    );
+
+    controllers.operator.getSetStateL1().onTrue(
+      getSetStateCommand(CoralStates.kRest)
+    );
+
+    controllers.operator.getSetStateL1().onTrue(
+      getSetStateCommand(CoralStates.kRest)
+    );
+  }
+
+  private Command getSetStateCommand(CoralState coralState) {
+    return new InstantCommand(
+      () -> subsystems.coralStateManager.setState(coralState), 
+      subsystems.coralStateManager
+    );
+  }
+
+  private void configureOperatorBindings() {
+    configureSetState();
+
+    controllers.operator.getScore().onTrue( 
+      new InstantCommand(
+        () -> subsystems.coralIntake.setVelocity(CoralConstants.kScoreVelocity),
+        subsystems.coralIntake
+      )
+    );
   }
 
   public Command getAutonomousCommand() {

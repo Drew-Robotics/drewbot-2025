@@ -49,10 +49,6 @@ public class OperatorController extends Controller {
     return leftBumper();
   }
 
-  public Trigger getToggleExtendAlgae() {
-    return null; // dpad left
-  }
-
   public Trigger getPickupAlgae() {
     return null; // dpad down
   }

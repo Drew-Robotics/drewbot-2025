@@ -1,12 +1,12 @@
 package frc.robot.subsystems.coral;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.RobotContainer.subsystems;
 import frc.robot.constants.CoralStates;
 import frc.robot.subsystems.SubsystemAbstract;
 
 public class CoralStateManager extends SubsystemAbstract{
     private static CoralState m_currentState = CoralStates.kRest;
-
 
     protected static CoralStateManager m_instance;
     public static CoralStateManager getInstance() {
@@ -19,11 +19,6 @@ public class CoralStateManager extends SubsystemAbstract{
         super();
     }
 
-    protected void dashboardPeriodic() {}
-    protected void dashboardInit() {}
-    protected void publishInit() {}
-    protected void publishPeriodic() {}
-
     public CoralState getState() {
         return m_currentState;
     }
@@ -33,9 +28,19 @@ public class CoralStateManager extends SubsystemAbstract{
         update();
     }
 
-    public void update() {
+    private void update() {
         subsystems.elevator.setState(m_currentState);
         subsystems.coralArm.setState(m_currentState);
         subsystems.coralIntake.setState(m_currentState);
     }
+
+    /* Overrides */
+    protected void dashboardPeriodic() {}
+
+    protected void dashboardInit() {
+        SmartDashboard.putString("Coral State", getState().toString());
+    }
+
+    protected void publishInit() {}
+    protected void publishPeriodic() {}
 }

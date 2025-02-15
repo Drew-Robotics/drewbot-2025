@@ -1,5 +1,9 @@
 package frc.robot.constants;
 
+import static edu.wpi.first.units.Units.Centimeters;
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Meters;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
@@ -10,8 +14,9 @@ import edu.wpi.first.units.measure.LinearVelocity;
 
 public class AlgaeConstants {
     public static final class CANIDs {
-        public static final int kArm = 0;
-        public static final int kIntake = 0;
+        public static final int kArm = 30;
+        public static final int kIntake = 31;
+        public static final int kSensor = 32;
     }
 
     public static final class PID {
@@ -49,4 +54,9 @@ public class AlgaeConstants {
     
     public static final Rotation2d kPivotMinPosition = Rotation2d.fromDegrees(-180);
     public static final Rotation2d kPivotMaxPosition = Rotation2d.fromDegrees(180);
+
+    public static final Distance kSensorTripDistance = Centimeters.of(0);
+    
+    public static final Rotation2d kArmRestingAngle = Rotation2d.fromDegrees(0);
+    public static final Rotation2d kArmExtendedAngle = Rotation2d.fromDegrees(0);
 }

@@ -24,11 +24,14 @@ public class CoralConstants {
 
     public static LinearVelocity kIntakeSurfaceVelocity = Units.MetersPerSecond.of(0);
 
+    public static LinearVelocity kScoreVelocity = Units.MetersPerSecond.of(0);
+
     public static final class CANIDs {
-        public static final int kElevatorLeft = 0;
-        public static final int kElevatorRight = 0;
-        public static final int kCoralArm = 0;
-        public static final int kCoralIntake = 0;
+        public static final int kElevatorLeft = 10;
+        public static final int kElevatorRight = 11;
+        public static final int kElevatorEncoder = 22;
+        public static final int kCoralArm = 20;
+        public static final int kCoralIntake = 21;
     }
 
     public static final class PID {
