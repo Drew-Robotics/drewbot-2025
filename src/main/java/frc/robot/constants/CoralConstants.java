@@ -23,7 +23,8 @@ public class CoralConstants {
     public static boolean kCoralIntakeMotorInverted = false;
 
     public static LinearVelocity kIntakeSurfaceVelocity = Units.MetersPerSecond.of(0);
-
+    public static LinearVelocity kOuttakeSurfaceVelocity = Units.MetersPerSecond.of(0);
+    
     public static LinearVelocity kScoreVelocity = Units.MetersPerSecond.of(0);
 
     public static final class CANIDs {

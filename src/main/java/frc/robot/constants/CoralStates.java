@@ -9,4 +9,25 @@ public class CoralStates {
         Units.Meters.of(0),
         Rotation2d.fromDegrees(0)
     );
+
+
+    public static CoralState kL1 = new CoralState(
+        Units.Meters.of(0),
+        Rotation2d.fromDegrees(0)
+    );
+
+    public static CoralState kL2 = new CoralState(
+        Units.Meters.of(0),
+        Rotation2d.fromDegrees(0)
+    );
+
+    public static CoralState kL3 = new CoralState(
+        Units.Meters.of(0),
+        Rotation2d.fromDegrees(0)
+    );
+
+    public static CoralState kL4 = new CoralState(
+        Units.Meters.of(0),
+        Rotation2d.fromDegrees(0)
+    );
 }

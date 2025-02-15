@@ -24,6 +24,12 @@ import frc.robot.constants.CoralConstants;
 import frc.robot.subsystems.SubsystemAbstract;
 
 public class CoralIntakeSubsystem extends SubsystemAbstract implements CoralSubsystemI {
+  public enum CoralIntakeStates {
+    Rest,
+    Outtake,
+    Intake
+  }
+
   private final SparkFlex m_coralIntakeMotor;
   private final RelativeEncoder m_coralIntakeEncoder;
   private final SparkClosedLoopController m_coralIntakeClosedLoopController;
@@ -79,8 +85,19 @@ public class CoralIntakeSubsystem extends SubsystemAbstract implements CoralSubs
   }
 
   public void setState(CoralState state) {
-    if (state.getIntakeRunning()){
-      setVelocity(CoralConstants.kIntakeSurfaceVelocity);
+    switch (state.getIntakeState()) {
+      case Rest:
+        setVelocity(MetersPerSecond.zero());
+        break;
+      case Intake:
+        setVelocity(CoralConstants.kIntakeSurfaceVelocity);
+        break;
+  
+      case Outtake:
+        setVelocity(CoralConstants.kOuttakeSurfaceVelocity);
+        break;
+      default:
+        break;
     }
   }
 

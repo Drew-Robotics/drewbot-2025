@@ -40,6 +40,16 @@ public class DriverController extends Controller{
   }
 
   public Trigger getResetGyro() {
+    return null; // TODO: should be something
+  }
+
+
+  public Trigger getMoveNearestRightCoral() {
+    return rightBumper();
+  }
+
+  public Trigger getMoveNearestLeftCoral() {
     return leftBumper();
   }
+
 }

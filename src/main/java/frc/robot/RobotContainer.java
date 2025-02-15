@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 //     .----.   @   @
 //    / .-"-.`.  \v/
 //    | | '\ \ \_/ )
@@ -20,11 +16,10 @@ import edu.wpi.first.networktables.StringTopic;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.commands.CoralIntakeStateCommand;
 import frc.robot.commands.drivecommands.AutoAlignDriveCommand;
 import frc.robot.commands.drivecommands.DriveCommand;
 import frc.robot.commands.drivecommands.TurnToAngleCommand;
-import frc.robot.constants.CoralConstants;
 import frc.robot.constants.CoralStates;
 import frc.robot.controllers.DriverController;
 import frc.robot.controllers.OperatorController;
@@ -33,9 +28,9 @@ import frc.robot.subsystems.algae.AlgaeIntakeSubsystem;
 import frc.robot.subsystems.algae.AlgaeSensorSubsystem;
 import frc.robot.subsystems.coral.CoralArmSubsystem;
 import frc.robot.subsystems.coral.CoralIntakeSubsystem;
-import frc.robot.subsystems.coral.CoralState;
 import frc.robot.subsystems.coral.CoralStateManager;
 import frc.robot.subsystems.coral.ElevatorSubsystem;
+import frc.robot.subsystems.coral.CoralIntakeSubsystem.CoralIntakeStates;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
@@ -76,6 +71,7 @@ public class RobotContainer {
     autoChooser.setDefaultOption("DefaultAuto", AutoBuilder.buildAuto("DefaultAuto"));
 
     configureDriverBindings();
+    configureOperatorBindings();
   }
 
   private void configureDriverBindings() {
@@ -87,12 +83,14 @@ public class RobotContainer {
       )
     );
 
-    controllers.driver.getToggleAutoRotate().onTrue(
+    controllers.driver.getToggleAutoRotate().toggleOnTrue(
       new AutoAlignDriveCommand(
         controllers.driver::getXVelocity,
         controllers.driver::getYVelocity
       )
     );
+
+    // TODO: add more turn to angle commands.
 
     controllers.driver.getTurnToZeroButton().onTrue(
       new TurnToAngleCommand(
@@ -103,39 +101,33 @@ public class RobotContainer {
     );
   }
 
-  private void configureSetState() {
-    controllers.operator.getSetStateL1().onTrue(
-      getSetStateCommand(CoralStates.kRest)
-    );
-
-    controllers.operator.getSetStateL1().onTrue(
-      getSetStateCommand(CoralStates.kRest)
-    );
-
-    controllers.operator.getSetStateL1().onTrue(
-      getSetStateCommand(CoralStates.kRest)
-    );
-
-    controllers.operator.getSetStateL1().onTrue(
-      getSetStateCommand(CoralStates.kRest)
-    );
-  }
-
-  private Command getSetStateCommand(CoralState coralState) {
-    return new InstantCommand(
-      () -> subsystems.coralStateManager.setState(coralState), 
-      subsystems.coralStateManager
-    );
-  }
-
   private void configureOperatorBindings() {
-    configureSetState();
+    controllers.operator.getSetStateRest().onTrue(
+      subsystems.coralStateManager.getSetStateCommand(CoralStates.kRest)
+    );
 
-    controllers.operator.getScore().onTrue( 
-      new InstantCommand(
-        () -> subsystems.coralIntake.setVelocity(CoralConstants.kScoreVelocity),
-        subsystems.coralIntake
-      )
+    controllers.operator.getSetStateL1().onTrue(
+      subsystems.coralStateManager.getSetStateCommand(CoralStates.kL1)
+    );
+
+    controllers.operator.getSetStateL2().onTrue(
+      subsystems.coralStateManager.getSetStateCommand(CoralStates.kL2)
+    );
+
+    controllers.operator.getSetStateL3().onTrue(
+      subsystems.coralStateManager.getSetStateCommand(CoralStates.kL3)
+    );
+
+    controllers.operator.getSetStateL4().onTrue(
+      subsystems.coralStateManager.getSetStateCommand(CoralStates.kL4)
+    );
+
+    controllers.operator.getCoralIntake().onTrue(
+      new CoralIntakeStateCommand(CoralIntakeStates.Intake)
+    );
+
+    controllers.operator.getCoralOuttake().onTrue(
+      new CoralIntakeStateCommand(CoralIntakeStates.Outtake)
     );
   }
 

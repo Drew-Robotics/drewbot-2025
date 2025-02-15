@@ -17,12 +17,8 @@ public class OperatorController extends Controller {
     super(port);
   }
 
-  public Trigger getMoveNearestRightCoral() {
-    return rightBumper();
-  }
-
-  public Trigger getMoveNearestLeftCoral() {
-    return leftBumper();
+  public Trigger getSetStateRest() {
+    return null; // TODO: set this to something
   }
 
   public Trigger getSetStateL1() {
@@ -41,19 +37,19 @@ public class OperatorController extends Controller {
     return x(); 
   }
 
-  public Trigger getScore() {
-    return rightTrigger();
+  public Trigger getCoralIntake() {
+    return rightTrigger(0.5); // TODO: make this a constant
   }
 
-  public Trigger getRemoveAlgae() {
-    return leftBumper();
+  public Trigger getCoralOuttake() {
+    return leftTrigger(0.5); // TODO: make this a constant
   }
 
-  public Trigger getPickupAlgae() {
+  public Trigger getAlgaeIntake() {
     return null; // dpad down
   }
 
-  public Trigger getDropAlgae() {
+  public Trigger getAlgaeOuttake() {
     return null; // dpad right
   }
 }

@@ -1,8 +1,6 @@
 package frc.robot.constants;
 
 import static edu.wpi.first.units.Units.Centimeters;
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Meters;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.Units;

@@ -53,7 +53,7 @@ public class DriveSubsystem extends SubsystemAbstract {
   private LinearVelocity m_yVelocity = MetersPerSecond.zero();
   private AngularVelocity m_rotationalVelocity = RadiansPerSecond.zero();
 
-  private PIDController m_rotationController = new PIDController(0, 0, 0, 0);
+  private PIDController m_rotationController = new PIDController(0, 0, 0, 0); // TODO: make this not what it is
 
   private static DriveSubsystem m_instance;
   public static DriveSubsystem getInstance() {
@@ -369,28 +369,28 @@ public class DriveSubsystem extends SubsystemAbstract {
 
     double xv, yv, rv, mv, dv;
   
-    xv = DriveConstants.MaxVels.kTranslationalVelocity.times(x).in(MetersPerSecond);
-    yv = DriveConstants.MaxVels.kTranslationalVelocity.times(y).in(MetersPerSecond);
-    rv = DriveConstants.MaxVels.kRotationalVelocity.times(rot).in(RadiansPerSecond);
+    // xv = DriveConstants.MaxVels.kTranslationalVelocity.times(x).in(MetersPerSecond);
+    // yv = DriveConstants.MaxVels.kTranslationalVelocity.times(y).in(MetersPerSecond);
+    // rv = DriveConstants.MaxVels.kRotationalVelocity.times(rot).in(RadiansPerSecond);
     
-    mv = Math.sqrt(Math.pow(xv, 2) + Math.pow(yv, 2));
-    dv = Math.atan2(yv, xv);
+    // mv = Math.sqrt(Math.pow(xv, 2) + Math.pow(yv, 2));
+    // dv = Math.atan2(yv, xv);
 
-    // rate limit
+    // // rate limit
 
-    mv = m_magnitudeLimiter.calculate(mv);
-    dv = m_directionalLimiter.calculate(dv);
+    // mv = m_magnitudeLimiter.calculate(mv);
+    // dv = m_directionalLimiter.calculate(dv);
 
-    rv = m_rotationLimiter.calculate(rv);
+    // rv = m_rotationLimiter.calculate(rv);
 
-    // convert back and store units
+    // // convert back and store units
 
-    xv = mv * Math.cos(dv);
-    yv = mv * Math.sin(dv);
+    // xv = mv * Math.cos(dv);
+    // yv = mv * Math.sin(dv);
     
-    m_xVelocity = MetersPerSecond.of(xv);
-    m_yVelocity = MetersPerSecond.of(xv);
-    m_rotationalVelocity = RadiansPerSecond.of(xv);
+    // m_xVelocity = MetersPerSecond.of(xv);
+    // m_yVelocity = MetersPerSecond.of(xv);
+    // m_rotationalVelocity = RadiansPerSecond.of(xv);
 
     // get chassis speeds
 
