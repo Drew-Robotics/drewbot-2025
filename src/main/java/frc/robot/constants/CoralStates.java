@@ -6,28 +6,27 @@ import frc.robot.subsystems.coral.CoralState;
 
 public class CoralStates {
     public static CoralState kRest = new CoralState(
-        Units.Meters.of(0),
+        Units.Inches.of(0),
         Rotation2d.fromDegrees(0)
     );
 
-
     public static CoralState kL1 = new CoralState(
-        Units.Meters.of(0),
+        Units.Inches.of(7),
         Rotation2d.fromDegrees(0)
     );
 
     public static CoralState kL2 = new CoralState(
-        Units.Meters.of(0),
+        Units.Inches.of(14),
         Rotation2d.fromDegrees(0)
     );
 
     public static CoralState kL3 = new CoralState(
-        Units.Meters.of(0),
+        Units.Inches.of(21),
         Rotation2d.fromDegrees(0)
     );
 
     public static CoralState kL4 = new CoralState(
-        Units.Meters.of(0),
+        Units.Inches.of(28),
         Rotation2d.fromDegrees(0)
     );
 }

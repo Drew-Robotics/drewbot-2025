@@ -120,6 +120,6 @@ public class DriveConstants {
     public static final double kD = 0;
   }
 
-  public static final Current kDrivingMotorCurrentLimit = Amps.of(50);
-  public static final Current kTurningMotorCurrentLimit = Amps.of(20);
+  public static final Current kDrivingMotorCurrentLimit = Amps.of(5);
+  public static final Current kTurningMotorCurrentLimit = Amps.of(5);
 }

@@ -53,7 +53,7 @@ public class DriveSubsystem extends SubsystemAbstract {
   private LinearVelocity m_yVelocity = MetersPerSecond.zero();
   private AngularVelocity m_rotationalVelocity = RadiansPerSecond.zero();
 
-  private PIDController m_rotationController = new PIDController(0, 0, 0, 0); // TODO: make this not what it is
+  private PIDController m_rotationController = new PIDController(0, 0, 0, 0.2); // TODO: make this not what it is
 
   private static DriveSubsystem m_instance;
   public static DriveSubsystem getInstance() {
@@ -138,40 +138,40 @@ public class DriveSubsystem extends SubsystemAbstract {
   }
 
   protected void publishInit() {
-    addTopicSup(
-      new StructTopicSup<Pose2d>(
-        m_table.getStructTopic("Pose Estimation", Pose2d.struct).publish(),
-        this::getPose
-      )
-    );
+  //   addTopicSup(
+  //     new StructTopicSup<Pose2d>(
+  //       m_table.getStructTopic("Pose Estimation", Pose2d.struct).publish(),
+  //       this::getPose
+  //     )
+  //   );
 
-    addTopicSup(
-      new StructTopicSup<ChassisSpeeds>(
-        m_table.getStructTopic("Commanded Chassis Speed", ChassisSpeeds.struct).publish(),
-        () -> new ChassisSpeeds(m_xVelocity, m_yVelocity, m_rotationalVelocity)
-      )
-    );
+  //   addTopicSup(
+  //     new StructTopicSup<ChassisSpeeds>(
+  //       m_table.getStructTopic("Commanded Chassis Speed", ChassisSpeeds.struct).publish(),
+  //       () -> new ChassisSpeeds(m_xVelocity, m_yVelocity, m_rotationalVelocity)
+  //     )
+  //   );
 
-    addTopicSup(
-      new StructTopicSup<ChassisSpeeds>(
-        m_table.getStructTopic("Commanded Chassis Speeds", ChassisSpeeds.struct).publish(),
-        () -> new ChassisSpeeds(m_xVelocity, m_yVelocity, m_rotationalVelocity)
-      )
-    );
+  //   addTopicSup(
+  //     new StructTopicSup<ChassisSpeeds>(
+  //       m_table.getStructTopic("Commanded Chassis Speeds", ChassisSpeeds.struct).publish(),
+  //       () -> new ChassisSpeeds(m_xVelocity, m_yVelocity, m_rotationalVelocity)
+  //     )
+  //   );
 
-    addTopicSup(
-      new StructTopicSup<ChassisSpeeds>(
-        m_table.getStructTopic("Measured Chassis Speeds", ChassisSpeeds.struct).publish(),
-        () -> getChassisSpeeds()
-      )
-    );
+  //   addTopicSup(
+  //     new StructTopicSup<ChassisSpeeds>(
+  //       m_table.getStructTopic("Measured Chassis Speeds", ChassisSpeeds.struct).publish(),
+  //       () -> getChassisSpeeds()
+  //     )
+  //   );
 
-    addTopicSup(
-      new DoubleTopicSup(
-        m_table.getDoubleTopic("Yaw Rotations").publish(),
-        () -> getGyroYaw().getRotations()
-      )
-    );
+  //   addTopicSup(
+  //     new DoubleTopicSup(
+  //       m_table.getDoubleTopic("Yaw Rotations").publish(),
+  //       () -> getGyroYaw().getRotations()
+  //     )
+  //   );
   }
 
   public void publishPeriodic() {}

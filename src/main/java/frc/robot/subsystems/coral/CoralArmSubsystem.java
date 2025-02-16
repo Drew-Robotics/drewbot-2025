@@ -1,6 +1,7 @@
 package frc.robot.subsystems.coral;
 
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkAbsoluteEncoder;
@@ -17,13 +18,15 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import frc.robot.subsystems.SubsystemAbstract;
 import frc.robot.constants.CoralConstants;
+import frc.robot.constants.CoralStates;
 
 public class CoralArmSubsystem extends SubsystemAbstract implements CoralSubsystemI{
   private final SparkFlex m_coralPivotMotorController;
   private final SparkAbsoluteEncoder m_coralPivotEncoder;
   private final SparkClosedLoopController m_coralPivotClosedLoopController;
 
-  private Rotation2d m_armDesiredAngle;
+  private CoralState m_targetState = CoralStates.kRest;
+  private Rotation2d m_armDesiredAngle = CoralStates.kRest.getArmSetpoint();
 
   protected static CoralArmSubsystem m_instance;
   public static CoralArmSubsystem getInstance() {
@@ -42,13 +45,12 @@ public class CoralArmSubsystem extends SubsystemAbstract implements CoralSubsyst
     SparkFlexConfig coralPivotConfig = new SparkFlexConfig();
 
     coralPivotConfig
-      .smartCurrentLimit((int) CoralConstants.kArmCurrentLimit.in(Units.Amps));
-
+      .smartCurrentLimit((int) CoralConstants.kArmCurrentLimit.in(Units.Amps))
+      .idleMode(CoralConstants.IdleModes.kArm);
     coralPivotConfig
       .absoluteEncoder
       .positionConversionFactor(CoralConstants.ConversionFactors.Arm.kPositionConversionFactor.in(Units.Radians))
       .velocityConversionFactor(CoralConstants.ConversionFactors.Arm.kVelocityConversionFactor.in(Units.RadiansPerSecond));
-
     coralPivotConfig
       .closedLoop
       .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
@@ -66,7 +68,7 @@ public class CoralArmSubsystem extends SubsystemAbstract implements CoralSubsyst
   private void setDesiredAngle(Rotation2d angle) {
     m_armDesiredAngle = angle;
 
-    m_coralPivotClosedLoopController.setReference(clampAngle(angle).getRadians(), ControlType.kPosition);
+    m_coralPivotClosedLoopController.setReference(clampAngle(m_armDesiredAngle).getRadians(), ControlType.kPosition);
   }
 
   private Rotation2d clampAngle(Rotation2d angle) {
@@ -85,13 +87,14 @@ public class CoralArmSubsystem extends SubsystemAbstract implements CoralSubsyst
   }
 
   public void setState(CoralState state) {
-    setDesiredAngle(state.getArmSetpoint());
+    m_targetState = state;
+    // setDesiredAngle(m_targetState.getArmSetpoint());
   }
 
   /* Overrides */
   protected void dashboardPeriodic() {
-    SmartDashboard.putNumber("Desired Arm Angle (degrees)", m_armDesiredAngle.getDegrees());
-    SmartDashboard.putNumber("Measured Arm Angle (degrees)", getAngle().getDegrees());
+    SmartDashboard.putNumber("Desired Coral Arm Angle (degrees)", m_armDesiredAngle.getDegrees());
+    SmartDashboard.putNumber("Measured Coral Arm Angle (degrees)", getAngle().getDegrees());
   }
 
   protected void dashboardInit() {}

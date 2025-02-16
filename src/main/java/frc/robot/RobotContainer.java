@@ -70,6 +70,9 @@ public class RobotContainer {
     SmartDashboard.putData("Auto Chooser", autoChooser);
     autoChooser.setDefaultOption("DefaultAuto", AutoBuilder.buildAuto("DefaultAuto"));
 
+
+    SmartDashboard.putData("Set Rest", subsystems.coralStateManager.getSetStateCommand(CoralStates.kRest));
+    SmartDashboard.putData("Set L4", subsystems.coralStateManager.getSetStateCommand(CoralStates.kL4));
     configureDriverBindings();
     configureOperatorBindings();
   }
@@ -135,10 +138,10 @@ public class RobotContainer {
     return autoChooser.getSelected();
   }
 
-  public String getAutonomousName() {
-    StringTopic activeAutoTopic = NetworkTableInstance.getDefault().getStringTopic("/SmartDashboard/Auto Chooser/active");
-    String activeAutoName = activeAutoTopic.getEntry("Super Cool Fast Awesome Auto", PubSubOption.sendAll(false)).get();
+  // public String getAutonomousName() {
+  //   StringTopic activeAutoTopic = NetworkTableInstance.getDefault().getStringTopic("/SmartDashboard/Auto Chooser/active");
+  //   String activeAutoName = activeAutoTopic.getEntry("Super Cool Fast Awesome Auto", PubSubOption.sendAll(false)).get();
   
-    return activeAutoName;
-  }
+  //   return activeAutoName;
+  // }
 }

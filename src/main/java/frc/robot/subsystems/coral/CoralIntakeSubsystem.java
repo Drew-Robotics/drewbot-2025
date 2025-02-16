@@ -11,6 +11,7 @@ import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.units.Units;
 
 import com.revrobotics.spark.SparkBase.ControlType;
@@ -21,6 +22,7 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import frc.robot.constants.CoralConstants;
+import frc.robot.constants.CoralStates;
 import frc.robot.subsystems.SubsystemAbstract;
 
 public class CoralIntakeSubsystem extends SubsystemAbstract implements CoralSubsystemI {
@@ -33,6 +35,8 @@ public class CoralIntakeSubsystem extends SubsystemAbstract implements CoralSubs
   private final SparkFlex m_coralIntakeMotor;
   private final RelativeEncoder m_coralIntakeEncoder;
   private final SparkClosedLoopController m_coralIntakeClosedLoopController;
+
+  private LinearVelocity m_desiredVelocity = MetersPerSecond.zero();
 
   protected static CoralIntakeSubsystem m_instance;
   public static CoralIntakeSubsystem getInstance() {
@@ -51,7 +55,8 @@ public class CoralIntakeSubsystem extends SubsystemAbstract implements CoralSubs
     SparkFlexConfig coralIntakeConfig = new SparkFlexConfig();
 
     coralIntakeConfig
-      .smartCurrentLimit((int) CoralConstants.kArmCurrentLimit.in(Units.Amps));
+      .smartCurrentLimit((int) CoralConstants.kArmCurrentLimit.in(Units.Amps))
+      .idleMode(CoralConstants.IdleModes.kIntake);;
  
     coralIntakeConfig
       .encoder
@@ -77,6 +82,8 @@ public class CoralIntakeSubsystem extends SubsystemAbstract implements CoralSubs
 
   /* Setters and Getters */
   public void setVelocity(LinearVelocity desiredVelocity) {
+    m_desiredVelocity = desiredVelocity;
+
     m_coralIntakeClosedLoopController.setReference(desiredVelocity.in(Units.MetersPerSecond), ControlType.kVelocity);
   }
 
@@ -85,26 +92,29 @@ public class CoralIntakeSubsystem extends SubsystemAbstract implements CoralSubs
   }
 
   public void setState(CoralState state) {
-    switch (state.getIntakeState()) {
-      case Rest:
-        setVelocity(MetersPerSecond.zero());
-        break;
-      case Intake:
-        setVelocity(CoralConstants.kIntakeSurfaceVelocity);
-        break;
+    // switch (state.getIntakeState()) {
+    //   case Rest:
+    //     setVelocity(MetersPerSecond.zero());
+    //     break;
+    //   case Intake:
+    //     setVelocity(CoralConstants.kIntakeSurfaceVelocity);
+    //     break;
   
-      case Outtake:
-        setVelocity(CoralConstants.kOuttakeSurfaceVelocity);
-        break;
-      default:
-        break;
-    }
+    //   case Outtake:
+    //     setVelocity(CoralConstants.kOuttakeSurfaceVelocity);
+    //     break;
+    //   default:
+    //     break;
+    // }
   }
 
   /* Overrides */
   protected void dashboardInit() {}
 
-  protected void dashboardPeriodic() {}
+  protected void dashboardPeriodic() {
+    SmartDashboard.putNumber("Current Coral Intake Velocity (MPS)", getVelocity().in(MetersPerSecond));
+    SmartDashboard.putNumber("Desired Coral Intake Velocity (MPS)", m_desiredVelocity.in(MetersPerSecond));
+  }
 
   protected void publishInit() {}
   protected void publishPeriodic() {}

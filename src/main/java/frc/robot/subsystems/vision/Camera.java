@@ -38,8 +38,12 @@ public class Camera {
   }
 
   public PhotonPipelineResult getLastestCameraResult() {
-    double now = Timer.getFPGATimestamp(); // seconds
-    boolean isNewResult = Math.abs(now - m_latestResult.getTimestampSeconds()) > 1e-3; // ask Drew about all this stuff
+    boolean isNewResult = true;
+    
+    if (m_latestResult != null) {
+      double now = Timer.getFPGATimestamp(); // seconds
+      isNewResult = Math.abs(now - m_latestResult.getTimestampSeconds()) > 1e-3; // ask Drew about all this stuff 
+    }
 
     if(!isNewResult)
       return m_latestResult;

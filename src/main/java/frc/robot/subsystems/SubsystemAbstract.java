@@ -12,7 +12,7 @@ public abstract class SubsystemAbstract extends SubsystemBase {
     protected final String m_name;
     protected final NetworkTable m_table;
 
-    private List<TopicSupAbstract> m_topicSups = List.of();
+    // private List<TopicSupAbstract> m_topicSups = List.of();
 
     protected abstract void dashboardInit();
     protected abstract void dashboardPeriodic();
@@ -28,16 +28,16 @@ public abstract class SubsystemAbstract extends SubsystemBase {
         dashboardInit();
     }
 
-    public TopicSupAbstract addTopicSup(TopicSupAbstract topicSup) {
-        m_topicSups.add(topicSup);
-        return topicSup;
-    }
+    // public TopicSupAbstract addTopicSup(TopicSupAbstract topicSup) {
+    //     m_topicSups.add(topicSup);
+    //     return topicSup;
+    // }
 
     @Override
     public void periodic() {
         super.periodic();
 
-        m_topicSups.forEach(topicSup -> topicSup.update());
+        // m_topicSups.forEach(topicSup -> topicSup.update());
 
         publishPeriodic(); 
         dashboardPeriodic();

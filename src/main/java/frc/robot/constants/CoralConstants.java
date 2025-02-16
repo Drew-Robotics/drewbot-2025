@@ -1,5 +1,7 @@
 package frc.robot.constants;
 
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
@@ -9,9 +11,9 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.AngularVelocity;
 
 public class CoralConstants {
-    public static Current kElevatorCurrentLimit = Units.Amps.of(0);
-    public static Current kArmCurrentLimit = Units.Amps.of(0);
-    public static Current kIntakeCurrentLimit = Units.Amps.of(0);
+    public static Current kElevatorCurrentLimit = Units.Amps.of(60);
+    public static Current kArmCurrentLimit = Units.Amps.of(5);
+    public static Current kIntakeCurrentLimit = Units.Amps.of(5);
 
     public static boolean kElevatorLeftMotorInverted = false;
     public static boolean kElevatorRightMotorInverted = true;
@@ -22,10 +24,14 @@ public class CoralConstants {
     public static boolean kCoralArmMotorInverted = false;
     public static boolean kCoralIntakeMotorInverted = false;
 
-    public static LinearVelocity kIntakeSurfaceVelocity = Units.MetersPerSecond.of(0);
-    public static LinearVelocity kOuttakeSurfaceVelocity = Units.MetersPerSecond.of(0);
+    public static LinearVelocity kIntakeSurfaceVelocity = Units.MetersPerSecond.of(1);
+    public static LinearVelocity kOuttakeSurfaceVelocity = Units.MetersPerSecond.of(-1);
     
-    public static LinearVelocity kScoreVelocity = Units.MetersPerSecond.of(0);
+    public static final class IdleModes {
+        public static final IdleMode kArm = IdleMode.kCoast;
+        public static final IdleMode kIntake = IdleMode.kCoast;
+        public static final IdleMode kElevator = IdleMode.kBrake;
+    }
 
     public static final class CANIDs {
         public static final int kElevatorLeft = 10;
@@ -37,10 +43,11 @@ public class CoralConstants {
 
     public static final class PID {
         public static final class Elevator {
-            public static final double kP = 0.05;
-            public static final double kI = 0;
-            public static final double kD = 0;
-            public static final double kFF = 0.05;
+            public static final double kP = 0.1;
+            public static final double kI = 0.0;
+            public static final double kD = 0.0;
+            public static final double kFF = 0.005;
+            public static final double kOutput = 0.6;
         }
     
         public static final class CoralArm {
@@ -90,17 +97,17 @@ public class CoralConstants {
         *       ((` ((
         */
         public static final class Intake {
-            public static Distance kWheelRadius = Units.Inches.of(0);
+            public static Distance kWheelRadius = Units.Inches.of(1.5);
             public static Distance kPositionConversionFactor = kWheelRadius.times(2 * Math.PI); 
             public static LinearVelocity kVelocityConversionFactor = kPositionConversionFactor.per(Units.Minutes);
         };
     }
 
     public static final class ArmHeightConversion {
-        public static final Distance kElevatorMinHeight = Units.Meters.of(0);
-        public static final Distance kElevatorMaxHeight = Units.Meters.of(0);
+        public static final Distance kElevatorMinHeight = Units.Inches.of(0);
+        public static final Distance kElevatorMaxHeight = Units.Inches.of(28);
         
         public static final Angle kMinRotations = Units.Rotations.of(0);
-        public static final Angle kMaxRotations = Units.Rotations.of(0);
+        public static final Angle kMaxRotations = Units.Rotations.of(74.36);
     }
 }

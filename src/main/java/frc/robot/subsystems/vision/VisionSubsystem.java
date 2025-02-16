@@ -20,7 +20,7 @@ import frc.robot.subsystems.SubsystemAbstract;
 import frc.robot.subsystems.topicSup.StructArrayTopicSup;
 
 public class VisionSubsystem extends SubsystemAbstract {
-  private final Camera m_frontLeft, m_frontRight, m_backLeft, m_backRight;
+  // private final Camera m_frontLeft, m_frontRight, m_backLeft, m_backRight;
   private final List<Camera> m_cameras;
 
   private AprilTag[] m_fieldTags = VisionConstants.AprilTags.kTags.toArray(AprilTag[]::new);
@@ -44,12 +44,14 @@ public class VisionSubsystem extends SubsystemAbstract {
   private VisionSubsystem() {
     super();
 
-    m_frontLeft = new Camera(VisionConstants.CameraNames.kFrontLeft, VisionConstants.CameraTransforms.kFrontLeft);  
-    m_frontRight = new Camera(VisionConstants.CameraNames.kFrontRight, VisionConstants.CameraTransforms.kFrontRight);
-    m_backLeft = new Camera(VisionConstants.CameraNames.kBackLeft, VisionConstants.CameraTransforms.kBackLeft);
-    m_backRight = new Camera(VisionConstants.CameraNames.kBackRight, VisionConstants.CameraTransforms.kBackRight);
+    // m_frontLeft = new Camera(VisionConstants.CameraNames.kFrontLeft, VisionConstants.CameraTransforms.kFrontLeft);  
+    // m_frontRight = new Camera(VisionConstants.CameraNames.kFrontRight, VisionConstants.CameraTransforms.kFrontRight);
+    // m_backLeft = new Camera(VisionConstants.CameraNames.kBackLeft, VisionConstants.CameraTransforms.kBackLeft);
+    // m_backRight = new Camera(VisionConstants.CameraNames.kBackRight, VisionConstants.CameraTransforms.kBackRight);
 
-    m_cameras = List.of(m_frontLeft, m_frontRight, m_backLeft, m_backRight);
+    // m_cameras = List.of(m_frontLeft, m_frontRight, m_backLeft, m_backRight);
+    m_cameras = List.of();
+
   }
 
   /* ----- OVERRIDES ----- */

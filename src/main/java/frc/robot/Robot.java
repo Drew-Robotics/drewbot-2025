@@ -58,11 +58,10 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.cancel();
     }
 
-    String autoName = m_robotContainer.getAutonomousName();
-    System.out.println(autoName + " this is a test i want to make this message long so its eaiser to find so ima just keep typing and typing. Why did you stop typing? What is this quiters mentailty??? How DARE you stop at purely that. Pathetic. You could have typed for at least another 20 minutes straight without negtive physical effects on your body.");
-    Pose2d startingPose = new PathPlannerAuto(autoName).getStartingPose(); // should we swap this when on red?
+    // String autoName = m_robotContainer.getAutonomousName();
+    // Pose2d startingPose = new PathPlannerAuto(autoName).getStartingPose(); // should we swap this when on red?
 
-    subsystems.drive.setGyroOffset(startingPose.getRotation());
+    // subsystems.drive.setGyroOffset(startingPose.getRotation());
   }
 
   @Override

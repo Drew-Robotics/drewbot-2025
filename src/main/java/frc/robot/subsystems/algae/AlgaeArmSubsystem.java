@@ -25,7 +25,7 @@ public class AlgaeArmSubsystem extends SubsystemAbstract {
 
     private final SparkClosedLoopController m_algaePivotClosedLoopController;
 
-    private Rotation2d m_currentDesiredAngle;
+    private Rotation2d m_currentDesiredAngle = Rotation2d.kZero; // TODO: fix this
 
     protected static AlgaeArmSubsystem m_instance;
     public static AlgaeArmSubsystem getInstance() {
@@ -93,8 +93,8 @@ public class AlgaeArmSubsystem extends SubsystemAbstract {
     protected void dashboardInit() {}
 
     protected void dashboardPeriodic() {
-        SmartDashboard.putNumber("Current Angle", getAngle().getDegrees());
-        SmartDashboard.putNumber("Desired Angle", m_currentDesiredAngle.getDegrees());
+        SmartDashboard.putNumber("Current Algae Arm Angle", getAngle().getDegrees());
+        SmartDashboard.putNumber("Desired Algae Arm Angle", m_currentDesiredAngle.getDegrees());
     }
 
     protected void publishInit() {}

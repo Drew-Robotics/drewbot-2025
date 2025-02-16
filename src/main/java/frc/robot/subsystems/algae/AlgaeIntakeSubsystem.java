@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.algae;
 
+import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import com.revrobotics.RelativeEncoder;
@@ -11,6 +12,7 @@ import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.units.Units;
 
 import com.revrobotics.spark.SparkBase.ControlType;
@@ -27,6 +29,8 @@ public class AlgaeIntakeSubsystem extends SubsystemAbstract {
   private final SparkFlex m_algaeIntakeMotor;
   private final RelativeEncoder m_algaeIntakeEncoder;
   private final SparkClosedLoopController m_algaeIntakeClosedLoopController;
+
+  private LinearVelocity m_desiredVelocity = MetersPerSecond.zero();
 
   protected static AlgaeIntakeSubsystem m_instance;
   public static AlgaeIntakeSubsystem getInstance() {
@@ -82,7 +86,10 @@ public class AlgaeIntakeSubsystem extends SubsystemAbstract {
   /* Overrides */
   protected void dashboardInit() {}
 
-  protected void dashboardPeriodic() {}
+  protected void dashboardPeriodic() {
+    SmartDashboard.putNumber("Current Algae Intake Velocity (MPS)", getVelocity().in(MetersPerSecond));
+    SmartDashboard.putNumber("Desired Algae Intake Velocity (MPS)", m_desiredVelocity.in(MetersPerSecond));
+  }
 
   protected void publishInit() {}
   protected void publishPeriodic() {}

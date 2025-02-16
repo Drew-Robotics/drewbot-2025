@@ -31,6 +31,7 @@ public class CoralStateManager extends SubsystemAbstract{
     }
 
     private void update() {
+        System.out.println("SET STATE MANAGER");
         subsystems.elevator.setState(m_currentState);
         subsystems.coralArm.setState(m_currentState);
         subsystems.coralIntake.setState(m_currentState);

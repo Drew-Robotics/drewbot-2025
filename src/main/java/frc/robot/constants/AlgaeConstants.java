@@ -41,14 +41,14 @@ public class AlgaeConstants {
         };
 
         public static final class Intake {
-            public static Distance kWheelRadius = Units.Inches.of(0);
+            public static Distance kWheelRadius = Units.Inches.of(1.5);
             public static Distance kPositionConversionFactor = kWheelRadius.times(2 * Math.PI); 
             public static LinearVelocity kVelocityConversionFactor = kPositionConversionFactor.per(Units.Minutes);
         };
     }
 
-    public static Current kArmCurrentLimit = Units.Amps.of(0);
-    public static Current kIntakeCurrentLimit = Units.Amps.of(0);
+    public static Current kArmCurrentLimit = Units.Amps.of(5);
+    public static Current kIntakeCurrentLimit = Units.Amps.of(5);
     
     public static final Rotation2d kPivotMinPosition = Rotation2d.fromDegrees(-180);
     public static final Rotation2d kPivotMaxPosition = Rotation2d.fromDegrees(180);

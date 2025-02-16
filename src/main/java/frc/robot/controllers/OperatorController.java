@@ -18,7 +18,7 @@ public class OperatorController extends Controller {
   }
 
   public Trigger getSetStateRest() {
-    return null; // TODO: set this to something
+    return leftBumper(); // TODO: set this to something
   }
 
   public Trigger getSetStateL1() {
