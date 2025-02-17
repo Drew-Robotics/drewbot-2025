@@ -1,7 +1,5 @@
 package frc.robot.subsystems.coral;
 
-import static edu.wpi.first.units.Units.Meters;
-
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -18,6 +16,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import frc.robot.constants.CoralConstants;
@@ -35,6 +34,8 @@ public class ElevatorSubsystem extends SubsystemAbstract implements CoralSubsyst
     private final SparkClosedLoopController m_elevatorClosedLoopController;
 
     private CoralState m_targetState = CoralStates.kRest;
+    private double m_restTimer = Timer.getFPGATimestamp();
+    private boolean m_zeroingEncoders = false;
 
     private boolean m_switchReset = false;
 
@@ -93,18 +94,31 @@ public class ElevatorSubsystem extends SubsystemAbstract implements CoralSubsyst
         
     }
 
+    public void setZero() {
+        m_elevatorLeftEncoder.setPosition(0);
+    }
+
     /* ----- OVERIDES ----- */
 
     @Override
     public void periodic() {
         super.periodic();
+        boolean restTimerActive = (Timer.getFPGATimestamp() - m_restTimer > CoralConstants.kRestTimerSeconds);
+        boolean restVelocity = Math.abs(m_elevatorLeftEncoder.getVelocity()) < CoralConstants.kElevatorRestVelocity.in(Units.Rotations.per(Units.Minute));
+
+        m_zeroingEncoders = m_targetState == CoralStates.kRest && restTimerActive && restTimerActive && restVelocity;
+
+        if (m_zeroingEncoders) {
+            m_elevatorLeftEncoder.setPosition(CoralConstants.ElevatorHeightConversion.kMinRotations.in(Units.Rotations));
+            m_elevatorRightEncoder.setPosition(CoralConstants.ElevatorHeightConversion.kMinRotations.in(Units.Rotations));
+        }
         
         // // reset from limit switch
         // if (m_elevatorLeadMotor.getReverseLimitSwitch().isPressed() && !m_switchReset) {
         //     m_switchReset = true;
 
-        //     m_elevatorLeftEncoder.setPosition(CoralConstants.ArmHeightConversion.kMaxRotations.in(Units.Rotations));
-        //     m_elevatorRightEncoder.setPosition(CoralConstants.ArmHeightConversion.kMaxRotations.in(Units.Rotations));
+        //     m_elevatorLeftEncoder.setPosition(CoralConstants.ElevatorHeightConversion.kMaxRotations.in(Units.Rotations));
+        //     m_elevatorRightEncoder.setPosition(CoralConstants.ElevatorHeightConversion.kMaxRotations.in(Units.Rotations));
         // } 
         // else if (!m_elevatorLeadMotor.getReverseLimitSwitch().isPressed()) {
         //     m_switchReset = false;
@@ -116,17 +130,24 @@ public class ElevatorSubsystem extends SubsystemAbstract implements CoralSubsyst
     protected void dashboardInit() {}
 
     protected void dashboardPeriodic() {
-        SmartDashboard.putNumber("Elevator Encoder Reading", getEncoderReading().getRotations());
-        SmartDashboard.putNumber("Elevator Applied Volatage", m_elevatorLeadMotor.getAppliedOutput());
+        // SmartDashboard.putNumber("Elevator Encoder Reading", getEncoderReading().getRotations());
+        // SmartDashboard.putNumber("Encoder Velocity RPM", m_elevatorLeftEncoder.getVelocity());
+
+        SmartDashboard.putNumber("Elevator Applied Out", m_elevatorLeadMotor.getAppliedOutput());
         SmartDashboard.putNumber("Elevator Desired Height", m_targetState.getElevatorSetpoint().in(Units.Meters));
         SmartDashboard.putNumber("Elevator Height", getHeight().in(Units.Meters));
-        SmartDashboard.putBoolean("Limit Switch Pressed", m_elevatorLeadMotor.getReverseLimitSwitch().isPressed());
+        // SmartDashboard.putBoolean("Limit Switch Pressed", m_elevatorLeadMotor.getReverseLimitSwitch().isPressed());
+        SmartDashboard.putBoolean("Elevator Zeroing Encoders", m_zeroingEncoders);
     }
 
     protected void publishInit() {}
     protected void publishPeriodic() {}
 
     public void setState(CoralState state) {
+        if (state == CoralStates.kRest) {
+            m_restTimer = Timer.getFPGATimestamp();
+        }
+
         m_targetState = state;
         // set refrence and move the motor
         m_elevatorClosedLoopController.setReference(
@@ -139,8 +160,8 @@ public class ElevatorSubsystem extends SubsystemAbstract implements CoralSubsyst
         Rotation2d leftHeight = Rotation2d.fromRotations(m_elevatorLeftEncoder.getPosition());
 
         // Rotation2d rightHeight = Rotation2d.fromRotations(m_elevatorRightEncoder.getPosition());
-
         // return leftHeight.plus(rightHeight).times(0.5);
+
         return leftHeight;
     }
 
@@ -151,41 +172,41 @@ public class ElevatorSubsystem extends SubsystemAbstract implements CoralSubsyst
     /* ----- CONVERSIONS ----- */
 
     private Distance rotationsToHeight(Rotation2d rot) {
-        Angle angularDistance = CoralConstants.ArmHeightConversion.kMaxRotations.plus(
-            CoralConstants.ArmHeightConversion.kMinRotations.times(-1)
+        Angle angularDistance = CoralConstants.ElevatorHeightConversion.kMaxRotations.plus(
+            CoralConstants.ElevatorHeightConversion.kMinRotations.times(-1)
         );
 
-        Distance heightDistance = CoralConstants.ArmHeightConversion.kElevatorMaxHeight.plus(
-            CoralConstants.ArmHeightConversion.kElevatorMinHeight.times(-1)
+        Distance heightDistance = CoralConstants.ElevatorHeightConversion.kElevatorMaxHeight.plus(
+            CoralConstants.ElevatorHeightConversion.kElevatorMinHeight.times(-1)
         );
         
         double progression = 
-            (rot.getRadians() - CoralConstants.ArmHeightConversion.kMinRotations.in(Units.Radians))
+            (rot.getRadians() - CoralConstants.ElevatorHeightConversion.kMinRotations.in(Units.Radians))
                 / angularDistance.in(Units.Radians);
         
 
         double heightMeters = progression * heightDistance.in(Units.Meters) 
-            + CoralConstants.ArmHeightConversion.kElevatorMinHeight.in(Units.Meters);
+            + CoralConstants.ElevatorHeightConversion.kElevatorMinHeight.in(Units.Meters);
         
         return Units.Meters.of(heightMeters);
     }
 
     private Rotation2d heightToRotations(Distance height) {
-        Angle angularDistance = CoralConstants.ArmHeightConversion.kMaxRotations.plus(
-            CoralConstants.ArmHeightConversion.kMinRotations.times(-1)
+        Angle angularDistance = CoralConstants.ElevatorHeightConversion.kMaxRotations.plus(
+            CoralConstants.ElevatorHeightConversion.kMinRotations.times(-1)
         );
 
-        Distance heightDistance = CoralConstants.ArmHeightConversion.kElevatorMaxHeight.plus(
-            CoralConstants.ArmHeightConversion.kElevatorMinHeight.times(-1)
+        Distance heightDistance = CoralConstants.ElevatorHeightConversion.kElevatorMaxHeight.plus(
+            CoralConstants.ElevatorHeightConversion.kElevatorMinHeight.times(-1)
         );
 
         double progression = 
-            (height.in(Units.Meters) - CoralConstants.ArmHeightConversion.kElevatorMinHeight.in(Units.Meters))
+            (height.in(Units.Meters) - CoralConstants.ElevatorHeightConversion.kElevatorMinHeight.in(Units.Meters))
                 / heightDistance.in(Units.Meters);
         
 
         double angleRadians = progression * angularDistance.in(Units.Radians) 
-            + CoralConstants.ArmHeightConversion.kMinRotations.in(Units.Radians);
+            + CoralConstants.ElevatorHeightConversion.kMinRotations.in(Units.Radians);
 
         return Rotation2d.fromRadians(angleRadians);
     }

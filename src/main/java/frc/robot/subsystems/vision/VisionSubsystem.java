@@ -17,7 +17,6 @@ import org.photonvision.EstimatedRobotPose;
 
 import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.SubsystemAbstract;
-import frc.robot.subsystems.topicSup.StructArrayTopicSup;
 
 public class VisionSubsystem extends SubsystemAbstract {
   // private final Camera m_frontLeft, m_frontRight, m_backLeft, m_backRight;
@@ -32,7 +31,7 @@ public class VisionSubsystem extends SubsystemAbstract {
     VisionConstants.CameraNames.kBackRight
   );
 
-  private StructArrayTopicSup<AprilTag> m_seenTagsTopicSup;
+  // private StructArrayTopicSup<AprilTag> m_seenTagsTopicSup;
 
   private static VisionSubsystem m_instance;
   public static VisionSubsystem getInstance() {

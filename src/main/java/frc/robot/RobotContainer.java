@@ -16,6 +16,7 @@ import edu.wpi.first.networktables.StringTopic;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.CoralIntakeStateCommand;
 import frc.robot.commands.drivecommands.AutoAlignDriveCommand;
 import frc.robot.commands.drivecommands.DriveCommand;
@@ -71,8 +72,8 @@ public class RobotContainer {
     autoChooser.setDefaultOption("DefaultAuto", AutoBuilder.buildAuto("DefaultAuto"));
 
 
-    SmartDashboard.putData("Set Rest", subsystems.coralStateManager.getSetStateCommand(CoralStates.kRest));
-    SmartDashboard.putData("Set L4", subsystems.coralStateManager.getSetStateCommand(CoralStates.kL4));
+    
+    SmartDashboard.putData("Set Elevator Zero", new InstantCommand(subsystems.elevator::setZero));
     configureDriverBindings();
     configureOperatorBindings();
   }

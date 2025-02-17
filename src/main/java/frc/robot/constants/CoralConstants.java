@@ -1,5 +1,4 @@
 package frc.robot.constants;
-
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -7,16 +6,19 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearVelocity; 
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.AngularVelocity;
 
 public class CoralConstants {
     public static Current kElevatorCurrentLimit = Units.Amps.of(60);
-    public static Current kArmCurrentLimit = Units.Amps.of(5);
+    public static Current kArmCurrentLimit = Units.Amps.of(20);
     public static Current kIntakeCurrentLimit = Units.Amps.of(5);
 
     public static boolean kElevatorLeftMotorInverted = false;
     public static boolean kElevatorRightMotorInverted = true;
+    
+    public static AngularVelocity kElevatorRestVelocity = Units.Rotations.per(Units.Minutes).of(25);
+    public static double kRestTimerSeconds = 0.5;
 
     public static Rotation2d kMinArmAngle = Rotation2d.fromDegrees(-180);
     public static Rotation2d kMaxArmAngle = Rotation2d.fromDegrees(180);
@@ -28,7 +30,7 @@ public class CoralConstants {
     public static LinearVelocity kOuttakeSurfaceVelocity = Units.MetersPerSecond.of(-1);
     
     public static final class IdleModes {
-        public static final IdleMode kArm = IdleMode.kCoast;
+        public static final IdleMode kArm = IdleMode.kBrake;
         public static final IdleMode kIntake = IdleMode.kCoast;
         public static final IdleMode kElevator = IdleMode.kBrake;
     }
@@ -38,23 +40,24 @@ public class CoralConstants {
         public static final int kElevatorRight = 11;
         public static final int kElevatorEncoder = 22;
         public static final int kCoralArm = 20;
+        public static final int kCoralArmEncoder = 22;
         public static final int kCoralIntake = 21;
     }
 
     public static final class PID {
         public static final class Elevator {
-            public static final double kP = 0.1;
+            public static final double kP = 0.06;
             public static final double kI = 0.0;
             public static final double kD = 0.0;
             public static final double kFF = 0.005;
-            public static final double kOutput = 0.6;
+            public static final double kOutput = 1;
         }
     
         public static final class CoralArm {
-            public static final double kP = 0.05;
+            public static final double kP = 0.75; // 1.5
             public static final double kI = 0;
             public static final double kD = 0;
-            public static final double kFF = 0.05;
+            public static final double kG = 0.25;
         }
     
         public static final class CoralIntake {
@@ -66,7 +69,8 @@ public class CoralConstants {
 
     public static final class ConversionFactors {
         public static final class Arm {
-            public static Angle kPositionConversionFactor = Units.Radians.of(2 * Math.PI);
+            public static double kGearReduction = (64d/28d) * (64d/16d) * 3d * 5d;
+            public static Angle kPositionConversionFactor = Units.Rotations.of(1);
             public static AngularVelocity kVelocityConversionFactor = kPositionConversionFactor.per(Units.Minutes);
         };
         /*
@@ -103,7 +107,7 @@ public class CoralConstants {
         };
     }
 
-    public static final class ArmHeightConversion {
+    public static final class ElevatorHeightConversion {
         public static final Distance kElevatorMinHeight = Units.Inches.of(0);
         public static final Distance kElevatorMaxHeight = Units.Inches.of(28);
         

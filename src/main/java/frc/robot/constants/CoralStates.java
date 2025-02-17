@@ -11,22 +11,22 @@ public class CoralStates {
     );
 
     public static CoralState kL1 = new CoralState(
-        Units.Inches.of(7),
-        Rotation2d.fromDegrees(0)
+        Units.Inches.of(0),
+        Rotation2d.fromDegrees(90)
     );
 
     public static CoralState kL2 = new CoralState(
-        Units.Inches.of(14),
+        Units.Inches.of(0),
         Rotation2d.fromDegrees(0)
     );
 
     public static CoralState kL3 = new CoralState(
-        Units.Inches.of(21),
+        Units.Inches.of(0),
         Rotation2d.fromDegrees(0)
     );
 
     public static CoralState kL4 = new CoralState(
-        Units.Inches.of(28),
+        Units.Inches.of(0),
         Rotation2d.fromDegrees(0)
     );
 }

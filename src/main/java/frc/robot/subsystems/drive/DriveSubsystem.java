@@ -36,8 +36,6 @@ import frc.robot.constants.DriveConstants;
 import frc.robot.constants.VisionConstants;
 import frc.robot.RobotContainer.subsystems;
 import frc.robot.subsystems.SubsystemAbstract;
-import frc.robot.subsystems.topicSup.DoubleTopicSup;
-import frc.robot.subsystems.topicSup.StructTopicSup;
 
 public class DriveSubsystem extends SubsystemAbstract {
   private final AHRS m_gyro;
