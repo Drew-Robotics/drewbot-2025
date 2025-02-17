@@ -5,6 +5,8 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.networktables.StructArrayTopic;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import java.util.ArrayList;
@@ -15,7 +17,9 @@ import java.util.stream.Collectors;
 
 import org.photonvision.EstimatedRobotPose;
 
+import frc.robot.RobotContainer.subsystems;
 import frc.robot.constants.VisionConstants;
+import frc.robot.subsystems.LoggerI;
 import frc.robot.subsystems.SubsystemAbstract;
 import frc.robot.subsystems.topicSup.StructArrayTopicSup;
 
@@ -34,6 +38,18 @@ public class VisionSubsystem extends SubsystemAbstract {
 
   private StructArrayTopicSup<AprilTag> m_seenTagsTopicSup;
 
+  private static class VisionLogger implements LoggerI {
+    private VisionSubsystem m_vision = subsystems.vision;
+
+    private StructArrayPublisher<AprilTag> m_fieldTags = m_vision.m_table.getStructArrayTopic("Field Tags", new AprilTagStruct()).publish();
+    private StructArrayPublisher<AprilTag> m_seenTags = m_vision.m_table.getStructArrayTopic("Seen Tags", new AprilTagStruct()).publish();
+
+    public void publishPeriodic() {
+        m_fieldTags.accept(subsystems.vision.m_fieldTags);
+        m_seenTags.accept(subsystems.vision.getSeenTags().toArray(AprilTag[]::new));
+    }
+}
+
   private static VisionSubsystem m_instance;
   public static VisionSubsystem getInstance() {
     if (m_instance == null)
@@ -42,7 +58,7 @@ public class VisionSubsystem extends SubsystemAbstract {
   }
 
   private VisionSubsystem() {
-    super();
+    super(new VisionLogger());
 
     // m_frontLeft = new Camera(VisionConstants.CameraNames.kFrontLeft, VisionConstants.CameraTransforms.kFrontLeft);  
     // m_frontRight = new Camera(VisionConstants.CameraNames.kFrontRight, VisionConstants.CameraTransforms.kFrontRight);
@@ -61,30 +77,22 @@ public class VisionSubsystem extends SubsystemAbstract {
     super.periodic();
   }
 
-  @Override
-  public void dashboardInit() {}
-  @Override
-  public void dashboardPeriodic() {}
+  // @Override
+  // public void publishInit() {
+  //   addTopicSup(
+  //     new StructArrayTopicSup<AprilTag>(
+  //       m_table.getStructArrayTopic("Field Tags", new AprilTagStruct()).publish(),
+  //       m_fieldTags
+  //     )
+  //   );
 
-  @Override
-  public void publishInit() {
-    // addTopicSup(
-    //   new StructArrayTopicSup<AprilTag>(
-    //     m_table.getStructArrayTopic("Field Tags", new AprilTagStruct()).publish(),
-    //     m_fieldTags
-    //   )
-    // );
-
-    // m_seenTagsTopicSup = (StructArrayTopicSup<AprilTag>) addTopicSup(
-    //   new StructArrayTopicSup<AprilTag>(
-    //     m_table.getStructArrayTopic("Seen Tags", new AprilTagStruct()).publish(),
-    //     this::getSeenTags
-    //   )
-    // );
-  }
-
-  @Override
-  public void publishPeriodic() {}
+  //   m_seenTagsTopicSup = (StructArrayTopicSup<AprilTag>) addTopicSup(
+  //     new StructArrayTopicSup<AprilTag>(
+  //       m_table.getStructArrayTopic("Seen Tags", new AprilTagStruct()).publish(),
+  //       this::getSeenTags
+  //     )
+  //   );
+  // }
 
   /* ----- VISION ------ */
 

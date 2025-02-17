@@ -15,13 +15,16 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.networktables.BooleanPublisher;
+import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
+import frc.robot.RobotContainer.subsystems;
 import frc.robot.constants.CoralConstants;
 import frc.robot.constants.CoralStates;
+import frc.robot.subsystems.LoggerI;
 import frc.robot.subsystems.SubsystemAbstract;
 
 public class ElevatorSubsystem extends SubsystemAbstract implements CoralSubsystemI{
@@ -45,8 +48,27 @@ public class ElevatorSubsystem extends SubsystemAbstract implements CoralSubsyst
         return m_instance;
     }
 
+    private static class ElevatorLogger implements LoggerI {
+        private ElevatorSubsystem m_elevator = subsystems.elevator;
+
+        private DoublePublisher m_encoderReading = m_elevator.m_table.getDoubleTopic("Elevator Encoder Reading").publish();
+        private DoublePublisher m_appliedVoltage = m_elevator.m_table.getDoubleTopic("Elevator Applied Voltage").publish();
+        private DoublePublisher m_desiredHeight = m_elevator.m_table.getDoubleTopic("Elevator Desired Height").publish();
+        private DoublePublisher m_realHeight = m_elevator.m_table.getDoubleTopic("Elevator Height").publish();
+        private BooleanPublisher m_limitSwitchPressed = m_elevator.m_table.getBooleanTopic("Elevator Limit Switch Pressed").publish();
+
+        public void publishPeriodic() {
+            m_encoderReading.accept(m_elevator.getEncoderReading().getRotations());
+            m_appliedVoltage.accept(m_elevator.m_elevatorLeadMotor.getAppliedOutput());
+            m_desiredHeight.accept(m_elevator.m_targetState.getElevatorSetpoint().in(Units.Meters));
+            m_realHeight.accept(m_elevator.getHeight().in(Units.Meters));
+            m_limitSwitchPressed.accept(m_elevator.m_elevatorLeadMotor.getReverseLimitSwitch().isPressed());
+        }
+    }
+
     public ElevatorSubsystem() {
-        super();
+        super(new ElevatorLogger());
+
         m_elevatorLeadMotor = new SparkMax(CoralConstants.CANIDs.kElevatorLeft, MotorType.kBrushless);
         m_elevatorFollowerMotorRight = new SparkMax(CoralConstants.CANIDs.kElevatorRight, MotorType.kBrushless);
 

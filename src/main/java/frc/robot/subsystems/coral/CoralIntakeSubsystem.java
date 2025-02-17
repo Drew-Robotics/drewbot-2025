@@ -12,6 +12,7 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.units.Units;
 
 import com.revrobotics.spark.SparkBase.ControlType;
@@ -21,8 +22,10 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
+import frc.robot.RobotContainer.subsystems;
 import frc.robot.constants.CoralConstants;
 import frc.robot.constants.CoralStates;
+import frc.robot.subsystems.LoggerI;
 import frc.robot.subsystems.SubsystemAbstract;
 
 public class CoralIntakeSubsystem extends SubsystemAbstract implements CoralSubsystemI {
@@ -45,8 +48,20 @@ public class CoralIntakeSubsystem extends SubsystemAbstract implements CoralSubs
       return m_instance;
   }
 
+  private static class CoralIntakeLogger implements LoggerI {
+    private CoralIntakeSubsystem m_coralIntake = subsystems.coralIntake;
+
+    private DoublePublisher m_intakeVelocity = m_coralIntake.m_table.getDoubleTopic("Current Coral Intake Velocity (MPS)").publish();
+    private DoublePublisher m_desiredIntakeVelocity = m_coralIntake.m_table.getDoubleTopic("Desired Coral Intake Velocity (MPS)").publish();
+
+    public void publishPeriodic() {
+      m_intakeVelocity.accept(m_coralIntake.getVelocity().in(MetersPerSecond));
+      m_desiredIntakeVelocity.accept(m_coralIntake.m_desiredVelocity.in(MetersPerSecond));
+    }
+  }
+
   public CoralIntakeSubsystem() {
-    super();
+    super(new CoralIntakeLogger());
 
     m_coralIntakeMotor = new SparkFlex(CoralConstants.CANIDs.kCoralIntake, MotorType.kBrushless);
     m_coralIntakeEncoder = m_coralIntakeMotor.getEncoder();
@@ -109,13 +124,13 @@ public class CoralIntakeSubsystem extends SubsystemAbstract implements CoralSubs
   }
 
   /* Overrides */
-  protected void dashboardInit() {}
+  // protected void dashboardInit() {}
 
-  protected void dashboardPeriodic() {
-    SmartDashboard.putNumber("Current Coral Intake Velocity (MPS)", getVelocity().in(MetersPerSecond));
-    SmartDashboard.putNumber("Desired Coral Intake Velocity (MPS)", m_desiredVelocity.in(MetersPerSecond));
-  }
+  // protected void dashboardPeriodic() {
+  //   SmartDashboard.putNumber("Current Coral Intake Velocity (MPS)", getVelocity().in(MetersPerSecond));
+  //   SmartDashboard.putNumber("Desired Coral Intake Velocity (MPS)", m_desiredVelocity.in(MetersPerSecond));
+  // }
 
-  protected void publishInit() {}
-  protected void publishPeriodic() {}
+  // protected void publishInit() {}
+  // protected void publishPeriodic() {}
 }

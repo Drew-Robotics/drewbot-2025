@@ -24,20 +24,25 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-
+import edu.wpi.first.networktables.BooleanPublisher;
+import edu.wpi.first.networktables.DoublePublisher;
+import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.units.measure.*;
 import static edu.wpi.first.units.Units.*;
 import frc.robot.constants.DriveAutoConstants;
 import frc.robot.constants.DriveConstants;
 import frc.robot.constants.VisionConstants;
 import frc.robot.RobotContainer.subsystems;
+import frc.robot.subsystems.LoggerI;
 import frc.robot.subsystems.SubsystemAbstract;
 import frc.robot.subsystems.topicSup.DoubleTopicSup;
 import frc.robot.subsystems.topicSup.StructTopicSup;
+import frc.robot.subsystems.vision.AprilTagStruct;
 
 public class DriveSubsystem extends SubsystemAbstract {
   private final AHRS m_gyro;
@@ -55,6 +60,20 @@ public class DriveSubsystem extends SubsystemAbstract {
 
   private PIDController m_rotationController = new PIDController(0, 0, 0, 0.2); // TODO: make this not what it is
 
+  private static class DriveLogger implements LoggerI {
+    private DriveSubsystem m_drive = subsystems.drive;
+
+    private BooleanPublisher m_gyroConnected = m_drive.m_table.getBooleanTopic("NavX Connected").publish();
+    private BooleanPublisher m_gyroCallibrating = m_drive.m_table.getBooleanTopic("NavX Connected").publish();
+    private DoublePublisher m_gyroYawDegrees = m_drive.m_table.getDoubleTopic("Yaw Degrees").publish();
+
+    public void publishPeriodic() {
+      m_gyroConnected.accept(m_drive.m_gyro.isConnected());
+      m_gyroCallibrating.accept(m_drive.m_gyro.isCalibrating());
+      m_gyroYawDegrees.accept(m_drive.getGyroYaw().getDegrees());
+    }
+}
+
   private static DriveSubsystem m_instance;
   public static DriveSubsystem getInstance() {
     if (m_instance == null)
@@ -63,7 +82,8 @@ public class DriveSubsystem extends SubsystemAbstract {
   }
 
   protected DriveSubsystem() {
-    super();
+    super(new DriveLogger());
+
     m_gyro = new AHRS(NavXComType.kUSB1, DriveConstants.kUpdateRate);
 
     m_frontLeft = new SwerveModule(
