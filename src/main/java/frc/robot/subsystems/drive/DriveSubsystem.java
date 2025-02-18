@@ -51,7 +51,7 @@ public class DriveSubsystem extends SubsystemAbstract {
   private LinearVelocity m_yVelocity = MetersPerSecond.zero();
   private AngularVelocity m_rotationalVelocity = RadiansPerSecond.zero();
 
-  private PIDController m_rotationController = new PIDController(0, 0, 0, 0.2); // TODO: make this not what it is
+  private PIDController m_rotationController = new PIDController(0, 0, 0); // TODO: make this not what it is
 
   private static DriveSubsystem m_instance;
   public static DriveSubsystem getInstance() {
@@ -62,7 +62,7 @@ public class DriveSubsystem extends SubsystemAbstract {
 
   protected DriveSubsystem() {
     super();
-    m_gyro = new AHRS(NavXComType.kUSB1, DriveConstants.kUpdateRate);
+    m_gyro = new AHRS(NavXComType.kMXP_SPI);
 
     m_frontLeft = new SwerveModule(
       "Front Left",
@@ -81,7 +81,6 @@ public class DriveSubsystem extends SubsystemAbstract {
       m_table.getSubTable("SwerveModules"),
       DriveConstants.DrivingInverted.kFrontRight,
       DriveConstants.TurningInverted.kFrontRight
-
     );
     m_backLeft = new SwerveModule(
       "Back Left",
@@ -178,7 +177,7 @@ public class DriveSubsystem extends SubsystemAbstract {
 
   public void pathPlannerConfig() {
     AutoBuilder.configure(
-      this::getPose, this::setPoseEstimator, this::getChassisSpeeds,
+      this::getPose, this::setPoseEstimator, this::getMeasuredChassisSpeeds,
       (speeds, ignore) -> setChassisSpeeds(speeds),
       DriveAutoConstants.autoDriveController,
       DriveAutoConstants.robotConfig,
@@ -271,7 +270,7 @@ public class DriveSubsystem extends SubsystemAbstract {
     m_poseEstimator.resetPosition(getGyroYaw(), getModulePositions(), pose2d);
   }
 
-  public ChassisSpeeds getChassisSpeeds() {
+  public ChassisSpeeds getMeasuredChassisSpeeds() {
     ChassisSpeeds chassisSpeeds = DriveConstants.kDriveKinematics.toChassisSpeeds(getModuleStates());
     return chassisSpeeds;
   }
@@ -365,7 +364,7 @@ public class DriveSubsystem extends SubsystemAbstract {
 
     // // convert to polar
 
-    double xv, yv, rv, mv, dv;
+    // double xv, yv, rv, mv, dv;
   
     // xv = DriveConstants.MaxVels.kTranslationalVelocity.times(x).in(MetersPerSecond);
     // yv = DriveConstants.MaxVels.kTranslationalVelocity.times(y).in(MetersPerSecond);

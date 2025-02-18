@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.commands.AlgaeIntakeCommand;
 import frc.robot.commands.CoralIntakeStateCommand;
 import frc.robot.commands.drivecommands.AutoAlignDriveCommand;
 import frc.robot.commands.drivecommands.DriveCommand;
@@ -73,7 +74,8 @@ public class RobotContainer {
 
 
     
-    SmartDashboard.putData("Set Elevator Zero", new InstantCommand(subsystems.elevator::setZero));
+    SmartDashboard.putData("Set Elevator Zero", new InstantCommand(subsystems.elevator::setEncoderZero));
+    SmartDashboard.putData("Set Algae Arm Zero", new InstantCommand(subsystems.algaeArm::setEncoderZero));
     configureDriverBindings();
     configureOperatorBindings();
   }
@@ -106,8 +108,14 @@ public class RobotContainer {
   }
 
   private void configureOperatorBindings() {
+
+    
     controllers.operator.getSetStateRest().onTrue(
       subsystems.coralStateManager.getSetStateCommand(CoralStates.kRest)
+    );
+
+    controllers.operator.getSetStateStation().onTrue(
+      subsystems.coralStateManager.getSetStateCommand(CoralStates.kStation)
     );
 
     controllers.operator.getSetStateL1().onTrue(
@@ -126,6 +134,7 @@ public class RobotContainer {
       subsystems.coralStateManager.getSetStateCommand(CoralStates.kL4)
     );
 
+
     controllers.operator.getCoralIntake().onTrue(
       new CoralIntakeStateCommand(CoralIntakeStates.Intake)
     );
@@ -133,6 +142,17 @@ public class RobotContainer {
     controllers.operator.getCoralOuttake().onTrue(
       new CoralIntakeStateCommand(CoralIntakeStates.Outtake)
     );
+
+    controllers.operator.getCoralIntake().onFalse(
+      new CoralIntakeStateCommand(CoralIntakeStates.Rest)
+    );
+
+    controllers.operator.getCoralOuttake().onFalse(
+      new CoralIntakeStateCommand(CoralIntakeStates.Rest)
+    );
+
+
+    controllers.operator.getAlgaeIntake().whileTrue(new AlgaeIntakeCommand());
   }
 
   public Command getAutonomousCommand() {

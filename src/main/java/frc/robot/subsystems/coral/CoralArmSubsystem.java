@@ -12,7 +12,9 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -25,7 +27,7 @@ public class CoralArmSubsystem extends SubsystemAbstract implements CoralSubsyst
   private final SparkMax m_coralArmEncoderController;
   private final SparkAbsoluteEncoder m_coralArmEncoder;
 
-  private final PIDController m_coralArmPIDController;
+  private final ProfiledPIDController m_coralArmPIDController;
   private final ArmFeedforward m_coralArmFeedforwardController;
   // private final SparkClosedLoopController m_coralArmClosedLoopController;
 
@@ -47,12 +49,19 @@ public class CoralArmSubsystem extends SubsystemAbstract implements CoralSubsyst
 
     m_coralArmEncoder = m_coralArmEncoderController.getAbsoluteEncoder();
 
-    m_coralArmPIDController = new PIDController(
+    m_coralArmPIDController = new ProfiledPIDController(
       Math.abs(CoralConstants.PID.CoralArm.kP),
       Math.abs(CoralConstants.PID.CoralArm.kI),
-      Math.abs(CoralConstants.PID.CoralArm.kD)
+      Math.abs(CoralConstants.PID.CoralArm.kD),
+      new Constraints(
+        CoralConstants.PID.CoralArm.kMaxVel.in(Units.RadiansPerSecond), 
+        CoralConstants.PID.CoralArm.kMaxAccel.in(Units.RadiansPerSecondPerSecond)
+      )
     );
-    m_coralArmPIDController.enableContinuousInput(0, CoralConstants.ConversionFactors.Arm.kPositionConversionFactor.in(Units.Radians));
+    // m_coralArmPIDController.enableContinuousInput(
+    //   CoralConstants.kArmMinAngle.in(Units.Radians),
+    //   CoralConstants.kArmMaxAngle.in(Units.Radians)
+    // );
     // m_coralArmClosedLoopController = m_coralArmEncoderController.getClosedLoopController();
 
     m_coralArmFeedforwardController = new ArmFeedforward(
@@ -126,19 +135,19 @@ public class CoralArmSubsystem extends SubsystemAbstract implements CoralSubsyst
     double feedforwardCalculatedVoltage = m_coralArmFeedforwardController.calculate(getAngle().getRadians(), 0);
 
     double calculatedVoltage = pidCalculatedVoltage + feedforwardCalculatedVoltage;
+    calculatedVoltage = MathUtil.clamp(calculatedVoltage, -12, 12);
 
-    SmartDashboard.putNumber("Coral Arm PID Voltage", pidCalculatedVoltage);
-    SmartDashboard.putNumber("Coral Arm FF Voltage", feedforwardCalculatedVoltage);
+    // SmartDashboard.putNumber("Coral Arm PID Voltage", pidCalculatedVoltage);
+    // SmartDashboard.putNumber("Coral Arm FF Voltage", feedforwardCalculatedVoltage);
     SmartDashboard.putNumber("Coral Arm Applied Voltage", calculatedVoltage);
 
-    calculatedVoltage = MathUtil.clamp(calculatedVoltage, -12, 12);
     m_coralArmMotorController.setVoltage(calculatedVoltage);
   }
 
   protected void dashboardPeriodic() {
     SmartDashboard.putNumber("Coral Arm Desired Degrees", m_armDesiredAngle.getDegrees());
     SmartDashboard.putNumber("Coral Arm Measured Degrees", getAngle().getDegrees());
-    SmartDashboard.putNumber("Coral Arm Measured Degrees Raw", Rotation2d.fromRadians(m_coralArmEncoder.getPosition()).getDegrees());
+    // SmartDashboard.putNumber("Coral Arm Measured Degrees Raw", Rotation2d.fromRadians(m_coralArmEncoder.getPosition()).getDegrees());
   }
 
   protected void dashboardInit() {}

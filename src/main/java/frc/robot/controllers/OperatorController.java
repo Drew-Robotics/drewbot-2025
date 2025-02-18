@@ -18,7 +18,11 @@ public class OperatorController extends Controller {
   }
 
   public Trigger getSetStateRest() {
-    return leftBumper(); // TODO: set this to something
+    return leftBumper();
+  }
+
+  public Trigger getSetStateStation() {
+    return rightBumper();
   }
 
   public Trigger getSetStateL1() {
@@ -38,18 +42,18 @@ public class OperatorController extends Controller {
   }
 
   public Trigger getCoralIntake() {
-    return rightTrigger(0.5); // TODO: make this a constant
-  }
-
-  public Trigger getCoralOuttake() {
     return leftTrigger(0.5); // TODO: make this a constant
   }
 
+  public Trigger getCoralOuttake() {
+    return rightTrigger(0.5); // TODO: make this a constant
+  }
+
   public Trigger getAlgaeIntake() {
-    return null; // dpad down
+    return povUp();
   }
 
   public Trigger getAlgaeOuttake() {
-    return null; // dpad right
+    return povDown();
   }
 }

@@ -18,8 +18,8 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 
 public class DriveConstants {
-  public static final Distance kWheelBase = Units.Inches.of(24.5);
-  public static final Distance kTrackWidth = Units.Inches.of(24.5);
+  public static final Distance kWheelBase = Units.Inches.of(26);
+  public static final Distance kTrackWidth = Units.Inches.of(26);
 
   public static final Boolean kGyroReversed = true;
   public static final Boolean kFieldOriented = true;
@@ -71,15 +71,15 @@ public class DriveConstants {
 
 
   public static final class DriveCANIDs {
-    public static final int kFrontLeftDriving = 1;
-    public static final int kBackLeftDriving = 5;
-    public static final int kFrontRightDriving = 3;
-    public static final int kBackRightDriving = 7;
+    public static final int kFrontLeftDriving = 5;
+    public static final int kBackLeftDriving = 3;
+    public static final int kFrontRightDriving = 7;
+    public static final int kBackRightDriving = 1;
 
-    public static final int kFrontLeftTurning = 2;
-    public static final int kBackLeftTurning = 6;
-    public static final int kFrontRightTurning = 4;
-    public static final int kBackRightTurning = 8;
+    public static final int kFrontLeftTurning = 6;
+    public static final int kBackLeftTurning = 4;
+    public static final int kFrontRightTurning = 8;
+    public static final int kBackRightTurning = 2;
   }
 
   public static final class MaxVels {
@@ -120,6 +120,6 @@ public class DriveConstants {
     public static final double kD = 0;
   }
 
-  public static final Current kDrivingMotorCurrentLimit = Amps.of(5);
-  public static final Current kTurningMotorCurrentLimit = Amps.of(5);
+  public static final Current kDrivingMotorCurrentLimit = Amps.of(40);
+  public static final Current kTurningMotorCurrentLimit = Amps.of(20);
 }

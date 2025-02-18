@@ -110,7 +110,8 @@ public class SwerveModule {
       .inverted(turningMotorInverted)
       .idleMode(IdleMode.kCoast)
       .smartCurrentLimit((int) DriveConstants.kTurningMotorCurrentLimit.in(Units.Amps));
-    turningConfig.encoder
+    turningConfig.absoluteEncoder
+      .inverted(true)
       .positionConversionFactor(DriveConstants.EncoderConversions.kTurningEncoderPositionFactor.in(Units.Radians))
       .velocityConversionFactor(DriveConstants.EncoderConversions.kTurningEncoderVelocityFactor.in(Units.RadiansPerSecond));
     turningConfig.closedLoop
@@ -165,6 +166,7 @@ public class SwerveModule {
    * @param moduleState Module State
    */
   public void setModuleState(SwerveModuleState moduleState) {
+
     SwerveModuleState correctedState = new SwerveModuleState(
       moduleState.speedMetersPerSecond,
       moduleState.angle.plus(m_angularOffset) // robot relative -> module relative
@@ -175,6 +177,8 @@ public class SwerveModule {
     // avoid spining more than 90 degrees
     // SwerveModuleState optimizedDesiredState = SwerveModuleState.optimize(correctedState, m_commandedState.angle.minus(m_angularOffset)); // module relative -> robot relative
     correctedState.optimize(new Rotation2d(m_turningEncoder.getPosition()));
+
+    m_commandedState = correctedState;
 
     m_drivingClosedLoopController.setReference(m_commandedState.speedMetersPerSecond, SparkFlex.ControlType.kVelocity);
     m_turningClosedLoopController.setReference(m_commandedState.angle.getRadians(), SparkMax.ControlType.kPosition);

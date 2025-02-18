@@ -94,7 +94,7 @@ public class ElevatorSubsystem extends SubsystemAbstract implements CoralSubsyst
         
     }
 
-    public void setZero() {
+    public void setEncoderZero() {
         m_elevatorLeftEncoder.setPosition(0);
     }
 

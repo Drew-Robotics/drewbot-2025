@@ -1,9 +1,8 @@
 package frc.robot.subsystems.algae;
 
-import com.revrobotics.AbsoluteEncoder;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.units.Units;
@@ -20,10 +19,10 @@ import frc.robot.subsystems.SubsystemAbstract;
 import frc.robot.constants.AlgaeConstants;
 
 public class AlgaeArmSubsystem extends SubsystemAbstract {
-    private final SparkFlex m_algaePivotMotorController;
-    private final AbsoluteEncoder m_algaePivotEncoder;
+    private final SparkFlex m_algaeArmMotorController;
+    private final RelativeEncoder m_algaeArmEncoder;
 
-    private final SparkClosedLoopController m_algaePivotClosedLoopController;
+    private final SparkClosedLoopController m_algaeArmClosedLoopController;
 
     private Rotation2d m_currentDesiredAngle = Rotation2d.kZero; // TODO: fix this
 
@@ -37,64 +36,61 @@ public class AlgaeArmSubsystem extends SubsystemAbstract {
     public AlgaeArmSubsystem() {
         super();
         
-        m_algaePivotMotorController = new SparkFlex(
+        m_algaeArmMotorController = new SparkFlex(
             AlgaeConstants.CANIDs.kArm,
             MotorType.kBrushless
         );
-        m_algaePivotEncoder = m_algaePivotMotorController.getAbsoluteEncoder();
-        m_algaePivotClosedLoopController = m_algaePivotMotorController.getClosedLoopController();
 
-        SparkFlexConfig algaePivotMotorConfig = new SparkFlexConfig();
+        m_algaeArmEncoder = m_algaeArmMotorController.getEncoder();
+        m_algaeArmClosedLoopController = m_algaeArmMotorController.getClosedLoopController();
 
-        algaePivotMotorConfig
-            .smartCurrentLimit((int) AlgaeConstants.kArmCurrentLimit.in(Units.Amps));
+        SparkFlexConfig algaeArmMotorConfig = new SparkFlexConfig();
 
-        algaePivotMotorConfig
-            .absoluteEncoder
+        algaeArmMotorConfig
+            .smartCurrentLimit((int) AlgaeConstants.kArmCurrentLimit.in(Units.Amps))
+            .inverted(AlgaeConstants.kAlgaeArmMotorInverted)
+            .idleMode(AlgaeConstants.IdleModes.kArm);
+
+        algaeArmMotorConfig
+            .encoder
             .positionConversionFactor(AlgaeConstants.ConversionFactors.Arm.kPositionConversionFactor.in(Units.Radians))
             .velocityConversionFactor(AlgaeConstants.ConversionFactors.Arm.kVelocityConversionFactor.in(Units.RadiansPerSecond));
     
-        algaePivotMotorConfig
+        algaeArmMotorConfig
             .closedLoop      
-            .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-            .pidf(
+            .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+            .pid(
                 AlgaeConstants.PID.Arm.kP, 
                 AlgaeConstants.PID.Arm.kI, 
-                AlgaeConstants.PID.Arm.kD, 
-                AlgaeConstants.PID.Arm.kFF
+                AlgaeConstants.PID.Arm.kD
             )
-            .outputRange(-1,1);
+            .outputRange(-AlgaeConstants.PID.Arm.kOutput, AlgaeConstants.PID.Arm.kOutput);
 
-        m_algaePivotMotorController.configure(algaePivotMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        m_algaeArmMotorController.configure(algaeArmMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    }
+
+    public void setEncoderZero() {
+        m_algaeArmEncoder.setPosition(0);
     }
 
     /* Getters and Setters */
     public void setDesiredAngle(Rotation2d angle) {
         m_currentDesiredAngle = angle;
 
-        m_algaePivotClosedLoopController.setReference(clampAngle(angle).getRadians(), SparkMax.ControlType.kPosition);
+        m_algaeArmClosedLoopController.setReference(angle.getRadians(), SparkMax.ControlType.kPosition);
     }
 
     public Rotation2d getAngle() {
-        return Rotation2d.fromRadians(m_algaePivotEncoder.getPosition());
-    }
-
-    public Rotation2d clampAngle(Rotation2d angle) {
-        return Rotation2d.fromRadians(
-            MathUtil.clamp(
-                angle.getRadians(), 
-                AlgaeConstants.kPivotMinPosition.getRadians(),
-                AlgaeConstants.kPivotMaxPosition.getRadians()
-            )
-        );
+        return Rotation2d.fromRadians(m_algaeArmEncoder.getPosition());
     }
 
     /* Overrides */
     protected void dashboardInit() {}
 
     protected void dashboardPeriodic() {
-        SmartDashboard.putNumber("Current Algae Arm Angle", getAngle().getDegrees());
-        SmartDashboard.putNumber("Desired Algae Arm Angle", m_currentDesiredAngle.getDegrees());
+        SmartDashboard.putNumber("Algae Arm Measured Angle", getAngle().getDegrees());
+        SmartDashboard.putNumber("Algae Arm Desired Angle", m_currentDesiredAngle.getDegrees());
+        SmartDashboard.putNumber("Algae Arm Current (Amps)", m_algaeArmMotorController.getOutputCurrent());
     }
 
     protected void publishInit() {}
