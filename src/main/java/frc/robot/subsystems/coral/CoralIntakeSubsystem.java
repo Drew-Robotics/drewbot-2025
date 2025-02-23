@@ -94,11 +94,11 @@ public class CoralIntakeSubsystem extends SubsystemAbstract {
     return m_tofSensor.getRange() <= CoralConstants.kCoralIntakeTOFMaxReading.in(Units.Millimeters);
   }
 
-  public Distance getPieceDistance() {
+  public Distance getPieceDispFromCenter() {
     if (!hasPiece())
       return null;
 
-    return Units.Millimeters.of(m_tofSensor.getRange());
+    return Units.Millimeters.of(m_tofSensor.getRange()); // TODO : this isnt right, fix it or something idk
   }
 
   public void setVoltage(Voltage voltage) {
