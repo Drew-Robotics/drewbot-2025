@@ -262,9 +262,15 @@ public class DriveSubsystem extends SubsystemAbstract {
     return path;
   }
 
-  public Command pathfindToCoralCommand(ReefSide reefSide, ReefBranch reefBranch, Distance tofCoralDistance) {
-    // TODO : tofCoralDistance stuff, too tired for this atm
-    Pose2d targetPose = reefSide.getEndPose(reefBranch);
+  public Command pathfindToCoralCommand(ReefSide reefSide, ReefBranch reefBranch, Distance tofCoralDisp) {
+    Pose2d targetPose = reefSide
+      .getEndPose(reefBranch)
+      .plus(
+        reefSide.kPerpNorm.times(
+          tofCoralDisp.in(Units.Meters)
+        )
+      );
+
     return AutoBuilder.pathfindToPose(targetPose, DriveAutoConstants.kPathingConstraints);
   }
 

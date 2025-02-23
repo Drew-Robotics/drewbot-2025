@@ -34,11 +34,24 @@ public class CoralConstants {
 
     public static Voltage kIntakeVoltage = Units.Volts.of(2);
     public static Voltage kOuttakeVoltage = Units.Volts.of(-5);
+    public static Voltage kHoldVoltage = Units.Volts.of(-0.5); // TODO : test this
 
     public static Distance kElevatorAtStatePositionTolerance = Centimeter.of(1);
     public static AngularVelocity kElevatorAtStateVelocityTolerance = Units.Rotations.per(Units.Minutes).of(50);
 
-    public static Distance kCoralIntakeTOFMaxReading = Units.Inches.of(20); // TODO : should be around the width of the intake minus width of coral
+    // TODO : all estimation, set these numbers
+    public static Distance kIntakeWidth = Units.Inches.of(20);
+    public static Distance kTOFWidth = Units.Inches.of(0.1);
+    public static Distance kCoralWidth = Units.Inches.of(2);
+
+    // TODO : double check this
+    public static Distance kCenteredCoralReading = kIntakeWidth
+        .minus(kTOFWidth)
+        .minus(kCoralWidth)
+        .times(0.5);
+
+    // TODO : just the reading from the tof when nothing is there maybe minus a little bit
+    public static Distance kCoralIntakeTOFMaxReading = Units.Millimeters.of(300);
 
     public static Angle kCoralArmAtStatePositionTolerance = Degrees.of(10);
     public static AngularVelocity kCoralArmAtStateVelocityTolerance = DegreesPerSecond.of(10);

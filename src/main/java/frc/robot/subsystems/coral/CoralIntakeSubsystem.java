@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems.coral;
 
+import java.lang.Thread.State;
+
 import com.playingwithfusion.TimeOfFlight;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.config.SparkFlexConfig;
@@ -28,12 +30,15 @@ public class CoralIntakeSubsystem extends SubsystemAbstract {
   public enum CoralIntakeState {
     Rest,
     Outtake,
-    Intake
+    Intake,
+    Hold
   }
 
   private final SparkFlex m_coralIntakeMotor;
   private final RelativeEncoder m_coralIntakeEncoder;
   private TimeOfFlight m_tofSensor;
+
+  private CoralIntakeState m_coralIntakeState = CoralIntakeState.Rest;
 
   // private final SparkClosedLoopController m_coralIntakeClosedLoopController;
 
@@ -97,8 +102,8 @@ public class CoralIntakeSubsystem extends SubsystemAbstract {
   public Distance getPieceDispFromCenter() {
     if (!hasPiece())
       return null;
-
-    return Units.Millimeters.of(m_tofSensor.getRange()); // TODO : this isnt right, fix it or something idk
+    // positive means shift right
+    return Units.Millimeters.of(m_tofSensor.getRange()).minus(CoralConstants.kCenteredCoralReading);
   }
 
   public void setVoltage(Voltage voltage) {
@@ -114,6 +119,7 @@ public class CoralIntakeSubsystem extends SubsystemAbstract {
   }
 
   public void setState(CoralIntakeState state) {
+    m_coralIntakeState = state;
     switch (state) {
       case Rest:
         setVoltage(Units.Volts.zero());
@@ -124,12 +130,23 @@ public class CoralIntakeSubsystem extends SubsystemAbstract {
       case Outtake:
         setVoltage(CoralConstants.kOuttakeVoltage);
         break;
+      case Hold:
+        setVoltage(CoralConstants.kHoldVoltage);
+        break;
       default:
         break;
     }
   }
 
   /* Overrides */
+
+  @Override
+  public void periodic() {
+    if (hasPiece() && m_coralIntakeState == CoralIntakeState.Rest) {
+      setState(CoralIntakeState.Hold);
+    }
+  }
+
   protected void dashboardInit() {}
 
   protected void dashboardPeriodic() {

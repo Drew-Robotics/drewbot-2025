@@ -14,6 +14,10 @@ public class ReefSide {
     public final Pose2d kLeftEndPose;
     public final Pose2d kRightEndPose;
 
+    public final Transform2d kPerpNorm;
+    public final Transform2d kParaNorm;
+    
+
     // public final Pose2d kLeftPathStartPose;
     // public final Pose2d kRightPathStartPose;
 
@@ -27,20 +31,20 @@ public class ReefSide {
         Pose2d tagPose = VisionConstants.kAprilTagLayout.getTagPose(tagID).get().toPose2d();
         kHeading = tagPose.getRotation();
 
-        Transform2d perpendicular = new Transform2d(kHeading.getCos(), kHeading.getSin(), Rotation2d.kZero);
-        Transform2d parallel = new Transform2d(-kHeading.getSin(), kHeading.getCos(), Rotation2d.kZero);
+        kPerpNorm = new Transform2d(kHeading.getCos(), kHeading.getSin(), Rotation2d.kZero);
+        kParaNorm = new Transform2d(-kHeading.getSin(), kHeading.getCos(), Rotation2d.kZero);
         
         // lets see if this has any chance of working (yay)
         Pose2d centerPose = tagPose.plus(
-            perpendicular.times(-DriveAutoConstants.kRobotDistanceFromCenter.in(Units.Meters))
+            kPerpNorm.times(-DriveAutoConstants.kRobotDistanceFromCenter.in(Units.Meters))
         );
 
         // might have to switch these 2
         kLeftEndPose = centerPose.plus(
-            parallel.times(DriveAutoConstants.kReefBranchDistanceFromCenter.in(Units.Meters))
+            kParaNorm.times(DriveAutoConstants.kReefBranchDistanceFromCenter.in(Units.Meters))
         );
         kRightEndPose = centerPose.plus(
-            parallel.times(-DriveAutoConstants.kReefBranchDistanceFromCenter.in(Units.Meters))
+            kParaNorm.times(-DriveAutoConstants.kReefBranchDistanceFromCenter.in(Units.Meters))
         );
 
         // kLeftPathStartPose = kLeftEndPose.plus(

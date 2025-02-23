@@ -2,13 +2,12 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer.subsystems;
-import frc.robot.subsystems.coral.CoralState;
-import frc.robot.subsystems.coral.CoralIntakeSubsystem.CoralIntakeStates;
+import frc.robot.subsystems.coral.CoralIntakeSubsystem.CoralIntakeState;
 
 public class CoralIntakeStateCommand extends Command {
-  CoralIntakeStates m_intakeState;
+  CoralIntakeState m_intakeState;
 
-  public CoralIntakeStateCommand(CoralIntakeStates intakeState) {
+  public CoralIntakeStateCommand(CoralIntakeState intakeState) {
     m_intakeState = intakeState;
 
     addRequirements(subsystems.coralIntake);
@@ -16,8 +15,7 @@ public class CoralIntakeStateCommand extends Command {
 
   @Override
   public void initialize() {
-    CoralState state = subsystems.coralStateManager.getState().setIntakeState(m_intakeState);
-    subsystems.coralStateManager.setState(state);
+    subsystems.coralIntake.setState(m_intakeState);
   }
 
   @Override
@@ -25,8 +23,7 @@ public class CoralIntakeStateCommand extends Command {
 
   @Override
   public void end(boolean interrupted) {
-    CoralState state = subsystems.coralStateManager.getState().setIntakeState(CoralIntakeStates.Rest);
-    subsystems.coralStateManager.setState(state);
+    subsystems.coralIntake.setState(CoralIntakeState.Rest);
   }
 
   @Override

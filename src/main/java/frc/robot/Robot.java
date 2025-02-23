@@ -5,6 +5,9 @@
 package frc.robot;
 
 import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.commands.PathfindingCommand;
+import com.pathplanner.lib.pathfinding.LocalADStar;
+import com.pathplanner.lib.pathfinding.Pathfinding;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -17,7 +20,10 @@ public class Robot extends TimedRobot {
   private final RobotContainer m_robotContainer = RobotContainer.getInstance();
 
   @Override
-  public void robotInit() {}
+  public void robotInit() {
+    Pathfinding.setPathfinder(new LocalADStar());
+    PathfindingCommand.warmupCommand().schedule(); // TODO : look more into this, make sure it doesnt mess stuff up
+  }
 
   @Override
   public void robotPeriodic() {
