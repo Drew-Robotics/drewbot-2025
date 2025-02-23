@@ -14,8 +14,7 @@ public class IntakeAlgaeCommand extends Command {
   public IntakeAlgaeCommand() {
     addRequirements(
       subsystems.algaeIntake, 
-      subsystems.algaeArm, 
-      subsystems.algaeSensor
+      subsystems.algaeArm
     );
   }
 
@@ -32,6 +31,6 @@ public class IntakeAlgaeCommand extends Command {
 
   @Override
   public boolean isFinished() {
-    return subsystems.algaeSensor.detecting();
+    return false;
   }
 }

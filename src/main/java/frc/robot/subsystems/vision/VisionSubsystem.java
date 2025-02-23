@@ -3,18 +3,24 @@ package frc.robot.subsystems.vision;
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 import org.photonvision.EstimatedRobotPose;
 
+import frc.robot.RobotContainer.subsystems;
 import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.SubsystemAbstract;
 
@@ -95,6 +101,22 @@ public class VisionSubsystem extends SubsystemAbstract {
         tag -> tag,
         (e, r) -> e // discards any repeating tags
       )).values());
+  }
+
+  public Optional<AprilTag> getClosestTag(List<Integer> acceptedTagsIDs) {
+    List<AprilTag> tags = getSeenTags().stream()
+      .filter(tag -> acceptedTagsIDs.contains(tag.ID)).toList();
+
+    if (tags.size() == 0){
+      return Optional.empty();
+    }
+
+    Translation3d robotTranslation3d = subsystems.drive.getPose3d().getTranslation();
+    tags.sort(Comparator.comparingDouble(
+      tag -> tag.pose.getTranslation().getDistance(robotTranslation3d)
+    ));
+
+    return Optional.of(tags.get(0));
   }
 
   public List<Optional<EstimatedRobotPose>> getCameraEstimatedPoses() {

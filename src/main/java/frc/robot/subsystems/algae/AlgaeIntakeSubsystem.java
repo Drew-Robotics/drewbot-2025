@@ -102,7 +102,7 @@ public class AlgaeIntakeSubsystem extends SubsystemAbstract {
   protected void dashboardInit() {}
 
   protected void dashboardPeriodic() {
-    SmartDashboard.putNumber("Algae Intake Current (Amps)", getCurrent().in(Units.Amps));
+    SmartDashboard.putNumber("Algae Intake Current", getCurrent().in(Units.Amps));
   }
 
   protected void publishInit() {}

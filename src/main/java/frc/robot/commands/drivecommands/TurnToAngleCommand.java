@@ -13,15 +13,13 @@ public class TurnToAngleCommand extends DriveCommand {
 
   Supplier<Rotation2d> m_setAngle;
     
+  public TurnToAngleCommand(DoubleSupplier xVel, DoubleSupplier yVel, Rotation2d angle) {
+    this(xVel, yVel, () -> angle);
+  }
+
   public TurnToAngleCommand(DoubleSupplier xVel, DoubleSupplier yVel, Supplier<Rotation2d> angle) {
     super(xVel, yVel, null);
     m_setAngle = angle;
-    addRequirements(subsystems.drive);
-  }
-
-  public TurnToAngleCommand(DoubleSupplier xVel, DoubleSupplier yVel, Rotation2d angle) {
-    super(xVel, yVel, null);
-    m_setAngle = () -> angle;
     addRequirements(subsystems.drive);
   }
 
@@ -30,12 +28,12 @@ public class TurnToAngleCommand extends DriveCommand {
 
   @Override
   public void execute() {
-    ChassisSpeeds speeds = 
+    ChassisSpeeds chassisSpeeds = 
       subsystems.drive.getChassisSpeedOnRotationControl(
         getXVelocity(), getXVelocity(), m_setAngle.get()
       );
 
-    subsystems.drive.setChassisSpeeds(speeds);
+    subsystems.drive.setChassisSpeeds(chassisSpeeds);
   }
 
   @Override

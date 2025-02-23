@@ -4,10 +4,12 @@
 
 package frc.robot.subsystems.coral;
 
+import com.playingwithfusion.TimeOfFlight;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -22,8 +24,8 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import frc.robot.constants.CoralConstants;
 import frc.robot.subsystems.SubsystemAbstract;
 
-public class CoralIntakeSubsystem extends SubsystemAbstract implements CoralSubsystemI {
-  public enum CoralIntakeStates {
+public class CoralIntakeSubsystem extends SubsystemAbstract {
+  public enum CoralIntakeState {
     Rest,
     Outtake,
     Intake
@@ -31,6 +33,8 @@ public class CoralIntakeSubsystem extends SubsystemAbstract implements CoralSubs
 
   private final SparkFlex m_coralIntakeMotor;
   private final RelativeEncoder m_coralIntakeEncoder;
+  private TimeOfFlight m_tofSensor;
+
   // private final SparkClosedLoopController m_coralIntakeClosedLoopController;
 
   // private LinearVelocity m_desiredVelocity = MetersPerSecond.zero();
@@ -76,12 +80,25 @@ public class CoralIntakeSubsystem extends SubsystemAbstract implements CoralSubs
     //   .outputRange(-1, 1);
 
       m_coralIntakeMotor.configure(coralIntakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+      m_tofSensor = new TimeOfFlight(CoralConstants.CANIDs.kCoralIntakeTimeOfFlight);
   }
 
   /* Setters and Getters */
 
   public LinearVelocity getVelocity() {
     return Units.MetersPerSecond.of(m_coralIntakeEncoder.getVelocity());
+  }
+
+  public boolean hasPiece() {
+    return m_tofSensor.getRange() <= CoralConstants.kCoralIntakeTOFMaxReading.in(Units.Millimeters);
+  }
+
+  public Distance getPieceDistance() {
+    if (!hasPiece())
+      return null;
+
+    return Units.Millimeters.of(m_tofSensor.getRange());
   }
 
   public void setVoltage(Voltage voltage) {
@@ -96,8 +113,8 @@ public class CoralIntakeSubsystem extends SubsystemAbstract implements CoralSubs
     return Units.Amps.of(m_coralIntakeMotor.getAppliedOutput());
   }
 
-  public void setState(CoralState state) {
-    switch (state.getIntakeState()) {
+  public void setState(CoralIntakeState state) {
+    switch (state) {
       case Rest:
         setVoltage(Units.Volts.zero());
         break;
@@ -116,7 +133,7 @@ public class CoralIntakeSubsystem extends SubsystemAbstract implements CoralSubs
   protected void dashboardInit() {}
 
   protected void dashboardPeriodic() {
-    SmartDashboard.putNumber("Coral Intake Current (Amps)", getCurrent().in(Units.Amps));
+    SmartDashboard.putNumber("Coral Intake Current", getCurrent().in(Units.Amps));
   }
 
   protected void publishInit() {}

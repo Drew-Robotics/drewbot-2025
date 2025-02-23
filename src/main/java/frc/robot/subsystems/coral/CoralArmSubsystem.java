@@ -11,7 +11,6 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
@@ -22,7 +21,7 @@ import frc.robot.subsystems.SubsystemAbstract;
 import frc.robot.constants.CoralConstants;
 import frc.robot.constants.CoralStates;
 
-public class CoralArmSubsystem extends SubsystemAbstract implements CoralSubsystemI{
+public class CoralArmSubsystem extends SubsystemAbstract{
   private final SparkFlex m_coralArmMotorController;
   private final SparkMax m_coralArmEncoderController;
   private final SparkAbsoluteEncoder m_coralArmEncoder;
@@ -126,6 +125,19 @@ public class CoralArmSubsystem extends SubsystemAbstract implements CoralSubsyst
     setDesiredAngle(m_targetState.getArmSetpoint());
   }
 
+  public boolean atState() {
+    boolean atPositionState = Units.Radians.of(getAngle().getRadians()).isNear(
+        Units.Radians.of(m_targetState.getArmSetpoint().getRadians()), 
+        CoralConstants.kCoralArmAtStatePositionTolerance
+    );
+
+    boolean atVelocityState = 
+        m_coralArmEncoder.getVelocity() < 
+        CoralConstants.kCoralArmAtStateVelocityTolerance.in(Units.Rotations.per(Units.Minute));
+
+    return atVelocityState && atPositionState;
+  }
+
   /* Overrides */
 
   @Override
@@ -145,8 +157,8 @@ public class CoralArmSubsystem extends SubsystemAbstract implements CoralSubsyst
   }
 
   protected void dashboardPeriodic() {
-    SmartDashboard.putNumber("Coral Arm Desired Degrees", m_armDesiredAngle.getDegrees());
-    SmartDashboard.putNumber("Coral Arm Measured Degrees", getAngle().getDegrees());
+    SmartDashboard.putNumber("Coral Arm Desired Angle", m_armDesiredAngle.getDegrees());
+    SmartDashboard.putNumber("Coral Arm Measured Angle", getAngle().getDegrees());
     // SmartDashboard.putNumber("Coral Arm Measured Degrees Raw", Rotation2d.fromRadians(m_coralArmEncoder.getPosition()).getDegrees());
   }
 

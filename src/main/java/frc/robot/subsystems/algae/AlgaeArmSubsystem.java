@@ -88,9 +88,9 @@ public class AlgaeArmSubsystem extends SubsystemAbstract {
     protected void dashboardInit() {}
 
     protected void dashboardPeriodic() {
-        SmartDashboard.putNumber("Algae Arm Measured Angle", getAngle().getDegrees());
         SmartDashboard.putNumber("Algae Arm Desired Angle", m_currentDesiredAngle.getDegrees());
-        SmartDashboard.putNumber("Algae Arm Current (Amps)", m_algaeArmMotorController.getOutputCurrent());
+        SmartDashboard.putNumber("Algae Arm Measured Angle", getAngle().getDegrees());
+        SmartDashboard.putNumber("Algae Arm Current", m_algaeArmMotorController.getOutputCurrent());
     }
 
     protected void publishInit() {}

@@ -1,4 +1,9 @@
 package frc.robot.constants;
+import static edu.wpi.first.units.Units.Centimeter;
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
+
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -7,7 +12,6 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.units.measure.AngularVelocity;
 
@@ -19,7 +23,7 @@ public class CoralConstants {
     public static boolean kElevatorLeftMotorInverted = false;
     public static boolean kElevatorRightMotorInverted = true;
     
-    public static AngularVelocity kElevatorRestVelocity = Units.Rotations.per(Units.Minutes).of(25);
+    public static AngularVelocity kElevatorRestVelocity = Units.Rotations.per(Units.Minutes).of(50);
     public static double kRestTimerSeconds = 0.5;
 
     public static Rotation2d kMinArmAngle = Rotation2d.fromDegrees(-180);
@@ -30,6 +34,14 @@ public class CoralConstants {
 
     public static Voltage kIntakeVoltage = Units.Volts.of(2);
     public static Voltage kOuttakeVoltage = Units.Volts.of(-5);
+
+    public static Distance kElevatorAtStatePositionTolerance = Centimeter.of(1);
+    public static AngularVelocity kElevatorAtStateVelocityTolerance = Units.Rotations.per(Units.Minutes).of(50);
+
+    public static Distance kCoralIntakeTOFMaxReading = Units.Inches.of(20); // TODO : should be around the width of the intake minus width of coral
+
+    public static Angle kCoralArmAtStatePositionTolerance = Degrees.of(10);
+    public static AngularVelocity kCoralArmAtStateVelocityTolerance = DegreesPerSecond.of(10);
     
     public static final class IdleModes {
         public static final IdleMode kArm = IdleMode.kBrake;
@@ -40,10 +52,12 @@ public class CoralConstants {
     public static final class CANIDs {
         public static final int kElevatorLeft = 10;
         public static final int kElevatorRight = 11;
-        public static final int kElevatorEncoder = 22;
+
         public static final int kCoralArm = 20;
         public static final int kCoralArmEncoder = 22;
+
         public static final int kCoralIntake = 21;
+        public static final int kCoralIntakeTimeOfFlight = 23;
     }
 
     public static final class PID {

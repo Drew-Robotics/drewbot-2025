@@ -7,12 +7,20 @@ import java.util.Optional;
 import org.photonvision.EstimatedRobotPose;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathfindThenFollowPath;
+import com.pathplanner.lib.path.GoalEndState;
+import com.pathplanner.lib.path.IdealStartingState;
+import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.path.Waypoint;
 import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -28,7 +36,7 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-
+import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.*;
 import static edu.wpi.first.units.Units.*;
 import frc.robot.constants.DriveAutoConstants;
@@ -36,6 +44,7 @@ import frc.robot.constants.DriveConstants;
 import frc.robot.constants.VisionConstants;
 import frc.robot.RobotContainer.subsystems;
 import frc.robot.subsystems.SubsystemAbstract;
+import frc.robot.subsystems.drive.ReefSide.ReefBranch;
 
 public class DriveSubsystem extends SubsystemAbstract {
   private final AHRS m_gyro;
@@ -51,7 +60,11 @@ public class DriveSubsystem extends SubsystemAbstract {
   private LinearVelocity m_yVelocity = MetersPerSecond.zero();
   private AngularVelocity m_rotationalVelocity = RadiansPerSecond.zero();
 
-  private PIDController m_rotationController = new PIDController(0, 0, 0); // TODO: make this not what it is
+  private PIDController m_rotationController = new PIDController(
+    DriveAutoConstants.TurningPID.kP,
+    DriveAutoConstants.TurningPID.kI,
+    DriveAutoConstants.TurningPID.kD
+  );
 
   private static DriveSubsystem m_instance;
   public static DriveSubsystem getInstance() {
@@ -134,42 +147,7 @@ public class DriveSubsystem extends SubsystemAbstract {
     SmartDashboard.putNumber("Yaw Degrees", getGyroYaw().getDegrees());
   }
 
-  protected void publishInit() {
-  //   addTopicSup(
-  //     new StructTopicSup<Pose2d>(
-  //       m_table.getStructTopic("Pose Estimation", Pose2d.struct).publish(),
-  //       this::getPose
-  //     )
-  //   );
-
-  //   addTopicSup(
-  //     new StructTopicSup<ChassisSpeeds>(
-  //       m_table.getStructTopic("Commanded Chassis Speed", ChassisSpeeds.struct).publish(),
-  //       () -> new ChassisSpeeds(m_xVelocity, m_yVelocity, m_rotationalVelocity)
-  //     )
-  //   );
-
-  //   addTopicSup(
-  //     new StructTopicSup<ChassisSpeeds>(
-  //       m_table.getStructTopic("Commanded Chassis Speeds", ChassisSpeeds.struct).publish(),
-  //       () -> new ChassisSpeeds(m_xVelocity, m_yVelocity, m_rotationalVelocity)
-  //     )
-  //   );
-
-  //   addTopicSup(
-  //     new StructTopicSup<ChassisSpeeds>(
-  //       m_table.getStructTopic("Measured Chassis Speeds", ChassisSpeeds.struct).publish(),
-  //       () -> getChassisSpeeds()
-  //     )
-  //   );
-
-  //   addTopicSup(
-  //     new DoubleTopicSup(
-  //       m_table.getDoubleTopic("Yaw Rotations").publish(),
-  //       () -> getGyroYaw().getRotations()
-  //     )
-  //   );
-  }
+  protected void publishInit() {}
 
   public void publishPeriodic() {}
 
@@ -241,7 +219,10 @@ public class DriveSubsystem extends SubsystemAbstract {
 
     if(pose.getX() < 0 || pose.getY() < 0)
       return;
-    if(pose.getX() > VisionConstants.kAprilTagLayout.getFieldLength() || pose.getY() > VisionConstants.kAprilTagLayout.getFieldWidth())
+    if(
+      pose.getX() > VisionConstants.kAprilTagLayout.getFieldLength() || 
+      pose.getY() > VisionConstants.kAprilTagLayout.getFieldWidth()
+    )
       return;
 
     m_poseEstimator.addVisionMeasurement(pose, timeStamp, stdDevs);
@@ -262,7 +243,51 @@ public class DriveSubsystem extends SubsystemAbstract {
 
   /* ----- PATHING ----- */
 
-  
+  public PathPlannerPath getPath(Pose2d target) {
+    List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
+      getPose(), target
+    );
+
+    // ChassisSpeeds measuredSpeeds = getMeasuredChassisSpeeds();
+    // LinearVelocity measuredSpeed = Units.MetersPerSecond.of(
+    //   Math.pow(measuredSpeeds.vxMetersPerSecond, 2) + 
+    //   Math.pow(measuredSpeeds.vyMetersPerSecond, 2)
+    // );
+
+    PathPlannerPath path = new PathPlannerPath(
+      waypoints, DriveAutoConstants.kPathingConstraints, null,
+      new GoalEndState(0d, target.getRotation()) // figure out how this is different (holonomic rotation vs non holonomic rotation?)
+    );
+
+    return path;
+  }
+
+  public Command pathfindToCoralCommand(ReefSide reefSide, ReefBranch reefBranch, Distance tofCoralDistance) {
+    // TODO : tofCoralDistance stuff, too tired for this atm
+    Pose2d targetPose = reefSide.getEndPose(reefBranch);
+    return AutoBuilder.pathfindToPose(targetPose, DriveAutoConstants.kPathingConstraints);
+  }
+
+  public Command pathfindToStation() {
+    PathPlannerPath path;
+    
+    try {
+      path = PathPlannerPath.fromPathFile(DriveAutoConstants.AutoNames.kPathingToStation);
+    }
+    catch (Exception e) {
+      return Commands.none();
+    }
+
+    return AutoBuilder.pathfindThenFollowPath(path, DriveAutoConstants.kPathingConstraints);
+  }
+
+  public Command getPathCommand(Pose2d target) {
+    return AutoBuilder.followPath(getPath(target));
+  }
+
+  public Command getPathCommand(PathPlannerPath path) {
+    return AutoBuilder.followPath(path);
+  }
 
   /* ----- SWERVE ----- */
 
@@ -286,7 +311,10 @@ public class DriveSubsystem extends SubsystemAbstract {
    * @param swerveModuleStates Array of modules states
    */
   public void setModuleStates(SwerveModuleState[] swerveModuleStates) {
-    SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, DriveConstants.MaxVels.kTranslationalVelocity);
+    SwerveDriveKinematics.desaturateWheelSpeeds(
+      swerveModuleStates, DriveConstants.MaxVels.kTranslationalVelocity  
+    );
+
     for (int i = 0; i < 4; i++)
       m_modules[i].setModuleState(swerveModuleStates[i]);
   }

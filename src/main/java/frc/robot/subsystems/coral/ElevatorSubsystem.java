@@ -13,6 +13,7 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
@@ -23,7 +24,7 @@ import frc.robot.constants.CoralConstants;
 import frc.robot.constants.CoralStates;
 import frc.robot.subsystems.SubsystemAbstract;
 
-public class ElevatorSubsystem extends SubsystemAbstract implements CoralSubsystemI{
+public class ElevatorSubsystem extends SubsystemAbstract{
 
     private final SparkMax m_elevatorLeadMotor;
     private final SparkMax m_elevatorFollowerMotorRight;
@@ -154,6 +155,19 @@ public class ElevatorSubsystem extends SubsystemAbstract implements CoralSubsyst
             heightToRotations(m_targetState.getElevatorSetpoint()).getRotations(), // only time we're using rotations
             ControlType.kPosition
         );
+    }
+
+    public boolean atState() {
+        boolean atPositionState = getHeight().isNear(
+            m_targetState.getElevatorSetpoint(), 
+            CoralConstants.kElevatorAtStatePositionTolerance
+        );
+
+        boolean atVelocityState = 
+            Math.abs(m_elevatorLeftEncoder.getVelocity()) < 
+            CoralConstants.kElevatorAtStateVelocityTolerance.in(Units.Rotations.per(Units.Minute));
+
+        return atVelocityState && atPositionState;
     }
 
     public Rotation2d getEncoderReading() {
