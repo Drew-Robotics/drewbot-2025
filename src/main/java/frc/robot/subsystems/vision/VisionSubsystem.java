@@ -19,6 +19,7 @@ import java.util.Comparator;
 import java.util.stream.Collectors;
 
 import org.photonvision.EstimatedRobotPose;
+import org.photonvision.PhotonCamera;
 
 import frc.robot.RobotContainer.subsystems;
 import frc.robot.constants.VisionConstants;
@@ -37,6 +38,8 @@ public class VisionSubsystem extends SubsystemAbstract {
     VisionConstants.CameraNames.kBackRight
   );
 
+  Camera m_frontLeft, m_frontRight, m_backLeft, m_backRight;
+
   // private StructArrayTopicSup<AprilTag> m_seenTagsTopicSup;
 
   private static VisionSubsystem m_instance;
@@ -49,13 +52,13 @@ public class VisionSubsystem extends SubsystemAbstract {
   private VisionSubsystem() {
     super();
 
-    // m_frontLeft = new Camera(VisionConstants.CameraNames.kFrontLeft, VisionConstants.CameraTransforms.kFrontLeft);  
-    // m_frontRight = new Camera(VisionConstants.CameraNames.kFrontRight, VisionConstants.CameraTransforms.kFrontRight);
-    // m_backLeft = new Camera(VisionConstants.CameraNames.kBackLeft, VisionConstants.CameraTransforms.kBackLeft);
-    // m_backRight = new Camera(VisionConstants.CameraNames.kBackRight, VisionConstants.CameraTransforms.kBackRight);
+    m_frontLeft = new Camera(VisionConstants.CameraNames.kFrontLeft, VisionConstants.CameraTransforms.kFrontLeft);  
+    m_frontRight = new Camera(VisionConstants.CameraNames.kFrontRight, VisionConstants.CameraTransforms.kFrontRight);
+    m_backLeft = new Camera(VisionConstants.CameraNames.kBackLeft, VisionConstants.CameraTransforms.kBackLeft);
+    m_backRight = new Camera(VisionConstants.CameraNames.kBackRight, VisionConstants.CameraTransforms.kBackRight);
 
-    // m_cameras = List.of(m_frontLeft, m_frontRight, m_backLeft, m_backRight);
-    m_cameras = List.of();
+    m_cameras = List.of(m_frontLeft, m_frontRight, m_backLeft, m_backRight);
+    // m_cameras = List.of();
 
   }
 
@@ -123,6 +126,7 @@ public class VisionSubsystem extends SubsystemAbstract {
     ArrayList<Optional<EstimatedRobotPose>> retVal = new ArrayList<Optional<EstimatedRobotPose>>();
     for(Camera camera : m_cameras) {
       retVal.add(camera.getEstimatedGlobalPose());
+
     }
     return retVal;
   }

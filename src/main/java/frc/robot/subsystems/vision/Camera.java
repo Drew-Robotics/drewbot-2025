@@ -27,8 +27,10 @@ public class Camera {
   private final PhotonCamera m_photonCamera;
   private final PhotonPoseEstimator m_poseEstimator;
   private PhotonPipelineResult m_latestResult;
+  private final String m_cameraName;
 
   public Camera(String name, Transform3d robotToCamera) {
+    m_cameraName = name;
     m_photonCamera = new PhotonCamera(name);
     m_poseEstimator = new PhotonPoseEstimator(
       VisionConstants.kAprilTagLayout,
@@ -42,15 +44,23 @@ public class Camera {
     
     if (m_latestResult != null) {
       double now = Timer.getFPGATimestamp(); // seconds
-      isNewResult = Math.abs(now - m_latestResult.getTimestampSeconds()) > 1e-3; // ask Drew about all this stuff 
+      isNewResult = Math.abs(now - m_latestResult.getTimestampSeconds()) > 1e-5; // ask Drew about all this stuff 
     }
+    // System.out.println("isNewResult" + isNewResult);
 
     if(!isNewResult)
       return m_latestResult;
     
     List<PhotonPipelineResult> cameraResults = m_photonCamera.getAllUnreadResults();
+    
     if (cameraResults.size() > 0){
-      m_latestResult = cameraResults.get(0);
+      PhotonPipelineResult result = cameraResults.get(0);
+
+      if (!result.hasTargets())
+        return m_latestResult;
+
+      m_latestResult = result;
+      System.out.println("GOT RESULT " + cameraResults.size() + " " + m_cameraName);
     }
 
     return m_latestResult;

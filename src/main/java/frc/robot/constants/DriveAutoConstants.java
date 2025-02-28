@@ -8,6 +8,8 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 
+import java.util.List;
+
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.config.PIDConstants;
@@ -20,6 +22,9 @@ public class DriveAutoConstants {
   public static final LinearAcceleration kMaxAcceleration = Units.MetersPerSecondPerSecond.of(9);
   public static final AngularVelocity kMaxAngularVelocity = Units.DegreesPerSecond.of(180);
   public static final AngularAcceleration kMaxAngularAcceleration  = Units.DegreesPerSecondPerSecond.of(360);
+
+  public static final List<Integer> kAutoAlignTagsIDs = List.of(0, 1, 2, 3);
+  public static final List<Integer> kAutoDriveTagsIDs = List.of(0, 1, 2, 3);
 
   /**
    * This is the distance that the robot's center should be from the edge of the reef while scoring.

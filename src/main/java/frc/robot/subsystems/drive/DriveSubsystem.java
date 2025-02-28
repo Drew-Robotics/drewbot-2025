@@ -7,10 +7,7 @@ import java.util.Optional;
 import org.photonvision.EstimatedRobotPose;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.PathfindThenFollowPath;
 import com.pathplanner.lib.path.GoalEndState;
-import com.pathplanner.lib.path.IdealStartingState;
-import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.Waypoint;
 import com.studica.frc.AHRS;
@@ -36,6 +33,7 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.*;
 import static edu.wpi.first.units.Units.*;
@@ -60,11 +58,11 @@ public class DriveSubsystem extends SubsystemAbstract {
   private LinearVelocity m_yVelocity = MetersPerSecond.zero();
   private AngularVelocity m_rotationalVelocity = RadiansPerSecond.zero();
 
-  private PIDController m_rotationController = new PIDController(
-    DriveAutoConstants.TurningPID.kP,
-    DriveAutoConstants.TurningPID.kI,
-    DriveAutoConstants.TurningPID.kD
-  );
+
+  private StructPublisher<Pose2d> m_visionPublisher = m_table.getStructTopic("VisionEstim", Pose2d.struct).publish();
+  private StructPublisher<Pose2d> m_robotPosePublisher = m_table.getStructTopic("RobotPose", Pose2d.struct).publish();
+
+  private PIDController m_rotationController;
 
   private static DriveSubsystem m_instance;
   public static DriveSubsystem getInstance() {
@@ -116,9 +114,14 @@ public class DriveSubsystem extends SubsystemAbstract {
 
     m_modules = new SwerveModule[] {m_frontLeft, m_frontRight, m_backLeft, m_backRight};
 
+    m_rotationController = new PIDController(
+      DriveAutoConstants.TurningPID.kP,
+      DriveAutoConstants.TurningPID.kI,
+      DriveAutoConstants.TurningPID.kD
+    );
+    m_rotationController.enableContinuousInput(0, 2 * Math.PI);
+
     m_poseEstimator = new SwerveDrivePoseEstimator(DriveConstants.kDriveKinematics, getGyroYaw(), getModulePositions(), new Pose2d());
-    
-    m_rotationController.enableContinuousInput(0, 2 * Math.PI); // TODO add pid constants for this
 
     m_magnitudeLimiter = new SlewRateLimiter(DriveConstants.SlewRate.kMag);
     m_directionalLimiter = new SlewRateLimiter(DriveConstants.SlewRate.kDir);
@@ -132,6 +135,8 @@ public class DriveSubsystem extends SubsystemAbstract {
     super.periodic();
     m_poseEstimator.update(getGyroYaw(), getModulePositions());
     updateVisionPoseEstimation();
+
+    m_robotPosePublisher.accept(getPose());
   }
 
   public void dashboardInit() {
@@ -216,6 +221,7 @@ public class DriveSubsystem extends SubsystemAbstract {
    */
   public void addVisionMeasurement(Pose2d pose, double timeStamp, Matrix<N3, N1> stdDevs) {
     pose = new Pose2d(pose.getTranslation(), pose.getRotation().rotateBy(Rotation2d.fromDegrees(180)));
+    m_visionPublisher.accept(pose);
 
     if(pose.getX() < 0 || pose.getY() < 0)
       return;
@@ -396,13 +402,13 @@ public class DriveSubsystem extends SubsystemAbstract {
     m_yVelocity = DriveConstants.MaxVels.kTranslationalVelocity.times(y);
     m_rotationalVelocity = DriveConstants.MaxVels.kRotationalVelocity.times(rot);
 
-    // // convert to polar
+    // convert to polar
 
     // double xv, yv, rv, mv, dv;
   
-    // xv = DriveConstants.MaxVels.kTranslationalVelocity.times(x).in(MetersPerSecond);
-    // yv = DriveConstants.MaxVels.kTranslationalVelocity.times(y).in(MetersPerSecond);
-    // rv = DriveConstants.MaxVels.kRotationalVelocity.times(rot).in(RadiansPerSecond);
+    // xv = m_xVelocity.in(MetersPerSecond);
+    // yv = m_yVelocity.in(MetersPerSecond);
+    // rv = m_rotationalVelocity.in(RadiansPerSecond);
     
     // mv = Math.sqrt(Math.pow(xv, 2) + Math.pow(yv, 2));
     // dv = Math.atan2(yv, xv);

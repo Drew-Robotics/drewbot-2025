@@ -16,13 +16,9 @@ public class ReefSide {
 
     public final Transform2d kPerpNorm;
     public final Transform2d kParaNorm;
-    
-
-    // public final Pose2d kLeftPathStartPose;
-    // public final Pose2d kRightPathStartPose;
 
     public static enum ReefBranch {
-        kLeft, kRight
+        Left, Right
     }
 
     public ReefSide(int tagID) {
@@ -57,6 +53,6 @@ public class ReefSide {
     }
 
     public Pose2d getEndPose(ReefBranch reefBranch){
-        return (reefBranch == ReefBranch.kLeft) ? kLeftEndPose : kRightEndPose;
+        return (reefBranch == ReefBranch.Left) ? kLeftEndPose : kRightEndPose;
     }
 }
