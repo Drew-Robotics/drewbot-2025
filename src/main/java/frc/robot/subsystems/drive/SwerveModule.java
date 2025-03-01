@@ -193,7 +193,7 @@ public class SwerveModule {
    */
   public SwerveModulePosition getModulePosition() {
     SwerveModulePosition modulePosition = new SwerveModulePosition(
-        Units.Meters.of(m_drivingEncoder.getPosition()),
+        Units.Meters.of(m_drivingEncoder.getPosition()).times(-1),
         getCurrentAngle()
     );
 

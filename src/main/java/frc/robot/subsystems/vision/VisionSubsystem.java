@@ -29,7 +29,7 @@ public class VisionSubsystem extends SubsystemAbstract {
   // private final Camera m_frontLeft, m_frontRight, m_backLeft, m_backRight;
   private final List<Camera> m_cameras;
 
-  private AprilTag[] m_fieldTags = VisionConstants.AprilTags.kTags.toArray(AprilTag[]::new);
+  // private AprilTag[] m_fieldTags = VisionConstants.AprilTags.kTags.toArray(AprilTag[]::new);
 
   private final List<String> m_cameraNames = List.of(
     VisionConstants.CameraNames.kFrontLeft, 
@@ -145,9 +145,7 @@ public class VisionSubsystem extends SubsystemAbstract {
         Pose2d pos = poseOptional.get().estimatedPose.toPose2d();
         SmartDashboard.putString(m_cameraNames.get(cameraIndex) + " Pose", pos.toString());
         
-        poseStdDevs.add(Optional.ofNullable(camera.getEstimationStdDevs(
-          poseOptional.get().estimatedPose.toPose2d()
-        )));
+        poseStdDevs.add(Optional.ofNullable(camera.getEstimationStdDevs()));
       }
       else
         poseStdDevs.add(Optional.empty());

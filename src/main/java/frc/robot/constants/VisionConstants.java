@@ -9,6 +9,7 @@ import java.util.List;
 
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -60,19 +61,19 @@ public class VisionConstants {
       );
     }
 
-    public static final class AprilTags {
-    public static final List<AprilTag> kTags = List.of( 
-      // new AprilTag(1, new Pose3d(5, 2, 1, new Rotation3d(0, 0, 180)))
-      // 1 (0,114,67) pos x
-      // 2 (106,0,69.5) pos y 
-      // 3 (251,175.25,65) neg x
-      new AprilTag(1, new Pose3d(2.8956, 0     , 1.7018, new Rotation3d(0, 0, Math.PI/2))),
-      new AprilTag(2, new Pose3d(0     , 3.8202, 1.5494, new Rotation3d(0, 0, 0))),
-      new AprilTag(3, new Pose3d(4.4260, 6.3754, 1.6129, new Rotation3d(0, 0, 3 * Math.PI / 2)))
-    );
-    }
+    // public static final class AprilTags {
+    // public static final List<AprilTag> kTags = List.of( 
+    //   // new AprilTag(1, new Pose3d(5, 2, 1, new Rotation3d(0, 0, 180)))
+    //   // 1 (0,114,67) pos x
+    //   // 2 (106,0,69.5) pos y 
+    //   // 3 (251,175.25,65) neg x
+    //   new AprilTag(1, new Pose3d(2.8956, 0     , 1.7018, new Rotation3d(0, 0, Math.PI/2))),
+    //   new AprilTag(2, new Pose3d(0     , 3.8202, 1.5494, new Rotation3d(0, 0, 0))),
+    //   new AprilTag(3, new Pose3d(4.4260, 6.3754, 1.6129, new Rotation3d(0, 0, 3 * Math.PI / 2)))
+    // );
+    // }
 
-    public static final AprilTagFieldLayout kAprilTagLayout = new AprilTagFieldLayout(AprilTags.kTags, 10, 10);
+    public static final AprilTagFieldLayout kAprilTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
 
     public static final class StdDevs {
       public static final Matrix<N3, N1> kSingleTag = VecBuilder.fill(4, 4, 8);

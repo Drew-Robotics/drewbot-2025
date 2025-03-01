@@ -27,66 +27,73 @@ public class Camera {
   private final PhotonPoseEstimator m_poseEstimator;
   private PhotonPipelineResult m_latestResult;
   private final String m_cameraName;
+  private Matrix<N3, N1> m_latestStdDevs;
 
   public Camera(String name, Transform3d robotToCamera) {
     m_cameraName = name;
     m_photonCamera = new PhotonCamera(name);
     m_poseEstimator = new PhotonPoseEstimator(
       VisionConstants.kAprilTagLayout,
-      PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+      PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, // MULTI_TAG_PNP_ON_COPROCESSOR
       robotToCamera
     );
+    m_poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
+
   }
 
-  public PhotonPipelineResult getLastestCameraResult() {
-    // boolean isNewResult = true;
+  // public PhotonPipelineResult getLastestCameraResult() {
+  //   // boolean isNewResult = true;
     
-    // if (m_latestResult != null) {
-    //   double now = Timer.getFPGATimestamp(); // seconds
-    //   isNewResult = Math.abs(now - m_latestResult.getTimestampSeconds()) > 1e-5; // ask Drew about all this stuff 
-    // }
-    // // System.out.println("isNewResult" + isNewResult);
+  //   // if (m_latestResult != null) {
+  //   //   double now = Timer.getFPGATimestamp(); // seconds
+  //   //   isNewResult = Math.abs(now - m_latestResult.getTimestampSeconds()) > 1e-5; // ask Drew about all this stuff 
+  //   // }
+  //   // // System.out.println("isNewResult" + isNewResult);
 
-    // if(!isNewResult)
-    //   return m_latestResult;
+  //   // if(!isNewResult)
+  //   //   return m_latestResult;
     
-    List<PhotonPipelineResult> cameraResults = m_photonCamera.getAllUnreadResults();
+  //   List<PhotonPipelineResult> cameraResults = m_photonCamera.getAllUnreadResults();
     
-    if (cameraResults.size() > 0){
-      PhotonPipelineResult result = cameraResults.get(0);
+  //   if (!cameraResults.isEmpty()){
+  //     PhotonPipelineResult result = cameraResults.get(cameraResults.size() - 1); // FIFO queue
 
-      // if (!result.hasTargets())
-      //   return m_latestResult;
+  //     if (!result.hasTargets())
+  //       return m_latestResult;
 
-      m_latestResult = result;
-      System.out.println("GOT RESULT " + cameraResults.size() + " " + m_cameraName);
-    }
+  //     m_latestResult = result;
+  //     System.out.println("GOT RESULT " + cameraResults.size() + " " + m_cameraName);
+  //   }
 
-    return m_latestResult;
-  }
+  //   return m_latestResult;
+  // }
 
   public Optional<EstimatedRobotPose> getEstimatedGlobalPose() {
-    if (getLastestCameraResult() == null)
-      return Optional.empty();
 
 
-    Optional<EstimatedRobotPose> visionEst = m_poseEstimator.update(getLastestCameraResult());
-    
-    if (m_cameraName == "frontLeft") {
-      System.out.print("frontLeft polled, num targets : " + getLastestCameraResult().targets.size() + " ");
-      System.out.println(visionEst.isPresent() + " " + getLastestCameraResult().getTimestampSeconds());
+    Optional<EstimatedRobotPose> visionEst = Optional.empty();
+
+    for (PhotonPipelineResult result : m_photonCamera.getAllUnreadResults()) {
+        visionEst = m_poseEstimator.update(result);
+        updateEstimationStdDevs(visionEst, result.getTargets());
     }
-    
-      
+
     return visionEst;
   }
 
-  public Matrix<N3, N1> getEstimationStdDevs(Pose2d estimatedPose) {
-    if (getLastestCameraResult() == null)
-      return VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+  public Matrix<N3, N1> getEstimationStdDevs() {
+    return m_latestStdDevs;
+  }
 
+  private void updateEstimationStdDevs(Optional<EstimatedRobotPose> estimatedPoseOp, List<PhotonTrackedTarget> targets) {
     Matrix<N3, N1> estStdDevs = VisionConstants.StdDevs.kSingleTag;
-    List<PhotonTrackedTarget> targets = getLastestCameraResult().getTargets();
+
+    if (estimatedPoseOp.isEmpty()) {
+      m_latestStdDevs = estStdDevs;
+      return;
+    }
+
+    Pose2d estimatedPose = estimatedPoseOp.get().estimatedPose.toPose2d();
 
     int numTags = 0;
     double avgDist = 0;
@@ -103,8 +110,10 @@ public class Camera {
       avgDist += tagTranslation.getDistance(estimatedPose.getTranslation());
     }
     
-    if (numTags == 0)
-      return estStdDevs;
+    if (numTags == 0){
+      m_latestStdDevs = estStdDevs;
+      return;
+    }
 
     avgDist /= numTags;
 
@@ -118,7 +127,7 @@ public class Camera {
     else
       estStdDevs = estStdDevs.times(1 + (avgDist * avgDist / 30));
 
-    return estStdDevs;
+    m_latestStdDevs = estStdDevs;
   }
 
   public AprilTag[] getSeenTags() {
@@ -135,5 +144,5 @@ public class Camera {
     }
     return tags;
   }
-
+  
 }
