@@ -5,13 +5,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotContainer.subsystems;
 import frc.robot.constants.CoralStates;
-import frc.robot.constants.DriveAutoConstants;
 import frc.robot.constants.ReefSides;
-import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.coral.CoralState;
 import frc.robot.subsystems.drive.ReefSide;
 import frc.robot.subsystems.drive.ReefSide.ReefBranch;
-import frc.robot.subsystems.vision.VisionSubsystem;
 
 public class ScoreCommands {
     private static CoralState m_coralState = CoralStates.kL1;

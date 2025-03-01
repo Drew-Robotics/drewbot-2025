@@ -117,7 +117,8 @@ public class CoralArmSubsystem extends SubsystemAbstract{
 
   /* Getters and Setters */
   public Rotation2d getAngle() {
-    return Rotation2d.fromRadians(m_coralArmEncoder.getPosition()).minus(Rotation2d.fromDegrees(63.42711));
+    return Rotation2d.fromRadians(m_coralArmEncoder.getPosition())
+      .minus(Rotation2d.fromDegrees(63.42711));
   }
 
   public void setState(CoralState state) {

@@ -1,6 +1,5 @@
 package frc.robot.subsystems.drive;
 
-
 import java.util.List;
 import java.util.Optional;
 
@@ -199,14 +198,19 @@ public class DriveSubsystem extends SubsystemAbstract {
     List<Optional<Matrix<N3, N1>>> stdDevs = subsystems.vision.getPoseStdDevs(estimatedPoses);
 
     for (int poseIndex = 0; poseIndex < estimatedPoses.size(); poseIndex++) {
+
+
       Optional<EstimatedRobotPose> poseOptional = estimatedPoses.get(poseIndex);
       Optional<Matrix<N3, N1>> stdDevsOptional = stdDevs.get(poseIndex);
 
-      if(!poseOptional.isPresent())
+      if(!poseOptional.isPresent()) {
         continue;
-      
+      }
+
       EstimatedRobotPose pose = poseOptional.get();
       Matrix<N3, N1> stdDev = stdDevsOptional.get();
+
+      System.out.println("Pose present " + pose.estimatedPose.toPose2d().getX() + " " + pose.estimatedPose.toPose2d().getY());
 
       addVisionMeasurement(pose.estimatedPose.toPose2d(), pose.timestampSeconds, stdDev);   
     }

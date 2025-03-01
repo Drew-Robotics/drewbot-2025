@@ -19,7 +19,6 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.wpilibj.Timer;
 import frc.robot.constants.VisionConstants;
 
 public class Camera {
@@ -40,24 +39,24 @@ public class Camera {
   }
 
   public PhotonPipelineResult getLastestCameraResult() {
-    boolean isNewResult = true;
+    // boolean isNewResult = true;
     
-    if (m_latestResult != null) {
-      double now = Timer.getFPGATimestamp(); // seconds
-      isNewResult = Math.abs(now - m_latestResult.getTimestampSeconds()) > 1e-5; // ask Drew about all this stuff 
-    }
-    // System.out.println("isNewResult" + isNewResult);
+    // if (m_latestResult != null) {
+    //   double now = Timer.getFPGATimestamp(); // seconds
+    //   isNewResult = Math.abs(now - m_latestResult.getTimestampSeconds()) > 1e-5; // ask Drew about all this stuff 
+    // }
+    // // System.out.println("isNewResult" + isNewResult);
 
-    if(!isNewResult)
-      return m_latestResult;
+    // if(!isNewResult)
+    //   return m_latestResult;
     
     List<PhotonPipelineResult> cameraResults = m_photonCamera.getAllUnreadResults();
     
     if (cameraResults.size() > 0){
       PhotonPipelineResult result = cameraResults.get(0);
 
-      if (!result.hasTargets())
-        return m_latestResult;
+      // if (!result.hasTargets())
+      //   return m_latestResult;
 
       m_latestResult = result;
       System.out.println("GOT RESULT " + cameraResults.size() + " " + m_cameraName);
@@ -67,11 +66,25 @@ public class Camera {
   }
 
   public Optional<EstimatedRobotPose> getEstimatedGlobalPose() {
+    if (getLastestCameraResult() == null)
+      return Optional.empty();
+
+
     Optional<EstimatedRobotPose> visionEst = m_poseEstimator.update(getLastestCameraResult());
+    
+    if (m_cameraName == "frontLeft") {
+      System.out.print("frontLeft polled, num targets : " + getLastestCameraResult().targets.size() + " ");
+      System.out.println(visionEst.isPresent() + " " + getLastestCameraResult().getTimestampSeconds());
+    }
+    
+      
     return visionEst;
   }
 
   public Matrix<N3, N1> getEstimationStdDevs(Pose2d estimatedPose) {
+    if (getLastestCameraResult() == null)
+      return VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+
     Matrix<N3, N1> estStdDevs = VisionConstants.StdDevs.kSingleTag;
     List<PhotonTrackedTarget> targets = getLastestCameraResult().getTargets();
 
