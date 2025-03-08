@@ -76,8 +76,6 @@ public class AlgaeArmSubsystem extends SubsystemAbstract {
     /* Getters and Setters */
     public void setDesiredAngle(Rotation2d angle) {
         m_currentDesiredAngle = angle;
-
-        m_algaeArmClosedLoopController.setReference(angle.getRadians(), SparkMax.ControlType.kPosition);
     }
 
     public Rotation2d getAngle() {
@@ -85,6 +83,12 @@ public class AlgaeArmSubsystem extends SubsystemAbstract {
     }
 
     /* Overrides */
+    @Override
+    public void periodic() {
+        super.periodic();
+        m_algaeArmClosedLoopController.setReference(m_currentDesiredAngle.getRadians(), SparkMax.ControlType.kPosition);
+    }
+
     protected void dashboardInit() {}
 
     protected void dashboardPeriodic() {

@@ -3,12 +3,9 @@ package frc.robot.subsystems.vision;
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.units.Units;
-import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import java.util.ArrayList;
@@ -19,14 +16,12 @@ import java.util.Comparator;
 import java.util.stream.Collectors;
 
 import org.photonvision.EstimatedRobotPose;
-import org.photonvision.PhotonCamera;
 
 import frc.robot.RobotContainer.subsystems;
 import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.SubsystemAbstract;
 
 public class VisionSubsystem extends SubsystemAbstract {
-  // private final Camera m_frontLeft, m_frontRight, m_backLeft, m_backRight;
   private final List<Camera> m_cameras;
 
   // private AprilTag[] m_fieldTags = VisionConstants.AprilTags.kTags.toArray(AprilTag[]::new);
@@ -35,10 +30,12 @@ public class VisionSubsystem extends SubsystemAbstract {
     VisionConstants.CameraNames.kFrontLeft, 
     VisionConstants.CameraNames.kFrontRight,
     VisionConstants.CameraNames.kBackLeft,
-    VisionConstants.CameraNames.kBackRight
+    VisionConstants.CameraNames.kBackRight,
+    VisionConstants.CameraNames.kLLFront,
+    VisionConstants.CameraNames.kLLBack
   );
 
-  Camera m_frontLeft, m_frontRight, m_backLeft, m_backRight;
+  Camera m_frontLeft, m_frontRight, m_backLeft, m_backRight, m_llFront, m_llBack;
 
   // private StructArrayTopicSup<AprilTag> m_seenTagsTopicSup;
 
@@ -57,7 +54,10 @@ public class VisionSubsystem extends SubsystemAbstract {
     m_backLeft = new Camera(VisionConstants.CameraNames.kBackLeft, VisionConstants.CameraTransforms.kBackLeft);
     m_backRight = new Camera(VisionConstants.CameraNames.kBackRight, VisionConstants.CameraTransforms.kBackRight);
 
-    m_cameras = List.of(m_frontLeft, m_frontRight, m_backLeft, m_backRight);
+    m_llFront = new Camera(VisionConstants.CameraNames.kLLFront, VisionConstants.CameraTransforms.kLLFront);
+    m_llBack = new Camera(VisionConstants.CameraNames.kLLBack, VisionConstants.CameraTransforms.kLLBack);
+
+    m_cameras = List.of(m_frontLeft, m_frontRight, m_backLeft, m_backRight, m_llFront, m_llBack);
     // m_cameras = List.of();
 
   }
@@ -122,10 +122,12 @@ public class VisionSubsystem extends SubsystemAbstract {
     return Optional.of(tags.get(0));
   }
 
-  public List<Optional<EstimatedRobotPose>> getCameraEstimatedPoses() {
+  public List<Optional<EstimatedRobotPose>> getCameraEstimatedPoses() { return getCameraEstimatedPoses(false); }
+
+  public List<Optional<EstimatedRobotPose>> getCameraEstimatedPoses(boolean singleTag) {
     ArrayList<Optional<EstimatedRobotPose>> retVal = new ArrayList<Optional<EstimatedRobotPose>>();
     for(Camera camera : m_cameras) {
-      retVal.add(camera.getEstimatedGlobalPose());
+      retVal.add(camera.getEstimatedGlobalPose(singleTag));
 
     }
     return retVal;

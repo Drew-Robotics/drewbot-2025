@@ -27,6 +27,8 @@ public class DriveCommand extends Command {
 
   @Override
   public void execute() {
+    super.execute();
+
     subsystems.drive.drive(
       m_xVelocity.getAsDouble(), 
       m_yVelocity.getAsDouble(), 
@@ -45,10 +47,12 @@ public class DriveCommand extends Command {
   }
 
   public double getXVelocity() {
+    
+
     return m_xVelocity.getAsDouble();
   }
 
-  public double getY() {
-    return m_xVelocity.getAsDouble();
+  public double getYVelocity() {
+    return m_yVelocity.getAsDouble();
   }
 }

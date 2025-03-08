@@ -30,8 +30,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.*;
@@ -41,6 +43,7 @@ import frc.robot.constants.DriveConstants;
 import frc.robot.constants.VisionConstants;
 import frc.robot.RobotContainer.subsystems;
 import frc.robot.subsystems.SubsystemAbstract;
+import frc.robot.subsystems.coral.CoralState;
 import frc.robot.subsystems.drive.ReefSide.ReefBranch;
 
 public class DriveSubsystem extends SubsystemAbstract {
@@ -52,6 +55,7 @@ public class DriveSubsystem extends SubsystemAbstract {
 
   private final SwerveDrivePoseEstimator m_poseEstimator;
   private final SlewRateLimiter m_magnitudeLimiter, m_directionalLimiter, m_rotationLimiter;
+  private boolean m_singleTagPoseEstimation = false;
 
   private LinearVelocity m_xVelocity = MetersPerSecond.zero();
   private LinearVelocity m_yVelocity = MetersPerSecond.zero();
@@ -61,7 +65,7 @@ public class DriveSubsystem extends SubsystemAbstract {
   private StructPublisher<Pose2d> m_visionPublisher = m_table.getStructTopic("VisionEstim", Pose2d.struct).publish();
   private StructPublisher<Pose2d> m_robotPosePublisher = m_table.getStructTopic("RobotPose", Pose2d.struct).publish();
 
-  private PIDController m_rotationController;
+  private ProfiledPIDController m_rotationController;
 
   private static DriveSubsystem m_instance;
   public static DriveSubsystem getInstance() {
@@ -113,12 +117,17 @@ public class DriveSubsystem extends SubsystemAbstract {
 
     m_modules = new SwerveModule[] {m_frontLeft, m_frontRight, m_backLeft, m_backRight};
 
-    m_rotationController = new PIDController(
-      DriveAutoConstants.TurningPID.kP,
-      DriveAutoConstants.TurningPID.kI,
-      DriveAutoConstants.TurningPID.kD
+    m_rotationController = new ProfiledPIDController(
+      DriveConstants.RotationPID.kP,
+      DriveConstants.RotationPID.kI,
+      DriveConstants.RotationPID.kD,
+      new Constraints(
+        DriveConstants.RotationPID.kMaxVel.in(Units.RadiansPerSecond),
+        DriveConstants.RotationPID.kMaxAccel.in(Units.RadiansPerSecondPerSecond)
+      )
     );
     m_rotationController.enableContinuousInput(0, 2 * Math.PI);
+    m_rotationController.setTolerance(DriveConstants.kRotationTolerance.in(Units.Radians));
 
     m_poseEstimator = new SwerveDrivePoseEstimator(DriveConstants.kDriveKinematics, getGyroYaw(), getModulePositions(), new Pose2d());
 
@@ -149,6 +158,10 @@ public class DriveSubsystem extends SubsystemAbstract {
     SmartDashboard.putBoolean("NavX Connected", m_gyro.isConnected());
     SmartDashboard.putBoolean("NavX Calibrating", m_gyro.isCalibrating());
     SmartDashboard.putNumber("Yaw Degrees", getGyroYaw().getDegrees());
+    double vx = getMeasuredChassisSpeeds().vxMetersPerSecond;
+    double vy = getMeasuredChassisSpeeds().vyMetersPerSecond;
+
+    SmartDashboard.putNumber("Drive Measured Speed", Math.sqrt((vx * vx) + (vy * vy)));
   }
 
   protected void publishInit() {}
@@ -190,11 +203,23 @@ public class DriveSubsystem extends SubsystemAbstract {
 
   /* ----- POSE ESTIMATION ----- */
 
+  public void setSingleTagPoseEstimation() {
+    m_singleTagPoseEstimation = true;
+  }
+
+  public void setMultiTagPoseEstimation() {
+    m_singleTagPoseEstimation = false;
+  }
+
+  public boolean atRotationSetpoint() {
+    return m_rotationController.atSetpoint();
+  }
+
   /**
    * Gets the position estimations and feeds them into the pose estimator.
    */
   public void updateVisionPoseEstimation() {
-    List<Optional<EstimatedRobotPose>> estimatedPoses = subsystems.vision.getCameraEstimatedPoses();
+    List<Optional<EstimatedRobotPose>> estimatedPoses = subsystems.vision.getCameraEstimatedPoses(m_singleTagPoseEstimation);
     List<Optional<Matrix<N3, N1>>> stdDevs = subsystems.vision.getPoseStdDevs(estimatedPoses);
 
     for (int poseIndex = 0; poseIndex < estimatedPoses.size(); poseIndex++) {
@@ -209,8 +234,6 @@ public class DriveSubsystem extends SubsystemAbstract {
 
       EstimatedRobotPose pose = poseOptional.get();
       Matrix<N3, N1> stdDev = stdDevsOptional.get();
-
-      System.out.println("Pose present " + pose.estimatedPose.toPose2d().getX() + " " + pose.estimatedPose.toPose2d().getY());
 
       addVisionMeasurement(pose.estimatedPose.toPose2d(), pose.timestampSeconds, stdDev);   
     }
@@ -253,57 +276,74 @@ public class DriveSubsystem extends SubsystemAbstract {
 
   /* ----- PATHING ----- */
 
-  public PathPlannerPath getPath(Pose2d target) {
-    List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
-      getPose(), target
+  // public PathPlannerPath getPath(Pose2d target) {
+  //   List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
+  //     getPose(), target
+  //   );
+
+  //   // ChassisSpeeds measuredSpeeds = getMeasuredChassisSpeeds();
+  //   // LinearVelocity measuredSpeed = Units.MetersPerSecond.of(
+  //   //   Math.pow(measuredSpeeds.vxMetersPerSecond, 2) + 
+  //   //   Math.pow(measuredSpeeds.vyMetersPerSecond, 2)
+  //   // );
+
+  //   PathPlannerPath path = new PathPlannerPath(
+  //     waypoints, DriveAutoConstants.kPathingConstraints, null,
+  //     new GoalEndState(0.5, target.getRotation()) // figure out how this is different (holonomic rotation vs non holonomic rotation?)
+  //   );
+
+  //   return path;
+  // }
+
+  public Pose2d getReefTargetPose(CoralState coralState, ReefSide reefSide, ReefBranch reefBranch, Distance tofCoralDisp) {
+    Pose2d targetPose = reefSide
+    .getEndPose(reefBranch)
+    .plus(
+      reefSide.kParaNorm.times(
+        (coralState.getReversed() ? 1 : -1 ) * tofCoralDisp.in(Units.Meters)
+      )
     );
 
-    // ChassisSpeeds measuredSpeeds = getMeasuredChassisSpeeds();
-    // LinearVelocity measuredSpeed = Units.MetersPerSecond.of(
-    //   Math.pow(measuredSpeeds.vxMetersPerSecond, 2) + 
-    //   Math.pow(measuredSpeeds.vyMetersPerSecond, 2)
-    // );
-
-    PathPlannerPath path = new PathPlannerPath(
-      waypoints, DriveAutoConstants.kPathingConstraints, null,
-      new GoalEndState(0d, target.getRotation()) // figure out how this is different (holonomic rotation vs non holonomic rotation?)
-    );
-
-    return path;
+    // flip by default
+    targetPose = targetPose.rotateAround(targetPose.getTranslation(), Rotation2d.fromDegrees(coralState.getReversed() ? 0 : 180));
+    return targetPose;
   }
 
-  public Command pathfindToCoralCommand(ReefSide reefSide, ReefBranch reefBranch, Distance tofCoralDisp) {
-    Pose2d targetPose = reefSide
-      .getEndPose(reefBranch)
-      .plus(
-        reefSide.kPerpNorm.times(
-          tofCoralDisp.in(Units.Meters)
-        )
-      );
+  public Command pathfindToReefCommand(CoralState coralState, ReefSide reefSide, ReefBranch reefBranch, Distance tofCoralDisp) {
+    Pose2d targetPose = getReefTargetPose(coralState, reefSide, reefBranch, tofCoralDisp);
+    
+    // m_table.getStructTopic("targetPose", Pose2d.struct).publish().accept(targetPose);
+    // m_table.getStructTopic("endPose", Pose2d.struct).publish().accept(reefSide.getEndPose(reefBranch));
+    // m_table.getStructTopic("centerPose", Pose2d.struct).publish().accept(reefSide.kCenterPose);
 
+    // return Commands.none();
+    return pathfindToPoseCommand(targetPose);
+  }
+
+  public Command pathfindToPoseCommand(Pose2d targetPose) {
     return AutoBuilder.pathfindToPose(targetPose, DriveAutoConstants.kPathingConstraints);
   }
 
-  public Command pathfindToStation() {
-    PathPlannerPath path;
+  // public Command pathfindToStation() {
+  //   PathPlannerPath path;
     
-    try {
-      path = PathPlannerPath.fromPathFile(DriveAutoConstants.AutoNames.kPathingToStation);
-    }
-    catch (Exception e) {
-      return Commands.none();
-    }
+  //   try {
+  //     path = PathPlannerPath.fromPathFile(DriveAutoConstants.AutoNames.kPathingToStation);
+  //   }
+  //   catch (Exception e) {
+  //     return Commands.none();
+  //   }
 
-    return AutoBuilder.pathfindThenFollowPath(path, DriveAutoConstants.kPathingConstraints);
-  }
+  //   return AutoBuilder.pathfindThenFollowPath(path, DriveAutoConstants.kPathingConstraints);
+  // }
 
-  public Command getPathCommand(Pose2d target) {
-    return AutoBuilder.followPath(getPath(target));
-  }
+  // public Command getPathCommand(Pose2d target) {
+  //   return AutoBuilder.followPath(getPath(target));
+  // }
 
-  public Command getPathCommand(PathPlannerPath path) {
-    return AutoBuilder.followPath(path);
-  }
+  // public Command getPathCommand(PathPlannerPath path) {
+  //   return AutoBuilder.followPath(path);
+  // }
 
   /* ----- SWERVE ----- */
 
@@ -375,16 +415,24 @@ public class DriveSubsystem extends SubsystemAbstract {
    */
   public ChassisSpeeds getChassisSpeedOnRotationControl(double x, double y, Rotation2d rotationalSetpoint) {
     ChassisSpeeds chassisSpeeds = getChassisSpeeds(x, y, 0);
-    
+
+    double rot = m_rotationController.calculate(
+      getGyroYaw().getRadians(), 
+      rotationalSetpoint.getRadians()
+    );
+
+    double maxVelocity = m_rotationController.getConstraints().maxVelocity;
+
+    // trust NOBODY
+    rot = Math.max(
+      Math.min(rot, maxVelocity), - maxVelocity
+    );
+
     return new ChassisSpeeds(
       chassisSpeeds.vxMetersPerSecond,
       chassisSpeeds.vyMetersPerSecond,
-      m_rotationController.calculate(
-        getGyroYaw().getRadians(), 
-        rotationalSetpoint.getRadians()
-      )
+      rot
     );
-
   }
 
   /**
@@ -443,5 +491,14 @@ public class DriveSubsystem extends SubsystemAbstract {
       commandedChassisSpeeds = new ChassisSpeeds(m_xVelocity, m_yVelocity, m_rotationalVelocity);
 
     return commandedChassisSpeeds;
+  }
+
+  public ChassisSpeeds fieldOrientChassisSpeeds(ChassisSpeeds chassisSpeeds) {
+    return ChassisSpeeds.fromFieldRelativeSpeeds(
+      chassisSpeeds.vxMetersPerSecond, 
+      chassisSpeeds.vyMetersPerSecond, 
+      chassisSpeeds.omegaRadiansPerSecond, 
+      getGyroYaw()
+    );
   }
 }

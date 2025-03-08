@@ -25,6 +25,7 @@ public class Camera {
   
   private final PhotonCamera m_photonCamera;
   private final PhotonPoseEstimator m_poseEstimator;
+  private final PhotonPoseEstimator m_singleTagPoseEstimator;
   private PhotonPipelineResult m_latestResult;
   private final String m_cameraName;
   private Matrix<N3, N1> m_latestStdDevs;
@@ -32,6 +33,12 @@ public class Camera {
   public Camera(String name, Transform3d robotToCamera) {
     m_cameraName = name;
     m_photonCamera = new PhotonCamera(name);
+    m_singleTagPoseEstimator = new PhotonPoseEstimator(
+      VisionConstants.kAprilTagLayout,
+      PoseStrategy.LOWEST_AMBIGUITY,
+      robotToCamera
+    );
+
     m_poseEstimator = new PhotonPoseEstimator(
       VisionConstants.kAprilTagLayout,
       PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, // MULTI_TAG_PNP_ON_COPROCESSOR
@@ -68,13 +75,18 @@ public class Camera {
   //   return m_latestResult;
   // }
 
-  public Optional<EstimatedRobotPose> getEstimatedGlobalPose() {
-
-
+  public Optional<EstimatedRobotPose> getEstimatedGlobalPose() { return getEstimatedGlobalPose(false);}
+  
+  public Optional<EstimatedRobotPose> getEstimatedGlobalPose(boolean singleTag) {
     Optional<EstimatedRobotPose> visionEst = Optional.empty();
 
     for (PhotonPipelineResult result : m_photonCamera.getAllUnreadResults()) {
-        visionEst = m_poseEstimator.update(result);
+        m_latestResult = result;
+        if (singleTag) {
+          visionEst = m_singleTagPoseEstimator.update(result);
+        } else {
+          visionEst = m_poseEstimator.update(result);
+        }
         updateEstimationStdDevs(visionEst, result.getTargets());
     }
 
@@ -131,6 +143,10 @@ public class Camera {
   }
 
   public AprilTag[] getSeenTags() {
+    if (m_latestResult == null) {
+      return new AprilTag[0];
+    }
+
     AprilTag[] tags = new AprilTag[m_latestResult.targets.size()];
 
     int i = 0;

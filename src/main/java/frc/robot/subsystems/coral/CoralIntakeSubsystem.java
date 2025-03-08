@@ -7,6 +7,7 @@ package frc.robot.subsystems.coral;
 import java.lang.Thread.State;
 
 import com.playingwithfusion.TimeOfFlight;
+import com.playingwithfusion.TimeOfFlight.RangingMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
@@ -53,7 +54,7 @@ public class CoralIntakeSubsystem extends SubsystemAbstract {
 
   public CoralIntakeSubsystem() {
     super();
-
+    
     m_coralIntakeMotor = new SparkFlex(CoralConstants.CANIDs.kCoralIntake, MotorType.kBrushless);
     m_coralIntakeEncoder = m_coralIntakeMotor.getEncoder();
     // m_coralIntakeClosedLoopController = m_coralIntakeMotor.getClosedLoopController();
@@ -87,6 +88,10 @@ public class CoralIntakeSubsystem extends SubsystemAbstract {
       m_coralIntakeMotor.configure(coralIntakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
       m_tofSensor = new TimeOfFlight(CoralConstants.CANIDs.kCoralIntakeTimeOfFlight);
+      m_tofSensor.setRangeOfInterest(
+        8 - CoralConstants.kIntakeTOFRangeOfInterest, 8 - CoralConstants.kIntakeTOFRangeOfInterest, 
+        8 + CoralConstants.kIntakeTOFRangeOfInterest, 8 + CoralConstants.kIntakeTOFRangeOfInterest
+      );
   }
 
   /* Setters and Getters */
@@ -95,15 +100,19 @@ public class CoralIntakeSubsystem extends SubsystemAbstract {
     return Units.MetersPerSecond.of(m_coralIntakeEncoder.getVelocity());
   }
 
+  public Distance getTofReading() {
+    return Units.Millimeters.of(m_tofSensor.getRange()).minus(CoralConstants.kTOFCorrection);
+  }
+
   public boolean hasPiece() {
-    return m_tofSensor.getRange() <= CoralConstants.kCoralIntakeTOFMaxReading.in(Units.Millimeters);
+    return getTofReading().in(Units.Millimeters) <= CoralConstants.kIntakeWidth.in(Units.Millimeters);
   }
 
   public Distance getPieceDispFromCenter() {
     if (!hasPiece())
-      return null;
+      return Units.Meters.zero();
     // positive means shift right
-    return Units.Millimeters.of(m_tofSensor.getRange()).minus(CoralConstants.kCenteredCoralReading);
+    return getTofReading().minus(CoralConstants.kCenteredCoralReading);
   }
 
   public void setVoltage(Voltage voltage) {
@@ -142,6 +151,7 @@ public class CoralIntakeSubsystem extends SubsystemAbstract {
 
   @Override
   public void periodic() {
+    super.periodic();
     if (hasPiece() && m_coralIntakeState == CoralIntakeState.Rest) {
       setState(CoralIntakeState.Hold);
     }
@@ -151,6 +161,9 @@ public class CoralIntakeSubsystem extends SubsystemAbstract {
 
   protected void dashboardPeriodic() {
     SmartDashboard.putNumber("Coral Intake Current", getCurrent().in(Units.Amps));
+
+    SmartDashboard.putBoolean("Coral Intake TOF Has Piece", hasPiece());
+    SmartDashboard.putNumber("Coral Intake TOF Center Disp Inches", getPieceDispFromCenter().in(Units.Inches));
   }
 
   protected void publishInit() {}

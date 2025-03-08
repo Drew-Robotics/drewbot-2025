@@ -17,14 +17,6 @@ public class OperatorController extends Controller {
     super(port);
   }
 
-  public Trigger getSetStateRest() {
-    return leftBumper();
-  }
-
-  public Trigger getSetStateStation() {
-    return rightBumper();
-  }
-
   public Trigger getSetStateL1() {
     return a();
   }
@@ -34,11 +26,19 @@ public class OperatorController extends Controller {
   }
 
   public Trigger getSetStateL3() {
-    return y(); 
+    return x(); 
   }
 
   public Trigger getSetStateL4() {
-    return x(); 
+    return y(); 
+  }
+
+  public Trigger getSetStateRMAlgaeL2() {
+    return b();
+  }
+
+  public Trigger getSetStateRMAlgaeL3() {
+    return x();
   }
 
   public Trigger getCoralIntake() {
@@ -49,11 +49,25 @@ public class OperatorController extends Controller {
     return rightTrigger(0.5); // TODO: make this a constant
   }
 
+  public Trigger getSetBranchLeft() {
+    return leftBumper();
+  }
+
+  public Trigger getSetBranchRight() {
+    return rightBumper();
+  }
+
   public Trigger getAlgaeIntake() {
     return povUp();
   }
 
   public Trigger getAlgaeOuttake() {
     return povDown();
+  }
+
+  public Trigger getStow() {
+    return new Trigger(() -> {
+      return leftStick().getAsBoolean() || rightStick().getAsBoolean();
+    });
   }
 }

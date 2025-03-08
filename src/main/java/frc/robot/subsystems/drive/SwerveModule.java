@@ -99,10 +99,10 @@ public class SwerveModule {
     drivingConfig.closedLoop
       .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
       .pidf(
-        DriveConstants.DrivingPID.kP, 
-        DriveConstants.DrivingPID.kI, 
-        DriveConstants.DrivingPID.kD, 
-        DriveConstants.DrivingPID.kFF
+        DriveConstants.DrivingMotorPID.kP, 
+        DriveConstants.DrivingMotorPID.kI, 
+        DriveConstants.DrivingMotorPID.kD, 
+        DriveConstants.DrivingMotorPID.kFF
       )
       .outputRange(-1,1);
 
@@ -193,7 +193,7 @@ public class SwerveModule {
    */
   public SwerveModulePosition getModulePosition() {
     SwerveModulePosition modulePosition = new SwerveModulePosition(
-        Units.Meters.of(m_drivingEncoder.getPosition()).times(-1),
+        Units.Meters.of(m_drivingEncoder.getPosition()),
         getCurrentAngle()
     );
 

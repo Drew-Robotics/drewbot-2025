@@ -5,7 +5,7 @@ import java.util.List;
 import frc.robot.subsystems.drive.ReefSide;
 
 public class ReefSides {
-    public static final ReefSide kFront = new ReefSide(0);
+    public static final ReefSide kFront = new ReefSide(18);
     public static final ReefSide kFrontLeft = new ReefSide(0);
     public static final ReefSide kFrontRight = new ReefSide(0);
 

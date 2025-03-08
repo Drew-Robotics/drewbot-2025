@@ -14,16 +14,30 @@ public class ReefSide {
     public final Pose2d kLeftEndPose;
     public final Pose2d kRightEndPose;
 
+    public final Pose2d kCenterPose;
+
     public final Transform2d kPerpNorm;
     public final Transform2d kParaNorm;
 
     public static enum ReefBranch {
-        Left, Right
+        Left, Right, Center
     }
 
     public ReefSide(int tagID) {
         kTagID = tagID;
         
+        if (VisionConstants.kAprilTagLayout.getTagPose(tagID).isEmpty()) {
+            kHeading = Rotation2d.kZero;
+
+            kLeftEndPose = Pose2d.kZero;
+            kRightEndPose = Pose2d.kZero;
+            kCenterPose = Pose2d.kZero;
+
+            kPerpNorm = Transform2d.kZero;
+            kParaNorm = Transform2d.kZero;
+            return;
+        }
+
         Pose2d tagPose = VisionConstants.kAprilTagLayout.getTagPose(tagID).get().toPose2d();
         kHeading = tagPose.getRotation();
 
@@ -31,15 +45,15 @@ public class ReefSide {
         kParaNorm = new Transform2d(-kHeading.getSin(), kHeading.getCos(), Rotation2d.kZero);
         
         // lets see if this has any chance of working (yay)
-        Pose2d centerPose = tagPose.plus(
+        kCenterPose = tagPose.plus(
             kPerpNorm.times(-DriveAutoConstants.kRobotDistanceFromCenter.in(Units.Meters))
         );
 
         // might have to switch these 2
-        kLeftEndPose = centerPose.plus(
+        kLeftEndPose = kCenterPose.plus(
             kParaNorm.times(DriveAutoConstants.kReefBranchDistanceFromCenter.in(Units.Meters))
         );
-        kRightEndPose = centerPose.plus(
+        kRightEndPose = kCenterPose.plus(
             kParaNorm.times(-DriveAutoConstants.kReefBranchDistanceFromCenter.in(Units.Meters))
         );
 
@@ -53,6 +67,15 @@ public class ReefSide {
     }
 
     public Pose2d getEndPose(ReefBranch reefBranch){
-        return (reefBranch == ReefBranch.Left) ? kLeftEndPose : kRightEndPose;
+        switch (reefBranch){
+            case Left:
+                return kLeftEndPose;
+            case Right:
+                return kRightEndPose;
+            case Center: // technically not needed but whatever
+                return kCenterPose;
+            default:
+                return kCenterPose;
+        }
     }
 }
