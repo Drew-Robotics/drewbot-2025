@@ -19,7 +19,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.constants.CoralConstants;
 import frc.robot.constants.CoralStates;
 import frc.robot.subsystems.SubsystemAbstract;
@@ -62,7 +62,8 @@ public class ElevatorSubsystem extends SubsystemAbstract{
 
         elevatorConfigLeader
             .smartCurrentLimit((int) CoralConstants.kElevatorCurrentLimit.in(Units.Amps))
-            .idleMode(CoralConstants.IdleModes.kElevator)
+            // .idleMode(CoralConstants.IdleModes.kElevator)
+            .idleMode(IdleMode.kCoast)
             .inverted(CoralConstants.kElevatorLeftMotorInverted);
         elevatorConfigLeader
             .encoder
@@ -87,8 +88,8 @@ public class ElevatorSubsystem extends SubsystemAbstract{
         elevatorConfigFollowerRight
             .smartCurrentLimit((int) CoralConstants.kElevatorCurrentLimit.in(Units.Amps))
             .idleMode(IdleMode.kCoast)
-            .inverted(CoralConstants.kElevatorRightMotorInverted)
-            .follow(m_elevatorLeadMotor);
+            // .idleMode(CoralConstants.IdleModes.kElevator)
+            .follow(m_elevatorLeadMotor, CoralConstants.kElevatorRightMotorInverted);
 
         m_elevatorLeadMotor.configure(elevatorConfigLeader, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         m_elevatorFollowerMotorRight.configure(elevatorConfigFollowerRight, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -124,8 +125,6 @@ public class ElevatorSubsystem extends SubsystemAbstract{
         // else if (!m_elevatorLeadMotor.getReverseLimitSwitch().isPressed()) {
         //     m_switchReset = false;
         // }
-
-
     }
 
     protected void dashboardInit() {}
@@ -138,7 +137,8 @@ public class ElevatorSubsystem extends SubsystemAbstract{
         SmartDashboard.putNumber("Elevator Desired Height", m_targetState.getElevatorSetpoint().in(Units.Meters));
         SmartDashboard.putNumber("Elevator Height", getHeight().in(Units.Meters));
         // SmartDashboard.putBoolean("Limit Switch Pressed", m_elevatorLeadMotor.getReverseLimitSwitch().isPressed());
-        SmartDashboard.putBoolean("Elevator Zeroing Encoders", m_zeroingEncoders);
+        // SmartDashboard.putBoolean("Elevator Zeroing Encoders", m_zeroingEncoders);
+
     }
 
     protected void publishInit() {}
@@ -155,6 +155,10 @@ public class ElevatorSubsystem extends SubsystemAbstract{
             heightToRotations(m_targetState.getElevatorSetpoint()).getRotations(), // only time we're using rotations
             ControlType.kPosition
         );
+    }
+
+    public CoralState getState() {
+        return m_targetState;
     }
 
     public boolean atState() {

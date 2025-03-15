@@ -14,7 +14,9 @@ public class ReefSide {
     public final Pose2d kLeftEndPose;
     public final Pose2d kRightEndPose;
 
+    public final Pose2d kTagPose2d;
     public final Pose2d kCenterPose;
+
 
     public final Transform2d kPerpNorm;
     public final Transform2d kParaNorm;
@@ -32,20 +34,21 @@ public class ReefSide {
             kLeftEndPose = Pose2d.kZero;
             kRightEndPose = Pose2d.kZero;
             kCenterPose = Pose2d.kZero;
+            kTagPose2d = Pose2d.kZero;
 
             kPerpNorm = Transform2d.kZero;
             kParaNorm = Transform2d.kZero;
             return;
         }
 
-        Pose2d tagPose = VisionConstants.kAprilTagLayout.getTagPose(tagID).get().toPose2d();
-        kHeading = tagPose.getRotation();
+        kTagPose2d = VisionConstants.kAprilTagLayout.getTagPose(tagID).get().toPose2d();
+        kHeading = kTagPose2d.getRotation();
 
-        kPerpNorm = new Transform2d(kHeading.getCos(), kHeading.getSin(), Rotation2d.kZero);
-        kParaNorm = new Transform2d(-kHeading.getSin(), kHeading.getCos(), Rotation2d.kZero);
+        kPerpNorm = new Transform2d(-1, 0, Rotation2d.kZero);
+        kParaNorm = new Transform2d(0, -1, Rotation2d.kZero);
         
         // lets see if this has any chance of working (yay)
-        kCenterPose = tagPose.plus(
+        kCenterPose = kTagPose2d.plus(
             kPerpNorm.times(-DriveAutoConstants.kRobotDistanceFromCenter.in(Units.Meters))
         );
 

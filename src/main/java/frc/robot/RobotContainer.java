@@ -6,6 +6,8 @@
 
 package frc.robot;
 
+import java.util.concurrent.Flow.Subscriber;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -16,6 +18,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.commands.AlgaeIntakeCommand;
 import frc.robot.commands.CoralIntakeCommand;
 import frc.robot.commands.CoralOuttakeCommand;
@@ -82,6 +86,28 @@ public class RobotContainer {
     SmartDashboard.putData("Set Algae Arm Zero", new InstantCommand(subsystems.algaeArm::setEncoderZero));
     configureDriverBindings();
     configureOperatorBindings();
+
+    SmartDashboard.putData("Reveal Sequence",
+      new SetCoralStateCommand(CoralStates.kStation)
+        .alongWith(new InstantCommand(() -> subsystems.coralIntake.setState(CoralIntakeState.Intake)))
+        .andThen(new WaitCommand(0.5))
+        .andThen(
+          new SetCoralStateCommand(CoralStates.kRest)
+            .alongWith(new InstantCommand(() -> subsystems.coralIntake.setState(CoralIntakeState.Rest))))
+        .andThen(
+          new AlgaeIntakeCommand().withDeadline(
+            new WaitCommand(0.5)
+              .andThen(new SetCoralStateCommand(CoralStates.kL4))
+              .alongWith(new InstantCommand(() -> subsystems.coralIntake.setState(CoralIntakeState.Outtake)))
+              .andThen(new WaitCommand(1))
+          )
+        )
+        .andThen(new SetCoralStateCommand(CoralStates.kRest)
+          .alongWith(
+            new InstantCommand(() -> subsystems.coralIntake.setState(CoralIntakeState.Rest))
+          )
+        )
+    );
   }
 
   private Command turnToAngleCommand(Rotation2d rot) {
@@ -113,7 +139,7 @@ public class RobotContainer {
       .andThen(new SetCoralStateCommand(CoralStates.kRest).withTimeout(1))
     );
 
-    controllers.driver.getScoreSetup().onTrue(
+    controllers.driver.getScoreSetup().whileTrue(
       new ScoreSetupCommand(() -> RobotContainer.m_operatorCoralState, () -> RobotContainer.m_operatorReefBranch)
     );
     
@@ -126,10 +152,10 @@ public class RobotContainer {
     controllers.driver.getTurnTo180Button().whileTrue(turnToAngleCommand(Rotation2d.fromDegrees(180)));
     controllers.driver.getTurnTo270Button().whileTrue(turnToAngleCommand(Rotation2d.fromDegrees(270)));
 
-    controllers.driver.getTurnToFrontLeftSide().whileTrue(turnToAngleCommand(Rotation2d.fromDegrees(-30)));
-    controllers.driver.getTurnToFrontRightSide().whileTrue(turnToAngleCommand(Rotation2d.fromDegrees(30)));
-    controllers.driver.getTurnToBackLeftSide().whileTrue(turnToAngleCommand(Rotation2d.fromDegrees(180 -30)));
-    controllers.driver.getTurnToBackRightSide().whileTrue(turnToAngleCommand(Rotation2d.fromDegrees(180 +30)));
+    controllers.driver.getTurnToFrontLeftSide().whileTrue(turnToAngleCommand(Rotation2d.fromDegrees(-60)));
+    controllers.driver.getTurnToFrontRightSide().whileTrue(turnToAngleCommand(Rotation2d.fromDegrees(60)));
+    controllers.driver.getTurnToBackLeftSide().whileTrue(turnToAngleCommand(Rotation2d.fromDegrees(180 +60)));
+    controllers.driver.getTurnToBackRightSide().whileTrue(turnToAngleCommand(Rotation2d.fromDegrees(180 -60)));
     
     controllers.driver.getSetStateStation().onTrue(
       new CoralIntakeCommand()
@@ -152,6 +178,22 @@ public class RobotContainer {
     controllers.operator.getSetStateL4().onTrue(
       new InstantCommand(() -> RobotContainer.m_operatorCoralState = CoralStates.kL4)
     );
+
+    // controllers.operator.getSetStateL1().onTrue(
+    //   new SetCoralStateCommand(CoralStates.kL1)
+    // );
+
+    // controllers.operator.getSetStateL2().onTrue(
+    //   new SetCoralStateCommand(CoralStates.kL2)
+    // );
+
+    // controllers.operator.getSetStateL3().onTrue(
+    //   new SetCoralStateCommand(CoralStates.kL3)
+    // );
+
+    // controllers.operator.getSetStateL4().onTrue(
+    //   new SetCoralStateCommand(CoralStates.kL4)
+    // );
 
     controllers.operator.getSetStateRMAlgaeL2().onTrue(
       new InstantCommand(() -> RobotContainer.m_operatorAlgaeRMState = CoralStates.kAlgaeL2)
@@ -176,7 +218,16 @@ public class RobotContainer {
     controllers.operator.getAlgaeIntake().whileTrue(new AlgaeIntakeCommand());
 
     controllers.operator.getStow().onTrue(
-      new SetCoralStateCommand(CoralStates.kRest)
+      new SetCoralStateCommand(CoralStates.kRest).andThen(
+        new InstantCommand(() -> {
+            if (subsystems.coralIntake.hasPiece()){
+              subsystems.coralIntake.setState(CoralIntakeState.Hold);
+            } else {
+              subsystems.coralIntake.setState(CoralIntakeState.Rest);
+            }
+          }, subsystems.coralIntake
+        )
+      )
     );
 
   }

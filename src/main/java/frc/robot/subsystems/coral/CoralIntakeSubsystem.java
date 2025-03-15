@@ -32,7 +32,8 @@ public class CoralIntakeSubsystem extends SubsystemAbstract {
     Rest,
     Outtake,
     Intake,
-    Hold
+    Hold,
+    AlgaeRemove
   }
 
   private final SparkFlex m_coralIntakeMotor;
@@ -105,7 +106,7 @@ public class CoralIntakeSubsystem extends SubsystemAbstract {
   }
 
   public boolean hasPiece() {
-    return getTofReading().in(Units.Millimeters) <= CoralConstants.kIntakeWidth.in(Units.Millimeters);
+    return getTofReading().in(Units.Millimeters) <= CoralConstants.kMaxTOFReading.in(Units.Millimeters);
   }
 
   public Distance getPieceDispFromCenter() {
@@ -119,6 +120,7 @@ public class CoralIntakeSubsystem extends SubsystemAbstract {
     double volts = voltage.in(Units.Volts);
 
     volts = MathUtil.clamp(volts, -12, 12);
+    System.out.println("test " + volts);
 
     m_coralIntakeMotor.setVoltage(volts);
   }
@@ -129,7 +131,7 @@ public class CoralIntakeSubsystem extends SubsystemAbstract {
 
   public void setState(CoralIntakeState state) {
     m_coralIntakeState = state;
-    switch (state) {
+    switch (m_coralIntakeState) {
       case Rest:
         setVoltage(Units.Volts.zero());
         break;
@@ -142,6 +144,8 @@ public class CoralIntakeSubsystem extends SubsystemAbstract {
       case Hold:
         setVoltage(CoralConstants.kHoldVoltage);
         break;
+      case AlgaeRemove:
+        setVoltage(CoralConstants.kAlgaeRemoveVoltage);
       default:
         break;
     }

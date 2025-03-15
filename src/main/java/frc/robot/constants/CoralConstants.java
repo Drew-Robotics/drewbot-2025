@@ -33,25 +33,22 @@ public class CoralConstants {
 
     public static Voltage kIntakeVoltage = Units.Volts.of(2);
     public static Voltage kOuttakeVoltage = Units.Volts.of(-5);
-    public static Voltage kHoldVoltage = Units.Volts.of(0.1); // TODO : test this
+    public static Voltage kHoldVoltage = Units.Volts.of(1); // TODO : test this
+    public static Voltage kAlgaeRemoveVoltage = Units.Volts.of(5);
 
     public static Distance kElevatorAtStatePositionTolerance = Centimeter.of(1);
     public static AngularVelocity kElevatorAtStateVelocityTolerance = Units.Rotations.per(Units.Minutes).of(50);
 
-    // TODO : all estimation, set these numbers
     public static Distance kIntakeWidth = Units.Inches.of(22);
+    public static Distance kMaxTOFReading = Units.Inches.of(19);
     public static Distance kCoralWidth = Units.Inches.of(4.5);
 
     public static int kIntakeTOFRangeOfInterest = 2;
     public static Distance kTOFCorrection = Units.Millimeters.of(52);
 
-    // TODO : double check this
     public static Distance kCenteredCoralReading = kIntakeWidth
         .minus(kCoralWidth)
         .times(0.5);
-
-    // TODO : just the reading from the tof when nothing is there maybe minus a little bit
-    public static Distance kCoralIntakeTOFMaxReading = Units.Millimeters.of(300);
 
     public static Angle kCoralArmAtStatePositionTolerance = Degrees.of(10);
     public static AngularVelocity kCoralArmAtStateVelocityTolerance = DegreesPerSecond.of(10);
@@ -143,6 +140,6 @@ public class CoralConstants {
         public static final Distance kElevatorMaxHeight = Units.Inches.of(28);
         
         public static final Angle kMinRotations = Units.Rotations.of(0);
-        public static final Angle kMaxRotations = Units.Rotations.of(74.36);
+        public static final Angle kMaxRotations = Units.Rotations.of(74.56);
     }
 }

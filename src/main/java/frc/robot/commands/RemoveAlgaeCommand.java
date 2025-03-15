@@ -19,6 +19,7 @@ import frc.robot.constants.CoralStates;
 import frc.robot.constants.DriveAutoConstants;
 import frc.robot.constants.ReefSides;
 import frc.robot.subsystems.coral.CoralState;
+import frc.robot.subsystems.coral.CoralIntakeSubsystem.CoralIntakeState;
 import frc.robot.subsystems.drive.ReefSide;
 import frc.robot.subsystems.drive.ReefSide.ReefBranch;
 
@@ -27,6 +28,8 @@ public class RemoveAlgaeCommand extends Command {
   private Supplier<CoralState> m_coralStateSup;
   private CoralState m_coralState;
   private ReefSide m_reefSide;
+
+  private Command m_autoAlignCommand = Commands.none();
 
   public RemoveAlgaeCommand(Supplier<CoralState> coralState) {
     m_coralStateSup = coralState;
@@ -57,6 +60,14 @@ public class RemoveAlgaeCommand extends Command {
 
     if (m_reefSide == null) return;
     if (subsystems.coralIntake.hasPiece()) return;
+
+    // Pose2d targetPose = subsystems.drive.getReefTargetPose(m_coralState, m_reefSide, ReefBranch.Center, Units.Meters.zero());
+
+    new SetCoralStateCommand(m_coralState).schedule();
+    new InstantCommand(() -> subsystems.coralIntake.setState(CoralIntakeState.AlgaeRemove)).schedule();
+    // m_autoAlignCommand = new AutoAlignDriveCommand(targetPose);
+    // m_autoAlignCommand.schedule();
+  
   }
 
   @Override
@@ -64,19 +75,8 @@ public class RemoveAlgaeCommand extends Command {
 
   @Override
   public void end(boolean interrupted) {
-    Pose2d targetPose = subsystems.drive.getReefTargetPose(m_coralState, m_reefSide, ReefBranch.Center, Units.Meters.zero());
-
-    subsystems.drive.pathfindToPoseCommand(targetPose)
-      .andThen(new InstantCommand(subsystems.drive::setSingleTagPoseEstimation, subsystems.drive))
-      .andThen(new AutoAlignDriveCommand(targetPose).withTimeout(2))
-      .andThen(new AutoAlignDriveCommand(targetPose)
-        .withDeadline(
-          new SetCoralStateCommand(m_coralState).withTimeout(2)
-        )
-      .andThen(new CoralOuttakeCommand().withTimeout(1))
-      .andThen(new SetCoralStateCommand(CoralStates.kRest).withTimeout(1))
-      )
-      .schedule();
+    // System.out.println(m_autoAlignCommand.getName() + m_autoAlignCommand.isScheduled());
+    m_autoAlignCommand.cancel();
   }
 
   @Override

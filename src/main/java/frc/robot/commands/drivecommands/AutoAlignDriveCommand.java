@@ -1,9 +1,6 @@
 package frc.robot.commands.drivecommands;
 
-import static edu.wpi.first.units.Units.Meter;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-
-import java.util.function.Supplier;
+import java.util.Optional;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -12,48 +9,55 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.networktables.StructTopic;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj2.command.PIDCommand;
 import frc.robot.RobotContainer.subsystems;
-import frc.robot.constants.DriveAutoConstants;
 import frc.robot.constants.DriveConstants;
-import frc.robot.constants.DriveConstants.MaxVels;
-import frc.robot.subsystems.drive.DriveSubsystem;
 
 public class AutoAlignDriveCommand extends TurnToAngleCommand {
 
     private Pose2d m_targetPose;
 
-    private ProfiledPIDController m_xController = new ProfiledPIDController(
+    private StructPublisher<Pose2d> m_targetPoseStructPublisher = 
+        NetworkTableInstance.getDefault().getStructTopic("AutoAlignTargetPose", Pose2d.struct).publish();
+
+    // private ProfiledPIDController m_xController = new ProfiledPIDController(
+    private PIDController m_xController = new PIDController(
         DriveConstants.DrivingPID.kP,
         DriveConstants.DrivingPID.kI,
-        DriveConstants.DrivingPID.kD,
-        new Constraints(
-            DriveConstants.DrivingPID.kMaxVel.in(Units.MetersPerSecond),
-            DriveConstants.DrivingPID.kMaxAccel.in(Units.MetersPerSecondPerSecond)
-        )
+        DriveConstants.DrivingPID.kD
+        // new Constraints(
+        //     DriveConstants.DrivingPID.kMaxVel.in(Units.MetersPerSecond),
+        //     DriveConstants.DrivingPID.kMaxAccel.in(Units.MetersPerSecondPerSecond)
+        // )
     );
-    private ProfiledPIDController m_yController = new ProfiledPIDController(
+    // private ProfiledPIDController m_yController = new ProfiledPIDController(
+    private PIDController m_yController = new PIDController(
         DriveConstants.DrivingPID.kP,
         DriveConstants.DrivingPID.kI,
-        DriveConstants.DrivingPID.kD,
-        new Constraints(
-            DriveConstants.DrivingPID.kMaxVel.in(Units.MetersPerSecond),
-            DriveConstants.DrivingPID.kMaxAccel.in(Units.MetersPerSecondPerSecond)
-        )
+        DriveConstants.DrivingPID.kD
+        // new Constraints(
+        //     DriveConstants.DrivingPID.kMaxVel.in(Units.MetersPerSecond),
+        //     DriveConstants.DrivingPID.kMaxAccel.in(Units.MetersPerSecondPerSecond)
+        // )
     );
     public AutoAlignDriveCommand(Pose2d targetPose) {
         super(targetPose);
 
         m_targetPose = targetPose;
-
         m_setAngle = m_targetPose::getRotation;
-        m_targetPose = targetPose;
 
         m_xController.setTolerance(DriveConstants.kPositionTolerance.in(Units.Meters));
-        m_yController.setTolerance(0.01);
+        m_yController.setTolerance(DriveConstants.kPositionTolerance.in(Units.Meters));
 
         addRequirements(subsystems.drive);
+        subsystems.drive.drive(0, 0, 0);
+        m_targetPoseStructPublisher.accept(targetPose);
     }
 
     public LinearVelocity calculateX() {
@@ -61,6 +65,8 @@ public class AutoAlignDriveCommand extends TurnToAngleCommand {
             subsystems.drive.getPose().getX(),
             m_targetPose.getX()
         );
+
+        // System.out.println(out);
 
         return Units.MetersPerSecond.of(out);
     }
@@ -81,20 +87,41 @@ public class AutoAlignDriveCommand extends TurnToAngleCommand {
 
     @Override
     public void execute() {
-        double radiansPerSecond = 
-        subsystems.drive.getChassisSpeedOnRotationControl(
-            0, 0, m_setAngle.get()
-        ).omegaRadiansPerSecond;
         
         ChassisSpeeds chassisSpeeds = new ChassisSpeeds();
 
         chassisSpeeds.vxMetersPerSecond = calculateX().in(Units.MetersPerSecond);
         chassisSpeeds.vyMetersPerSecond = calculateY().in(Units.MetersPerSecond);
-
         chassisSpeeds = subsystems.drive.fieldOrientChassisSpeeds(chassisSpeeds);
-        chassisSpeeds.omegaRadiansPerSecond = radiansPerSecond;
 
-        double maxSpeed = DriveAutoConstants.DrivingPID.kMaxVel.in(Units.MetersPerSecond);
+        // chassisSpeeds = subsystems.drive.fieldOrientChassisSpeeds(chassisSpeeds);
+        // chassisSpeeds.omegaRadiansPerSecond = radiansPerSecond;
+
+        Optional<Alliance> alliance = DriverStation.getAlliance();
+        
+        Rotation2d setAngle = m_setAngle.get();
+
+        if (alliance.isPresent()){
+            if(alliance.get() == DriverStation.Alliance.Red) {
+                chassisSpeeds.vxMetersPerSecond = -chassisSpeeds.vxMetersPerSecond;
+                chassisSpeeds.vyMetersPerSecond = -chassisSpeeds.vyMetersPerSecond;
+                setAngle = Rotation2d.fromDegrees(setAngle.getDegrees() + 180);
+            }
+        }
+
+        double radiansPerSecond = 
+            subsystems.drive.getChassisSpeedOnRotationControl(
+                0, 0, setAngle
+            ).omegaRadiansPerSecond;
+
+        chassisSpeeds.omegaRadiansPerSecond = radiansPerSecond;
+        
+
+        // System.out.print("x " + radiansPerSecond + " | t ");
+        // System.out.print(subsystems.drive.getPose().getX() + " | m ");
+        // System.out.println(m_targetPose.getX());
+
+        double maxSpeed = DriveConstants.DrivingPID.kMaxVel.in(Units.MetersPerSecond);
 
         chassisSpeeds.vxMetersPerSecond = Math.max(
             Math.min(chassisSpeeds.vxMetersPerSecond, maxSpeed), - maxSpeed
@@ -104,9 +131,7 @@ public class AutoAlignDriveCommand extends TurnToAngleCommand {
             Math.min(chassisSpeeds.vyMetersPerSecond, maxSpeed), - maxSpeed
         );
 
-        // System.out.print(chassisSpeeds.vxMetersPerSecond + " | ");
-        // System.out.print(subsystems.drive.getPose().getX() + " | ");
-        // System.out.println(m_targetPose.getX());
+        
 
         subsystems.drive.setChassisSpeeds(chassisSpeeds);
     }

@@ -3,7 +3,6 @@ package frc.robot.constants;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
@@ -39,7 +38,7 @@ public class DriveConstants {
     public static final double kWheelCoefficientOfFriction = 1.45;
     public static final AngularVelocity kDriveMotorFreeSpeed = Units.RadiansPerSecond.of(kDriveMotor.freeSpeedRadPerSec);
 
-    public static final Distance kWheelDiameter = Units.Meters.of(0.0762);
+    public static final Distance kWheelDiameter = Units.Inches.of(2.82);
     public static final Distance kWheelCircumference = Units.Meters.of(kWheelDiameter.in(Units.Meters) * Math.PI);
     
     public static final int kDrivingMotorPinionTeeth = 12;
@@ -130,18 +129,18 @@ public class DriveConstants {
 
   // this is for teleop non pathplanner
   public static final class DrivingPID {
-    public static final double kP = 40; // Meters -> Meters per second
-    public static final double kI = 5;
+    public static final double kP = 20; // Meters -> Meters per second
+    public static final double kI = 0;
     public static final double kD = 0;
-    public static final LinearVelocity kMaxVel = MetersPerSecond.of(0.3);
-    public static final LinearAcceleration kMaxAccel = MetersPerSecondPerSecond.of(3);
+    public static final LinearVelocity kMaxVel = MetersPerSecond.of(0.5);
+    // public static final LinearAcceleration kMaxAccel = MetersPerSecondPerSecond.of(3);
   }
 
   public static final class RotationPID {
-    public static final double kP = 7;
+    public static final double kP = 8.5;
     public static final double kI = 0;
     public static final double kD = 0;
-    public static final AngularVelocity kMaxVel = DegreesPerSecond.of(120);
+    public static final AngularVelocity kMaxVel = DegreesPerSecond.of(160);
     public static final AngularAcceleration kMaxAccel = DegreesPerSecondPerSecond.of(500);
   }
 

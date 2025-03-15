@@ -29,6 +29,7 @@ public class SetCoralStateCommand extends Command {
 
   @Override
   public boolean isFinished() {
-    return subsystems.elevator.atState() && subsystems.coralArm.atState() && subsystems.drive.atRotationSetpoint();
+    return true;
+    // return subsystems.elevator.atState() && subsystems.coralArm.atState();
   }
 }

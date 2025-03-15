@@ -127,6 +127,9 @@ public class CoralArmSubsystem extends SubsystemAbstract{
     setDesiredAngle(m_targetState.getArmSetpoint());
   }
 
+  public CoralState getState() {
+    return m_targetState;
+  }
   public boolean atState() {
     boolean atPositionState = Units.Radians.of(getAngle().getRadians()).isNear(
         Units.Radians.of(m_targetState.getArmSetpoint().getRadians()), 

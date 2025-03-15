@@ -6,7 +6,10 @@ import java.util.function.Supplier;
 
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -30,10 +33,12 @@ public class ScoreSetupCommand extends Command {
   private ReefSide m_reefSide;
   private Distance m_pieceDisp;
 
+  private Command m_autoAlignCommand = Commands.none();
+
   public ScoreSetupCommand(Supplier<CoralState> coralState, Supplier<ReefBranch> reefBranch) {
     m_coralStateSup = coralState;
     m_reefBranchSup = reefBranch;
-    addRequirements(subsystems.drive, subsystems.elevator, subsystems.coralArm, subsystems.coralIntake);
+    addRequirements();
   }
 
   public static ReefSide getClosestReefSideToPose(Pose2d startPose, ReefBranch reefBranch) {
@@ -73,12 +78,21 @@ public class ScoreSetupCommand extends Command {
     m_reefBranch = m_reefBranchSup.get();
 
     m_reefSide = getClosestReefSideToPose(subsystems.drive.getPose(), m_reefBranch);
-    System.out.println("Auto driving to tag : " + m_reefSide.kTagID);
 
     if (m_reefSide == null) return;
     if (!subsystems.coralIntake.hasPiece()) return;
 
+    System.out.println("Auto driving to tag : " + m_reefSide.kTagID);
+
     m_pieceDisp = subsystems.coralIntake.getPieceDispFromCenter();
+    Pose2d targetPose = subsystems.drive.getReefTargetPose(m_coralState, m_reefSide, m_reefBranch, m_pieceDisp);
+
+    // NetworkTableInstance.getDefault().getStructTopic("targetPose", Pose2d.struct).publish().accept(targetPose);;
+
+    // subsystems.drive.pathfindToPoseCommand(targetPose);
+    new SetCoralStateCommand(m_coralState).schedule();
+    m_autoAlignCommand = new AutoAlignDriveCommand(targetPose);
+    m_autoAlignCommand.schedule();
   }
 
   @Override
@@ -86,21 +100,12 @@ public class ScoreSetupCommand extends Command {
 
   @Override
   public void end(boolean interrupted) {
-    Pose2d targetPose = subsystems.drive.getReefTargetPose(m_coralState, m_reefSide, m_reefBranch, m_pieceDisp);
-
-    subsystems.drive.pathfindToPoseCommand(targetPose)
-      .andThen(new InstantCommand(subsystems.drive::setSingleTagPoseEstimation, subsystems.drive))
-      .andThen(new AutoAlignDriveCommand(targetPose).withTimeout(2))
-      .andThen(new AutoAlignDriveCommand(targetPose)
-        .alongWith(
-          new SetCoralStateCommand(m_coralState).withTimeout(2)
-        )
-      )
-      .schedule();
+    // System.out.println(m_autoAlignCommand.getName() + m_autoAlignCommand.isScheduled());
+    m_autoAlignCommand.cancel();
   }
 
   @Override
   public boolean isFinished() {
-    return true;
+    return false;
   }
 }

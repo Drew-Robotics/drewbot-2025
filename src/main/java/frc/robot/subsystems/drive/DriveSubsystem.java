@@ -6,9 +6,6 @@ import java.util.Optional;
 import org.photonvision.EstimatedRobotPose;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.path.GoalEndState;
-import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.path.Waypoint;
 import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
 
@@ -28,12 +25,14 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.*;
@@ -41,6 +40,9 @@ import static edu.wpi.first.units.Units.*;
 import frc.robot.constants.DriveAutoConstants;
 import frc.robot.constants.DriveConstants;
 import frc.robot.constants.VisionConstants;
+import frc.robot.constants.DriveConstants.DrivingPID;
+import frc.robot.constants.DriveConstants.RotationPID;
+import frc.robot.constants.DriveConstants.TurningPID;
 import frc.robot.RobotContainer.subsystems;
 import frc.robot.subsystems.SubsystemAbstract;
 import frc.robot.subsystems.coral.CoralState;
@@ -64,6 +66,11 @@ public class DriveSubsystem extends SubsystemAbstract {
 
   private StructPublisher<Pose2d> m_visionPublisher = m_table.getStructTopic("VisionEstim", Pose2d.struct).publish();
   private StructPublisher<Pose2d> m_robotPosePublisher = m_table.getStructTopic("RobotPose", Pose2d.struct).publish();
+
+  private StructPublisher<Pose2d> m_targetTagPosePublisher = m_table.getStructTopic("TargetTagPose", Pose2d.struct).publish();
+  private StructPublisher<Pose2d> m_targetCenterPublisher = m_table.getStructTopic("TargetCenter", Pose2d.struct).publish();
+  private StructPublisher<Pose2d> m_targetLeftPublisher = m_table.getStructTopic("TargetLeft", Pose2d.struct).publish();
+  private StructPublisher<Pose2d> m_targetRightPublisher = m_table.getStructTopic("TargetRight", Pose2d.struct).publish();
 
   private ProfiledPIDController m_rotationController;
 
@@ -118,6 +125,7 @@ public class DriveSubsystem extends SubsystemAbstract {
     m_modules = new SwerveModule[] {m_frontLeft, m_frontRight, m_backLeft, m_backRight};
 
     m_rotationController = new ProfiledPIDController(
+    // m_rotationController = new PIDController(
       DriveConstants.RotationPID.kP,
       DriveConstants.RotationPID.kI,
       DriveConstants.RotationPID.kD,
@@ -247,7 +255,7 @@ public class DriveSubsystem extends SubsystemAbstract {
    * @param stdDevs
    */
   public void addVisionMeasurement(Pose2d pose, double timeStamp, Matrix<N3, N1> stdDevs) {
-    pose = new Pose2d(pose.getTranslation(), pose.getRotation().rotateBy(Rotation2d.fromDegrees(180)));
+    // pose = new Pose2d(pose.getTranslation(), pose.getRotation().rotateBy(Rotation2d.fromDegrees(180)));
     m_visionPublisher.accept(pose);
 
     if(pose.getX() < 0 || pose.getY() < 0)
@@ -303,6 +311,11 @@ public class DriveSubsystem extends SubsystemAbstract {
         (coralState.getReversed() ? 1 : -1 ) * tofCoralDisp.in(Units.Meters)
       )
     );
+
+    // m_targetTagPosePublisher.accept(reefSide.kTagPose2d);
+    // m_targetCenterPublisher.accept(reefSide.kCenterPose);
+    // m_targetLeftPublisher.accept(reefSide.kLeftEndPose);
+    // m_targetRightPublisher.accept(reefSide.kRightEndPose);
 
     // flip by default
     targetPose = targetPose.rotateAround(targetPose.getTranslation(), Rotation2d.fromDegrees(coralState.getReversed() ? 0 : 180));
@@ -421,7 +434,7 @@ public class DriveSubsystem extends SubsystemAbstract {
       rotationalSetpoint.getRadians()
     );
 
-    double maxVelocity = m_rotationController.getConstraints().maxVelocity;
+    double maxVelocity = RotationPID.kMaxVel.in(Units.RadiansPerSecond);
 
     // trust NOBODY
     rot = Math.max(

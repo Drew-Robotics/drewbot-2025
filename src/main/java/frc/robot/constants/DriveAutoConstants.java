@@ -30,7 +30,7 @@ public class DriveAutoConstants {
   /**
    * This is the distance that the robot's center should be from the edge of the reef while scoring.
    */
-  public static final Distance kRobotDistanceFromCenter = Units.Inches.of(16.5);
+  public static final Distance kRobotDistanceFromCenter = Units.Inches.of(17);
 
   /**
    * This is the distance from the center of the side of a reef (between both branches), to the center of any of the branches
@@ -60,7 +60,7 @@ public class DriveAutoConstants {
   );
 
   public static final ModuleConfig moduleConfig = new ModuleConfig(
-    DriveConstants.SwerveCalculations.kWheelDiameter.times(0.5), //radius
+    DriveConstants.SwerveCalculations.kWheelDiameter.times(0.5), // radius
     Units.MetersPerSecond.of(5.65), // max measured speed
     DriveConstants.SwerveCalculations.kWheelCoefficientOfFriction,
     DCMotor.getNeoVortex(1), 

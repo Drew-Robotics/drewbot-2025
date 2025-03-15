@@ -87,7 +87,7 @@ public class DriverController extends Controller{
   }
 
   public Trigger getSetStateStation() {
-    return rightBumper();
+    return rightBumper().or(rightStick());
   }
   
   // public Trigger getMoveNearestRightCoral() {
