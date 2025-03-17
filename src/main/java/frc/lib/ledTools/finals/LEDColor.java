@@ -40,8 +40,9 @@ public final class LEDColor extends Color {
     double aThis = (double) a / 255d;
     double aOther = (double) other.a / 255d;
 
-    aThis *= 1 / (aThis + aOther);
-    aOther *= 1 / (aThis + aOther);
+    // aThis *= 1 / (aThis + aOther);
+    // aOther *= 1 / (aThis + aOther);
+
     // if (aThis + aOther > 1) {
     //   aThis = 1;
     //   aOther = aThis - 1;
@@ -51,14 +52,20 @@ public final class LEDColor extends Color {
     //   aThis *= 1 / (aThis + aOther);
     //   aOther *= 1 / (aThis + aOther);
     // }
+
+    double aOut = aOther + aThis * (1 - aOther); // thanks chatgpt
+
+
+    // bruh more chatgpt
     LEDColor returnColor = new LEDColor(
-      (int) (r * aThis) + (int) (other.r * aOther),
-      (int) (g * aThis) + (int) (other.g * aOther),
-      (int) (b * aThis) + (int) (other.b * aOther),
-      a + other.a
+      ((int) (other.r * aOther) + (int) (r * aThis * (1 - aOther))) / (int) aOut,
+      ((int) (other.g * aOther) + (int) (g * aThis * (1 - aOther))) / (int) aOut,
+      ((int) (other.b * aOther) + (int) (b * aThis * (1 - aOther))) / (int) aOut,
+      (int) (aOut * 255)
     );
 
     // System.out.println("base : " + this + " other : " + other + " result : " + returnColor);
+
     return returnColor;
   }
 
