@@ -2,7 +2,7 @@ package frc.robot.controllers;
 
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.math.MathUtil;
-import frc.robot.constants.IOConstants;
+import frc.robot.constants.OtherConstants;
 
 public class DriverController extends Controller{
 
@@ -10,7 +10,7 @@ public class DriverController extends Controller{
 
   public static DriverController getInstance(){
     if (m_intance == null){
-        m_intance = new DriverController(IOConstants.DriverController.kPort);
+        m_intance = new DriverController(OtherConstants.DriverController.kPort);
     }
     return m_intance;
   }
@@ -20,15 +20,15 @@ public class DriverController extends Controller{
   }
 
   public double getXVelocity(){
-    return MathUtil.applyDeadband(-getLeftY(), IOConstants.DriverController.kDeadband);
+    return MathUtil.applyDeadband(-getLeftY(), OtherConstants.DriverController.kDeadband);
   }
 
   public double getYVelocity(){
-    return MathUtil.applyDeadband(-getLeftX(), IOConstants.DriverController.kDeadband);
+    return MathUtil.applyDeadband(-getLeftX(), OtherConstants.DriverController.kDeadband);
   }
 
   public double getRotationalVelocity(){
-    return MathUtil.applyDeadband(-getRightX(), IOConstants.DriverController.kDeadband);
+    return MathUtil.applyDeadband(-getRightX(), OtherConstants.DriverController.kDeadband);
   }
 
 
