@@ -23,7 +23,10 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 
 public class VisionConstants {
-  
+    public static final List<Integer> kBannedTagIDs = List.of(
+      1,2, 4, 5
+    );
+
     public static final class CameraNames {
       public static final String kFrontLeft = "frontLeft";
       public static final String kFrontRight = "frontRight";

@@ -5,6 +5,7 @@ import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.LimitSwitchConfig.Type;
 import com.revrobotics.spark.config.SparkFlexConfig;
+import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
@@ -40,6 +41,9 @@ public class ElevatorSubsystem extends SubsystemAbstract{
 
     private boolean m_switchReset = false;
 
+    SparkMaxConfig m_elevatorConfigLeader = new SparkMaxConfig();
+    SparkMaxConfig m_elevatorConfigFollowerRight = new SparkMaxConfig();
+
     protected static ElevatorSubsystem m_instance;
     public static ElevatorSubsystem getInstance() {
         if (m_instance == null)
@@ -57,23 +61,23 @@ public class ElevatorSubsystem extends SubsystemAbstract{
 
         m_elevatorClosedLoopController = m_elevatorLeadMotor.getClosedLoopController();
         
-        SparkFlexConfig elevatorConfigLeader = new SparkFlexConfig();
-        SparkFlexConfig elevatorConfigFollowerRight = new SparkFlexConfig();
+        SparkMaxConfig m_elevatorConfigLeader = new SparkMaxConfig();
+        SparkMaxConfig m_elevatorConfigFollowerRight = new SparkMaxConfig();
 
-        elevatorConfigLeader
+        m_elevatorConfigLeader
             .smartCurrentLimit((int) CoralConstants.kElevatorCurrentLimit.in(Units.Amps))
             // .idleMode(CoralConstants.IdleModes.kElevator)
             .idleMode(IdleMode.kCoast)
             .inverted(CoralConstants.kElevatorLeftMotorInverted);
-        elevatorConfigLeader
+        m_elevatorConfigLeader
             .encoder
             .positionConversionFactor(1) // we don't have a linear scaling system so we're doing something custom
             .velocityConversionFactor(1);
-        elevatorConfigLeader
+        m_elevatorConfigLeader
             .limitSwitch
             .reverseLimitSwitchEnabled(true)
             .reverseLimitSwitchType(Type.kNormallyOpen);
-        elevatorConfigLeader
+        m_elevatorConfigLeader
             .closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
             .pidf(
@@ -85,14 +89,14 @@ public class ElevatorSubsystem extends SubsystemAbstract{
             .outputRange(-CoralConstants.PID.Elevator.kOutput, CoralConstants.PID.Elevator.kOutput);
             
 
-        elevatorConfigFollowerRight
+        m_elevatorConfigFollowerRight
             .smartCurrentLimit((int) CoralConstants.kElevatorCurrentLimit.in(Units.Amps))
             .idleMode(IdleMode.kCoast)
             // .idleMode(CoralConstants.IdleModes.kElevator)
             .follow(m_elevatorLeadMotor, CoralConstants.kElevatorRightMotorInverted);
 
-        m_elevatorLeadMotor.configure(elevatorConfigLeader, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        m_elevatorFollowerMotorRight.configure(elevatorConfigFollowerRight, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        configureLeader();
+        m_elevatorFollowerMotorRight.configure(m_elevatorConfigFollowerRight, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         
     }
 
@@ -144,9 +148,30 @@ public class ElevatorSubsystem extends SubsystemAbstract{
     protected void publishInit() {}
     protected void publishPeriodic() {}
 
+    public void configureLeader() {
+        m_elevatorLeadMotor.configure(m_elevatorConfigLeader, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    }
+
     public void setState(CoralState state) {
         if (state == CoralStates.kRest) {
             m_restTimer = Timer.getFPGATimestamp();
+        }
+
+        // TODO : this
+        if (state == CoralStates.kClimberHold) {
+            m_elevatorConfigLeader.closedLoop.outputRange(
+                -CoralConstants.PID.Elevator.kClimbOutput, 
+                CoralConstants.PID.Elevator.kClimbOutput
+            );
+            configureLeader();
+        } 
+        // if we are moving from climber hold to something thats not climber hold then switch back
+        else if (state != CoralStates.kClimberHold && m_targetState == CoralStates.kClimberHold) {
+            m_elevatorConfigLeader.closedLoop.outputRange(
+                -CoralConstants.PID.Elevator.kOutput, 
+                CoralConstants.PID.Elevator.kOutput
+            );
+            configureLeader();
         }
 
         m_targetState = state;

@@ -32,6 +32,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.units.Units;
@@ -67,12 +68,16 @@ public class DriveSubsystem extends SubsystemAbstract {
   private StructPublisher<Pose2d> m_visionPublisher = m_table.getStructTopic("VisionEstim", Pose2d.struct).publish();
   private StructPublisher<Pose2d> m_robotPosePublisher = m_table.getStructTopic("RobotPose", Pose2d.struct).publish();
 
+  private StructPublisher<ChassisSpeeds> m_setChassisSpeedPublisher = m_table.getStructTopic("SetChassisSpeed", ChassisSpeeds.struct).publish();
+  private DoublePublisher m_rotationalSetpointPublisher = m_table.getDoubleTopic("RotationalSetpoint").publish();
+  private DoublePublisher m_yawPublisher = m_table.getDoubleTopic("RobotYaw").publish();
+
   private StructPublisher<Pose2d> m_targetTagPosePublisher = m_table.getStructTopic("TargetTagPose", Pose2d.struct).publish();
   private StructPublisher<Pose2d> m_targetCenterPublisher = m_table.getStructTopic("TargetCenter", Pose2d.struct).publish();
   private StructPublisher<Pose2d> m_targetLeftPublisher = m_table.getStructTopic("TargetLeft", Pose2d.struct).publish();
   private StructPublisher<Pose2d> m_targetRightPublisher = m_table.getStructTopic("TargetRight", Pose2d.struct).publish();
 
-  private ProfiledPIDController m_rotationController;
+  private PIDController m_rotationController;
 
   private static DriveSubsystem m_instance;
   public static DriveSubsystem getInstance() {
@@ -124,15 +129,15 @@ public class DriveSubsystem extends SubsystemAbstract {
 
     m_modules = new SwerveModule[] {m_frontLeft, m_frontRight, m_backLeft, m_backRight};
 
-    m_rotationController = new ProfiledPIDController(
-    // m_rotationController = new PIDController(
+    // m_rotationController = new ProfiledPIDController(
+    m_rotationController = new PIDController(
       DriveConstants.RotationPID.kP,
       DriveConstants.RotationPID.kI,
-      DriveConstants.RotationPID.kD,
-      new Constraints(
-        DriveConstants.RotationPID.kMaxVel.in(Units.RadiansPerSecond),
-        DriveConstants.RotationPID.kMaxAccel.in(Units.RadiansPerSecondPerSecond)
-      )
+      DriveConstants.RotationPID.kD
+      // new Constraints(
+      //   DriveConstants.RotationPID.kMaxVel.in(Units.RadiansPerSecond),
+      //   DriveConstants.RotationPID.kMaxAccel.in(Units.RadiansPerSecondPerSecond)
+      // )
     );
     m_rotationController.enableContinuousInput(0, 2 * Math.PI);
     m_rotationController.setTolerance(DriveConstants.kRotationTolerance.in(Units.Radians));
@@ -427,12 +432,21 @@ public class DriveSubsystem extends SubsystemAbstract {
    * @return
    */
   public ChassisSpeeds getChassisSpeedOnRotationControl(double x, double y, Rotation2d rotationalSetpoint) {
-    ChassisSpeeds chassisSpeeds = getChassisSpeeds(x, y, 0);
+    double rotSetpointRad = rotationalSetpoint.getRadians();
+
+    if (rotSetpointRad > Math.PI) {
+      rotSetpointRad -= 2 * Math.PI;
+    }
 
     double rot = m_rotationController.calculate(
       getGyroYaw().getRadians(), 
-      rotationalSetpoint.getRadians()
+      rotSetpointRad
     );
+
+    System.out.println(rotSetpointRad);
+
+    m_rotationalSetpointPublisher.accept(rotSetpointRad);
+    m_yawPublisher.accept(getGyroYaw().getRadians());
 
     double maxVelocity = RotationPID.kMaxVel.in(Units.RadiansPerSecond);
 
@@ -441,11 +455,13 @@ public class DriveSubsystem extends SubsystemAbstract {
       Math.min(rot, maxVelocity), - maxVelocity
     );
 
-    return new ChassisSpeeds(
-      chassisSpeeds.vxMetersPerSecond,
-      chassisSpeeds.vyMetersPerSecond,
-      rot
-    );
+    ChassisSpeeds chassisSpeeds = getChassisSpeeds(x, y, rot/maxVelocity);
+    // chassisSpeeds.omegaRadiansPerSecond /= DriveConstants.MaxVels.kRotationalVelocity.in(RadiansPerSecond);
+    // chassisSpeeds.omegaRadiansPerSecond = Math.max(Math.min(maxVelocity, 1), -1);
+    chassisSpeeds.omegaRadiansPerSecond = rot;
+
+    m_setChassisSpeedPublisher.accept(chassisSpeeds);
+    return chassisSpeeds;
   }
 
   /**

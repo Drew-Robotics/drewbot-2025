@@ -7,11 +7,13 @@ package frc.robot.subsystems.algae;
 import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
+import com.playingwithfusion.TimeOfFlight;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -30,11 +32,17 @@ import frc.robot.constants.CoralConstants;
 import frc.robot.subsystems.SubsystemAbstract;
 
 public class AlgaeIntakeSubsystem extends SubsystemAbstract {
-  private final SparkFlex m_algaeIntakeMotor;
-  private final RelativeEncoder m_algaeIntakeEncoder;
-  private final SparkClosedLoopController m_algaeIntakeClosedLoopController;
+  // public enum AlgaeIntakeState {
+  //   Rest,
+  //   Outtake,
+  //   Intake,
+  //   Hold
+  // }
 
-  private LinearVelocity m_desiredVelocity = MetersPerSecond.zero();
+  private final SparkFlex m_algaeIntakeMotor;
+  private TimeOfFlight m_tofSensor;
+
+  // private AlgaeIntakeState m_algaeIntakeState = AlgaeIntakeState.Rest;
 
   protected static AlgaeIntakeSubsystem m_instance;
   public static AlgaeIntakeSubsystem getInstance() {
@@ -47,8 +55,6 @@ public class AlgaeIntakeSubsystem extends SubsystemAbstract {
     super();
 
     m_algaeIntakeMotor = new SparkFlex(AlgaeConstants.CANIDs.kIntake, MotorType.kBrushless);
-    m_algaeIntakeEncoder = m_algaeIntakeMotor.getEncoder();
-    m_algaeIntakeClosedLoopController = m_algaeIntakeMotor.getClosedLoopController();
 
     SparkFlexConfig algaeIntakeConfig = new SparkFlexConfig();
 
@@ -57,30 +63,20 @@ public class AlgaeIntakeSubsystem extends SubsystemAbstract {
       .inverted(AlgaeConstants.kAlgaeIntakeMotorInverted)
       .idleMode(AlgaeConstants.IdleModes.kIntake);
 
-    // algaeIntakeConfig
-    //   .encoder
-    //   .positionConversionFactor(
-    //     AlgaeConstants.ConversionFactors.Intake.kPositionConversionFactor.in(Units.Meters)
-    //   )
-    //   .velocityConversionFactor(
-    //     AlgaeConstants.ConversionFactors.Intake.kVelocityConversionFactor.in(Units.MetersPerSecond)
-    //   );
-    
-    // algaeIntakeConfig
-    //   .closedLoop
-    //   .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-    //   .pid(
-    //     AlgaeConstants.PID.Intake.kP,
-    //     AlgaeConstants.PID.Intake.kI,
-    //     AlgaeConstants.PID.Intake.kD
-    //   )
-    //   .outputRange(-1, 1);
-
-      m_algaeIntakeMotor.configure(algaeIntakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    m_algaeIntakeMotor.configure(algaeIntakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    m_tofSensor = new TimeOfFlight(AlgaeConstants.CANIDs.kSensor);
   }
 
 
   /* Getters and Setters */
+
+  public Distance getTOFReading() {
+    return Units.Millimeters.of(m_tofSensor.getRange());
+  }
+
+  public boolean hasPiece() {
+    return getTOFReading().in(Units.Millimeters) <= AlgaeConstants.kAlgaeMaxTOFReading.in(Units.Millimeters);
+  }
 
   public void setVoltage(Voltage voltage) {
     double volts = voltage.in(Units.Volts);
@@ -94,9 +90,6 @@ public class AlgaeIntakeSubsystem extends SubsystemAbstract {
     return Units.Amps.of(m_algaeIntakeMotor.getOutputCurrent());
   }
 
-  public LinearVelocity getVelocity() {
-    return MetersPerSecond.of(m_algaeIntakeEncoder.getVelocity());
-  }
 
   /* Overrides */
   protected void dashboardInit() {}

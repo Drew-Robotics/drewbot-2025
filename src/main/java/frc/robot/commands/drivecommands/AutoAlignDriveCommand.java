@@ -1,5 +1,7 @@
 package frc.robot.commands.drivecommands;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+
 import java.util.Optional;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -88,51 +90,52 @@ public class AutoAlignDriveCommand extends TurnToAngleCommand {
     @Override
     public void execute() {
         
-        ChassisSpeeds chassisSpeeds = new ChassisSpeeds();
+        // ChassisSpeeds chassisSpeeds = new ChassisSpeeds();
 
-        chassisSpeeds.vxMetersPerSecond = calculateX().in(Units.MetersPerSecond);
-        chassisSpeeds.vyMetersPerSecond = calculateY().in(Units.MetersPerSecond);
-        chassisSpeeds = subsystems.drive.fieldOrientChassisSpeeds(chassisSpeeds);
+        
+        double maxSpeed = DriveConstants.DrivingPID.kMaxVel.in(Units.MetersPerSecond);
+
+        double xVel = Math.max(Math.min(calculateX().in(Units.MetersPerSecond), maxSpeed), - maxSpeed);
+        double yVel = Math.max(Math.min(calculateY().in(Units.MetersPerSecond), maxSpeed), - maxSpeed);
+
 
         // chassisSpeeds = subsystems.drive.fieldOrientChassisSpeeds(chassisSpeeds);
         // chassisSpeeds.omegaRadiansPerSecond = radiansPerSecond;
 
         Optional<Alliance> alliance = DriverStation.getAlliance();
-        
         Rotation2d setAngle = m_setAngle.get();
 
         if (alliance.isPresent()){
             if(alliance.get() == DriverStation.Alliance.Red) {
-                chassisSpeeds.vxMetersPerSecond = -chassisSpeeds.vxMetersPerSecond;
-                chassisSpeeds.vyMetersPerSecond = -chassisSpeeds.vyMetersPerSecond;
+                xVel = -xVel;
+                yVel = -yVel;
                 setAngle = Rotation2d.fromDegrees(setAngle.getDegrees() + 180);
             }
         }
-
-        double radiansPerSecond = 
-            subsystems.drive.getChassisSpeedOnRotationControl(
-                0, 0, setAngle
-            ).omegaRadiansPerSecond;
-
-        chassisSpeeds.omegaRadiansPerSecond = radiansPerSecond;
         
+
+        // double radiansPerSecond = 
+        ChassisSpeeds chassisSpeeds = 
+            subsystems.drive.getChassisSpeedOnRotationControl(
+                xVel/maxSpeed, yVel/maxSpeed, setAngle
+            );//.omegaRadiansPerSecond;
+
+        // chassisSpeeds.omegaRadiansPerSecond = radiansPerSecond;
+        
+        chassisSpeeds.vxMetersPerSecond /= DriveConstants.MaxVels.kTranslationalVelocity.in(MetersPerSecond);
+        chassisSpeeds.vyMetersPerSecond /= DriveConstants.MaxVels.kTranslationalVelocity.in(MetersPerSecond);
+
+        chassisSpeeds.vxMetersPerSecond = Math.max(Math.min(chassisSpeeds.vxMetersPerSecond, 1), - 1);
+        chassisSpeeds.vyMetersPerSecond = Math.max(Math.min(chassisSpeeds.vyMetersPerSecond, 1), - 1);
+
+        chassisSpeeds.vxMetersPerSecond *= maxSpeed;
+        chassisSpeeds.vyMetersPerSecond *= maxSpeed;
 
         // System.out.print("x " + radiansPerSecond + " | t ");
         // System.out.print(subsystems.drive.getPose().getX() + " | m ");
         // System.out.println(m_targetPose.getX());
 
-        double maxSpeed = DriveConstants.DrivingPID.kMaxVel.in(Units.MetersPerSecond);
-
-        chassisSpeeds.vxMetersPerSecond = Math.max(
-            Math.min(chassisSpeeds.vxMetersPerSecond, maxSpeed), - maxSpeed
-        );
-
-        chassisSpeeds.vyMetersPerSecond = Math.max(
-            Math.min(chassisSpeeds.vyMetersPerSecond, maxSpeed), - maxSpeed
-        );
-
-        
-
+        // chassisSpeeds = subsystems.drive.fieldOrientChassisSpeeds(chassisSpeeds);
         subsystems.drive.setChassisSpeeds(chassisSpeeds);
     }
 

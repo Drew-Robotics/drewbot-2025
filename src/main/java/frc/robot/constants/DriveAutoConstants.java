@@ -19,8 +19,8 @@ import com.pathplanner.lib.path.PathConstraints;
 
 public class DriveAutoConstants {
   
-  public static final LinearVelocity kMaxVelocity = Units.MetersPerSecond.of(1);
-  public static final LinearAcceleration kMaxAcceleration = Units.MetersPerSecondPerSecond.of(2);
+  public static final LinearVelocity kMaxVelocity = Units.MetersPerSecond.of(4.5);
+  public static final LinearAcceleration kMaxAcceleration = Units.MetersPerSecondPerSecond.of(9);
   public static final AngularVelocity kMaxAngularVelocity = Units.DegreesPerSecond.of(180);
   public static final AngularAcceleration kMaxAngularAcceleration  = Units.DegreesPerSecondPerSecond.of(360);
 

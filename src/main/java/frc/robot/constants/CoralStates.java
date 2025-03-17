@@ -52,4 +52,16 @@ public class CoralStates {
         Rotation2d.fromDegrees(135),
         true
     );
+
+    public static final CoralState kClimberUp = new CoralState(
+        Units.Inches.of(18.5),
+        Rotation2d.fromDegrees(130),
+        true
+    );
+
+    public static final CoralState kClimberHold = new CoralState(
+        Units.Inches.of(0),
+        Rotation2d.fromDegrees(130),
+        true
+    );
 }

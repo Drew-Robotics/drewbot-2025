@@ -81,13 +81,28 @@ public class Camera {
     Optional<EstimatedRobotPose> visionEst = Optional.empty();
 
     for (PhotonPipelineResult result : m_photonCamera.getAllUnreadResults()) {
-        m_latestResult = result;
-        if (singleTag) {
-          visionEst = m_singleTagPoseEstimator.update(result);
-        } else {
-          visionEst = m_poseEstimator.update(result);
+      if (!result.hasTargets()) continue;
+
+      // TODO : this sucks do a steams thing when you have time
+
+      for (PhotonTrackedTarget target : result.getTargets()) {
+        for (Integer bannedTarget : VisionConstants.kBannedTagIDs) {
+          if (bannedTarget == target.getFiducialId()) {
+            // System.out.println("Tag being filtered");
+            result = new PhotonPipelineResult();
+            continue;
+          }
         }
-        updateEstimationStdDevs(visionEst, result.getTargets());
+      }
+
+      m_latestResult = result;
+
+      if (singleTag) {
+        visionEst = m_singleTagPoseEstimator.update(result);
+      } else {
+        visionEst = m_poseEstimator.update(result);
+      }
+      updateEstimationStdDevs(visionEst, result.getTargets());
     }
 
     return visionEst;

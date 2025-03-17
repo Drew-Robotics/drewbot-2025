@@ -41,33 +41,40 @@ public class OperatorController extends Controller {
     return x();
   }
 
-  public Trigger getCoralIntake() {
-    return leftTrigger(0.5); // TODO: make this a constant
-  }
-
-  public Trigger getCoralOuttake() {
-    return rightTrigger(0.5); // TODO: make this a constant
-  }
-
   public Trigger getSetBranchLeft() {
     return leftBumper();
   }
 
   public Trigger getSetBranchRight() {
     return rightBumper();
+
   }
 
-  public Trigger getAlgaeIntake() {
+  public Trigger getClimberUp() {
     return povUp();
   }
 
-  public Trigger getAlgaeOuttake() {
+  public Trigger getClimberHold() {
     return povDown();
   }
 
+  public Trigger getAlgaeIntake() {
+    return leftTrigger(0.5);
+  }
+
+  public Trigger getAlgaeOuttake() {
+    return rightTrigger(0.5);
+  }
+
   public Trigger getStow() {
-    return new Trigger(() -> {
-      return leftStick().getAsBoolean() || rightStick().getAsBoolean();
-    });
+    return leftStick().or(rightStick());
+  }
+
+  public Trigger getDebugCoralEject() {
+    return start();
+  }
+
+  public Trigger getDebugAlgaeIntakeBack() {
+    return back();
   }
 }

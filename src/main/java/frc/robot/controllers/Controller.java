@@ -1,8 +1,12 @@
 package frc.robot.controllers;
 
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
+
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
@@ -16,23 +20,36 @@ public class Controller extends CommandXboxController {
     this.getHID().setRumble(RumbleType.kBothRumble, strength);
   }
 
-  public RunCommand rumbleCommand(double strength) {
+  public InstantCommand rumbleCommand(double strength) {
     System.out.println("rumble " + strength);
-    return new RunCommand(
+    return new InstantCommand(
       () -> this.getHID().setRumble(RumbleType.kBothRumble, strength)
     );
   }
 
-  public Command intakeRumbleCommand() {
+  public FunctionalCommand rumbleInteruptCommand(double strength) {
     return new FunctionalCommand(
       // init
-      () -> setRumble(1),
+      () -> setRumble(strength),
       // execute
       () -> {return;},
       // end
       interrupted -> setRumble(0),
       // finished
       () -> false
+    );
+  }
+
+  public FunctionalCommand rumbleSupplierCommand(double strength, BooleanSupplier isFinishedSup) {
+    return new FunctionalCommand(
+      // init
+      () -> setRumble(strength),
+      // execute
+      () -> {return;},
+      // end
+      interrupted -> setRumble(0),
+      // finished
+      isFinishedSup
     );
   }
 }

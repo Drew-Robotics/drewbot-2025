@@ -25,28 +25,29 @@ public class CoralConstants {
     public static AngularVelocity kElevatorRestVelocity = Units.Rotations.per(Units.Minutes).of(50);
     public static double kRestTimerSeconds = 0.5;
 
+    public static Distance kElevatorAtStatePositionTolerance = Centimeter.of(1);
+    public static AngularVelocity kElevatorAtStateVelocityTolerance = Units.Rotations.per(Units.Minutes).of(40);
+
     public static Rotation2d kMinArmAngle = Rotation2d.fromDegrees(-180);
     public static Rotation2d kMaxArmAngle = Rotation2d.fromDegrees(180);
 
     public static boolean kCoralArmMotorInverted = false;
     public static boolean kCoralIntakeMotorInverted = false;
 
-    public static Voltage kIntakeVoltage = Units.Volts.of(2);
-    public static Voltage kOuttakeVoltage = Units.Volts.of(-5);
-    public static Voltage kHoldVoltage = Units.Volts.of(1); // TODO : test this
-    public static Voltage kAlgaeRemoveVoltage = Units.Volts.of(5);
+    public static Voltage kCoralIntakeVoltage = Units.Volts.of(2);
+    public static Voltage kCoralOuttakeVoltage = Units.Volts.of(-5);
+    public static Voltage kCoralHoldVoltage = Units.Volts.of(1); // TODO : test this
+    public static Voltage kCoralAlgaeRemoveVoltage = Units.Volts.of(5);
+    public static Voltage kCoralDebugEjectVoltage = Units.Volts.of(-5);
 
-    public static Distance kElevatorAtStatePositionTolerance = Centimeter.of(1);
-    public static AngularVelocity kElevatorAtStateVelocityTolerance = Units.Rotations.per(Units.Minutes).of(50);
-
-    public static Distance kIntakeWidth = Units.Inches.of(22);
-    public static Distance kMaxTOFReading = Units.Inches.of(19);
+    public static Distance kCoralIntakeWidth = Units.Inches.of(22);
+    public static Distance kCoralMaxTOFReading = Units.Inches.of(19);
     public static Distance kCoralWidth = Units.Inches.of(4.5);
 
-    public static int kIntakeTOFRangeOfInterest = 2;
+    public static int kCoralIntakeTOFRangeOfInterest = 2;
     public static Distance kTOFCorrection = Units.Millimeters.of(52);
 
-    public static Distance kCenteredCoralReading = kIntakeWidth
+    public static Distance kCenteredCoralReading = kCoralIntakeWidth
         .minus(kCoralWidth)
         .times(0.5);
 
@@ -77,6 +78,7 @@ public class CoralConstants {
             public static final double kD = 0.0;
             public static final double kFF = 0.005;
             public static final double kOutput = 1;
+            public static final double kClimbOutput = 0.3;
         }
     
         public static final class CoralArm {

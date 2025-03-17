@@ -54,16 +54,21 @@ public class AlgaeConstants {
         };
     }
 
-    public static Current kArmCurrentLimit = Units.Amps.of(40);
+    public static Distance kAlgaeMaxTOFReading = Units.Inches.of(20); // TODO : Test
+
+    public static Current kArmCurrentLimit = Units.Amps.of(30);
     public static Current kIntakeCurrentLimit = Units.Amps.of(20);
 
     public static boolean kAlgaeArmMotorInverted = false;
     public static boolean kAlgaeIntakeMotorInverted = true;
 
     public static Voltage kIntakeVoltage = Units.Volts.of(5);
-
-    public static final Distance kSensorTripDistance = Centimeters.of(0);
+    public static Voltage kHoldVoltage = Units.Volts.of(2);
+    public static Voltage kEjectVoltage = Units.Volts.of(-5);
+    public static Voltage kRestVoltage = Units.Volts.of(0);
     
     public static final Rotation2d kArmRestingAngle = Rotation2d.fromDegrees(0);
-    public static final Rotation2d kArmExtendedAngle = Rotation2d.fromDegrees(-70);
+    public static final Rotation2d kArmHoldAngle = Rotation2d.fromDegrees(-20);
+    public static final Rotation2d kArmIntakeAngle = Rotation2d.fromDegrees(-70);
+    public static final Rotation2d kArmEjectAngle = Rotation2d.fromDegrees(-70);
 }

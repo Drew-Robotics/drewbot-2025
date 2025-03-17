@@ -1,0 +1,37 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "setL4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "setRightBranch"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "startToBL"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "scoreCoralCombo"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}
