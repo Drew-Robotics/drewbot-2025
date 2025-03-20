@@ -67,8 +67,17 @@ public class AlgaeConstants {
     public static Voltage kEjectVoltage = Units.Volts.of(-5);
     public static Voltage kRestVoltage = Units.Volts.of(0);
     
-    public static final Rotation2d kArmRestingAngle = Rotation2d.fromDegrees(0);
-    public static final Rotation2d kArmHoldAngle = Rotation2d.fromDegrees(-20);
+    public static final Rotation2d kArmRestAngle = Rotation2d.fromDegrees(0);
+    public static final Rotation2d kArmHoldAngle = Rotation2d.fromDegrees(-60);
     public static final Rotation2d kArmIntakeAngle = Rotation2d.fromDegrees(-70);
-    public static final Rotation2d kArmEjectAngle = Rotation2d.fromDegrees(-70);
+    public static final Rotation2d kArmEjectAngle = Rotation2d.fromDegrees(-10);
+    public static final Rotation2d kArmCorrectAngle = Rotation2d.fromDegrees(5); // relative
+
+    public static final Rotation2d kArmAlignAngle = Rotation2d.fromDegrees(-50); // bruh
+
+    public static final Rotation2d kMaxRestAngle = Rotation2d.fromDegrees(-30);
+
+    public static final Voltage kArmRestVoltage = Units.Volts.of(0.7);
+    public static final double kRestTimerSeconds = 0.5;
+    public static final double kAlgaeTimerSeconds = 0.5;
 }

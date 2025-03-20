@@ -24,7 +24,7 @@ public class AlgaeOuttakeCommand extends Command {
     // both have the same behavior, i just wanted to clairify in comments since this isnt super recommended
     // the whole algae system is really volitile in software but if it works it works
     // also who even cares about this if we cant score barge
-    subsystems.algaeArm.setDesiredAngle(AlgaeConstants.kArmRestingAngle);
+    subsystems.algaeArm.toRestState();
     subsystems.algaeIntake.setVoltage(AlgaeConstants.kRestVoltage);
   }
 

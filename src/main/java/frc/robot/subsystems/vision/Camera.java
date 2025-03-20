@@ -29,10 +29,16 @@ public class Camera {
   private PhotonPipelineResult m_latestResult;
   private final String m_cameraName;
   private Matrix<N3, N1> m_latestStdDevs;
+  private boolean m_lowStdDevs = false;
 
   public Camera(String name, Transform3d robotToCamera) {
+    this(name, robotToCamera, false);
+  }
+
+  public Camera(String name, Transform3d robotToCamera, boolean lowStdDevs) {
     m_cameraName = name;
     m_photonCamera = new PhotonCamera(name);
+    m_lowStdDevs = lowStdDevs;
     m_singleTagPoseEstimator = new PhotonPoseEstimator(
       VisionConstants.kAprilTagLayout,
       PoseStrategy.LOWEST_AMBIGUITY,
@@ -102,13 +108,16 @@ public class Camera {
       } else {
         visionEst = m_poseEstimator.update(result);
       }
-      updateEstimationStdDevs(visionEst, result.getTargets());
+      if (!m_lowStdDevs)
+        updateEstimationStdDevs(visionEst, result.getTargets());
     }
 
     return visionEst;
   }
 
   public Matrix<N3, N1> getEstimationStdDevs() {
+    if (m_lowStdDevs)
+      return VisionConstants.StdDevs.kLow;
     return m_latestStdDevs;
   }
 

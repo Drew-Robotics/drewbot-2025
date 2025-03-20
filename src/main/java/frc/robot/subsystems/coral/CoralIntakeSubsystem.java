@@ -141,8 +141,10 @@ public class CoralIntakeSubsystem extends SubsystemAbstract {
         break;
       case AlgaeRemove:
         setVoltage(CoralConstants.kCoralAlgaeRemoveVoltage);
+        break;
       case DebugEject:
         setVoltage(CoralConstants.kCoralDebugEjectVoltage);
+        break;
       default:
         break;
     }
@@ -165,10 +167,10 @@ public class CoralIntakeSubsystem extends SubsystemAbstract {
   protected void dashboardInit() {}
 
   protected void dashboardPeriodic() {
-    SmartDashboard.putNumber("Coral Intake Current", getCurrent().in(Units.Amps));
+    // SmartDashboard.putNumber("Coral Intake Current", getCurrent().in(Units.Amps));
 
     SmartDashboard.putBoolean("Coral Intake TOF Has Piece", hasPiece());
-    SmartDashboard.putNumber("Coral Intake TOF Center Disp Inches", getPieceDispFromCenter().in(Units.Inches));
+    // SmartDashboard.putNumber("Coral Intake TOF Center Disp Inches", getPieceDispFromCenter().in(Units.Inches));
   }
 
   protected void publishInit() {}

@@ -21,7 +21,7 @@ public class Controller extends CommandXboxController {
   }
 
   public InstantCommand rumbleCommand(double strength) {
-    System.out.println("rumble " + strength);
+    // System.out.println("rumble " + strength);
     return new InstantCommand(
       () -> this.getHID().setRumble(RumbleType.kBothRumble, strength)
     );

@@ -55,10 +55,10 @@ public class VisionSubsystem extends SubsystemAbstract {
     m_backRight = new Camera(VisionConstants.CameraNames.kBackRight, VisionConstants.CameraTransforms.kBackRight);
 
     m_llFront = new Camera(VisionConstants.CameraNames.kLLFront, VisionConstants.CameraTransforms.kLLFront);
-    m_llBack = new Camera(VisionConstants.CameraNames.kLLBack, VisionConstants.CameraTransforms.kLLBack);
+    m_llBack = new Camera(VisionConstants.CameraNames.kLLBack, VisionConstants.CameraTransforms.kLLBack, true);
 
     m_cameras = List.of(
-      m_frontLeft, m_frontRight, m_backLeft, m_backRight, 
+      m_frontLeft, m_frontRight, m_backLeft, m_backRight,
       //m_llFront, 
       m_llBack
     );

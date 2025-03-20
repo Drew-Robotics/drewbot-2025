@@ -17,6 +17,7 @@ public class ReefSide {
     public final Pose2d kTagPose2d;
     public final Pose2d kCenterPose;
 
+    public final boolean kBranchFlipped;
 
     public final Transform2d kPerpNorm;
     public final Transform2d kParaNorm;
@@ -25,8 +26,9 @@ public class ReefSide {
         Left, Right, Center
     }
 
-    public ReefSide(int tagID) {
+    public ReefSide(int tagID, boolean branchFlipped) {
         kTagID = tagID;
+        kBranchFlipped = branchFlipped;
         
         if (VisionConstants.kAprilTagLayout.getTagPose(tagID).isEmpty()) {
             kHeading = Rotation2d.kZero;
@@ -70,6 +72,19 @@ public class ReefSide {
     }
 
     public Pose2d getEndPose(ReefBranch reefBranch){
+        if (kBranchFlipped) {
+            switch (reefBranch) {
+                case Left:
+                    reefBranch = ReefBranch.Right;
+                    break;
+                case Right:
+                    reefBranch = ReefBranch.Left;
+                    break;
+                default:
+                    break;
+            }
+        }
+
         switch (reefBranch){
             case Left:
                 return kLeftEndPose;

@@ -21,6 +21,7 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.RobotContainer;
 import frc.robot.constants.CoralConstants;
 import frc.robot.constants.CoralStates;
 import frc.robot.subsystems.SubsystemAbstract;
@@ -95,7 +96,8 @@ public class ElevatorSubsystem extends SubsystemAbstract{
             // .idleMode(CoralConstants.IdleModes.kElevator)
             .follow(m_elevatorLeadMotor, CoralConstants.kElevatorRightMotorInverted);
 
-        configureLeader();
+        // configureLeader();
+        m_elevatorLeadMotor.configure(m_elevatorConfigLeader, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         m_elevatorFollowerMotorRight.configure(m_elevatorConfigFollowerRight, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         
     }
@@ -129,52 +131,31 @@ public class ElevatorSubsystem extends SubsystemAbstract{
         // else if (!m_elevatorLeadMotor.getReverseLimitSwitch().isPressed()) {
         //     m_switchReset = false;
         // }
+
+        RobotContainer.getInstance().loggingPeriodicCalledInElevator();
     }
 
-    protected void dashboardInit() {}
-
-    protected void dashboardPeriodic() {
-        // SmartDashboard.putNumber("Elevator Encoder Reading", getEncoderReading().getRotations());
-        // SmartDashboard.putNumber("Encoder Velocity RPM", m_elevatorLeftEncoder.getVelocity());
-
-        SmartDashboard.putNumber("Elevator Applied Out", m_elevatorLeadMotor.getAppliedOutput());
-        SmartDashboard.putNumber("Elevator Desired Height", m_targetState.getElevatorSetpoint().in(Units.Meters));
-        SmartDashboard.putNumber("Elevator Height", getHeight().in(Units.Meters));
-        // SmartDashboard.putBoolean("Limit Switch Pressed", m_elevatorLeadMotor.getReverseLimitSwitch().isPressed());
-        // SmartDashboard.putBoolean("Elevator Zeroing Encoders", m_zeroingEncoders);
-
-    }
-
-    protected void publishInit() {}
-    protected void publishPeriodic() {}
-
-    public void configureLeader() {
-        m_elevatorLeadMotor.configure(m_elevatorConfigLeader, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    }
+    // public void configureLeader() {
+    //     m_elevatorLeadMotor.configure(m_elevatorConfigLeader, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    // }
 
     public void setState(CoralState state) {
         if (state == CoralStates.kRest) {
             m_restTimer = Timer.getFPGATimestamp();
         }
 
+        m_targetState = state;
+
         // TODO : this
-        if (state == CoralStates.kClimberHold) {
-            m_elevatorConfigLeader.closedLoop.outputRange(
-                -CoralConstants.PID.Elevator.kClimbOutput, 
-                CoralConstants.PID.Elevator.kClimbOutput
+        if (m_targetState == CoralStates.kClimberHold) {
+            m_elevatorClosedLoopController.setReference(
+                CoralConstants.kElevatorClimbVoltage.in(Units.Volts), // only time we're using rotations
+                ControlType.kVoltage
             );
-            configureLeader();
-        } 
-        // if we are moving from climber hold to something thats not climber hold then switch back
-        else if (state != CoralStates.kClimberHold && m_targetState == CoralStates.kClimberHold) {
-            m_elevatorConfigLeader.closedLoop.outputRange(
-                -CoralConstants.PID.Elevator.kOutput, 
-                CoralConstants.PID.Elevator.kOutput
-            );
-            configureLeader();
+            return;
         }
 
-        m_targetState = state;
+        System.out.println("Elevator set : " + m_targetState.getName());
         // set refrence and move the motor
         m_elevatorClosedLoopController.setReference(
             heightToRotations(m_targetState.getElevatorSetpoint()).getRotations(), // only time we're using rotations
@@ -253,5 +234,21 @@ public class ElevatorSubsystem extends SubsystemAbstract{
 
         return Rotation2d.fromRadians(angleRadians);
     }
+    protected void dashboardInit() {}
+
+    protected void dashboardPeriodic() {
+        // SmartDashboard.putNumber("Elevator Encoder Reading", getEncoderReading().getRotations());
+        // SmartDashboard.putNumber("Encoder Velocity RPM", m_elevatorLeftEncoder.getVelocity());
+
+        // SmartDashboard.putNumber("Elevator Applied Out", m_elevatorLeadMotor.getAppliedOutput());
+        // SmartDashboard.putNumber("Elevator Desired Height", m_targetState.getElevatorSetpoint().in(Units.Meters));
+        // SmartDashboard.putNumber("Elevator Measured Height", getHeight().in(Units.Meters));
+        // SmartDashboard.putBoolean("Limit Switch Pressed", m_elevatorLeadMotor.getReverseLimitSwitch().isPressed());
+        // SmartDashboard.putBoolean("Elevator Zeroing Encoders", m_zeroingEncoders);
+
+    }
+
+    protected void publishInit() {}
+    protected void publishPeriodic() {}
 
 }

@@ -7,13 +7,19 @@
         {
           "type": "named",
           "data": {
+            "name": "setL3Force"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "setL4"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "setRightBranch"
+            "name": "setLeftBranch"
           }
         },
         {
@@ -25,7 +31,7 @@
         {
           "type": "named",
           "data": {
-            "name": "scoreCoralCombo"
+            "name": "scoreCoral"
           }
         },
         {
@@ -75,7 +81,7 @@
         {
           "type": "named",
           "data": {
-            "name": "scoreCoralCombo"
+            "name": "scoreCoral"
           }
         },
         {
@@ -125,7 +131,7 @@
         {
           "type": "named",
           "data": {
-            "name": "scoreCoralCombo"
+            "name": "scoreCoral"
           }
         }
       ]

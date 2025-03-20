@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.0,
-        "y": 5.3
+        "x": 5.1,
+        "y": 5.5
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.0,
-        "y": 6.3
+        "x": 5.1,
+        "y": 6.5
       },
       "isLocked": false,
       "linkedName": "BLL"
@@ -28,18 +28,13 @@
       "linkedName": "FeedTop"
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 0.43764391447368406,
-      "rotationDegrees": 125.00000000000001
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 4.0,
-    "maxAcceleration": 8.0,
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
     "maxAngularVelocity": 180.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,

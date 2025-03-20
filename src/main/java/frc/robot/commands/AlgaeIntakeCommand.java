@@ -12,6 +12,10 @@ public class AlgaeIntakeCommand extends Command {
 
   @Override
   public void initialize() {
+    if(subsystems.algaeIntake.hasPiece()) {
+      end(true);
+      return;
+    }
     subsystems.algaeArm.setDesiredAngle(AlgaeConstants.kArmIntakeAngle);
     subsystems.algaeIntake.setVoltage(AlgaeConstants.kIntakeVoltage);
   }
@@ -22,7 +26,7 @@ public class AlgaeIntakeCommand extends Command {
   @Override
   public void end(boolean interrupted) {
     if (interrupted) {
-      subsystems.algaeArm.setDesiredAngle(AlgaeConstants.kArmRestingAngle);
+      subsystems.algaeArm.toRestState();
       subsystems.algaeIntake.setVoltage(AlgaeConstants.kRestVoltage);
       return;
     }

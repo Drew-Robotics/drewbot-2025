@@ -64,7 +64,7 @@ public class RemoveAlgaeCommand extends Command {
     // Pose2d targetPose = subsystems.drive.getReefTargetPose(m_coralState, m_reefSide, ReefBranch.Center, Units.Meters.zero());
 
     new SetCoralStateCommand(m_coralState).schedule();
-    new InstantCommand(() -> subsystems.coralIntake.setState(CoralIntakeState.AlgaeRemove)).schedule();
+    subsystems.coralIntake.setState(CoralIntakeState.AlgaeRemove);
     // m_autoAlignCommand = new AutoAlignDriveCommand(targetPose);
     // m_autoAlignCommand.schedule();
   

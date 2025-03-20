@@ -1,7 +1,4 @@
 package frc.robot.constants;
-import static edu.wpi.first.units.Units.Centimeter;
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.DegreesPerSecond;
 
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
@@ -25,8 +22,10 @@ public class CoralConstants {
     public static AngularVelocity kElevatorRestVelocity = Units.Rotations.per(Units.Minutes).of(50);
     public static double kRestTimerSeconds = 0.5;
 
-    public static Distance kElevatorAtStatePositionTolerance = Centimeter.of(1);
+    public static Distance kElevatorAtStatePositionTolerance = Units.Centimeter.of(1);
     public static AngularVelocity kElevatorAtStateVelocityTolerance = Units.Rotations.per(Units.Minutes).of(40);
+
+    public static Voltage kElevatorClimbVoltage = Units.Volts.of(-1);
 
     public static Rotation2d kMinArmAngle = Rotation2d.fromDegrees(-180);
     public static Rotation2d kMaxArmAngle = Rotation2d.fromDegrees(180);
@@ -51,8 +50,8 @@ public class CoralConstants {
         .minus(kCoralWidth)
         .times(0.5);
 
-    public static Angle kCoralArmAtStatePositionTolerance = Degrees.of(10);
-    public static AngularVelocity kCoralArmAtStateVelocityTolerance = DegreesPerSecond.of(10);
+    public static Angle kCoralArmAtStatePositionTolerance = Units.Degrees.of(10);
+    public static AngularVelocity kCoralArmAtStateVelocityTolerance = Units.DegreesPerSecond.of(10);
     
     public static final class IdleModes {
         public static final IdleMode kArm = IdleMode.kBrake;

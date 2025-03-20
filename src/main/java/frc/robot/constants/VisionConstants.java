@@ -140,5 +140,6 @@ public class VisionConstants {
     public static final class StdDevs {
       public static final Matrix<N3, N1> kSingleTag = VecBuilder.fill(4, 4, 8);
       public static final Matrix<N3, N1> kMultipleTags = VecBuilder.fill(0.5, 0.5, 1);
+      public static final Matrix<N3, N1> kLow = VecBuilder.fill(0.2, 0.2, 0.4);
     }
   }

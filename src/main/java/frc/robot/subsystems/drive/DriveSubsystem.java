@@ -57,7 +57,7 @@ public class DriveSubsystem extends SubsystemAbstract {
   private final SwerveModule[] m_modules;
 
   private final SwerveDrivePoseEstimator m_poseEstimator;
-  private final SlewRateLimiter m_magnitudeLimiter, m_directionalLimiter, m_rotationLimiter;
+  private final SlewRateLimiter m_magnitudeLimiter, m_rotationLimiter;
   private boolean m_singleTagPoseEstimation = false;
 
   private LinearVelocity m_xVelocity = MetersPerSecond.zero();
@@ -145,7 +145,6 @@ public class DriveSubsystem extends SubsystemAbstract {
     m_poseEstimator = new SwerveDrivePoseEstimator(DriveConstants.kDriveKinematics, getGyroYaw(), getModulePositions(), new Pose2d());
 
     m_magnitudeLimiter = new SlewRateLimiter(DriveConstants.SlewRate.kMag);
-    m_directionalLimiter = new SlewRateLimiter(DriveConstants.SlewRate.kDir);
     m_rotationLimiter = new SlewRateLimiter(DriveConstants.SlewRate.kRot);
   }
 
@@ -169,8 +168,9 @@ public class DriveSubsystem extends SubsystemAbstract {
   public void dashboardPeriodic() {
     // NavX
     SmartDashboard.putBoolean("NavX Connected", m_gyro.isConnected());
-    SmartDashboard.putBoolean("NavX Calibrating", m_gyro.isCalibrating());
+    // SmartDashboard.putBoolean("NavX Calibrating", m_gyro.isCalibrating());
     SmartDashboard.putNumber("Yaw Degrees", getGyroYaw().getDegrees());
+
     double vx = getMeasuredChassisSpeeds().vxMetersPerSecond;
     double vy = getMeasuredChassisSpeeds().vyMetersPerSecond;
 
@@ -275,7 +275,11 @@ public class DriveSubsystem extends SubsystemAbstract {
   }
 
   public Pose2d getPose() {
-    return m_poseEstimator.getEstimatedPosition();
+    Pose2d pose = m_poseEstimator.getEstimatedPosition();
+    if (pose == null) {
+      return Pose2d.kZero;
+    }
+    return pose;
   }
 
   public Pose3d getPose3d() {
@@ -434,17 +438,11 @@ public class DriveSubsystem extends SubsystemAbstract {
   public ChassisSpeeds getChassisSpeedOnRotationControl(double x, double y, Rotation2d rotationalSetpoint) {
     double rotSetpointRad = rotationalSetpoint.getRadians();
 
-    if (rotSetpointRad > Math.PI) {
-      rotSetpointRad -= 2 * Math.PI;
-    }
-
     double rot = m_rotationController.calculate(
       getGyroYaw().getRadians(), 
       rotSetpointRad
     );
-
-    System.out.println(rotSetpointRad);
-
+    
     m_rotationalSetpointPublisher.accept(rotSetpointRad);
     m_yawPublisher.accept(getGyroYaw().getRadians());
 
@@ -455,13 +453,17 @@ public class DriveSubsystem extends SubsystemAbstract {
       Math.min(rot, maxVelocity), - maxVelocity
     );
 
-    ChassisSpeeds chassisSpeeds = getChassisSpeeds(x, y, rot/maxVelocity);
+    ChassisSpeeds chassisSpeeds = getChassisSpeeds(x, y, rot/maxVelocity, false);
     // chassisSpeeds.omegaRadiansPerSecond /= DriveConstants.MaxVels.kRotationalVelocity.in(RadiansPerSecond);
     // chassisSpeeds.omegaRadiansPerSecond = Math.max(Math.min(maxVelocity, 1), -1);
     chassisSpeeds.omegaRadiansPerSecond = rot;
 
     m_setChassisSpeedPublisher.accept(chassisSpeeds);
     return chassisSpeeds;
+  }
+
+  public ChassisSpeeds getChassisSpeeds(double x, double y, double rot) { 
+    return getChassisSpeeds(x, y, rot, true);
   }
 
   /**
@@ -472,7 +474,7 @@ public class DriveSubsystem extends SubsystemAbstract {
    * @param rot
    * @return
    */
-  public ChassisSpeeds getChassisSpeeds(double x, double y, double rot) {
+  public ChassisSpeeds getChassisSpeeds(double x, double y, double rot, boolean rateLimit) {
 
     x = Math.max(-1, Math.min(1, x));
     y = Math.max(-1, Math.min(1, y));
@@ -485,33 +487,6 @@ public class DriveSubsystem extends SubsystemAbstract {
 
     // convert to polar
 
-    // double xv, yv, rv, mv, dv;
-  
-    // xv = m_xVelocity.in(MetersPerSecond);
-    // yv = m_yVelocity.in(MetersPerSecond);
-    // rv = m_rotationalVelocity.in(RadiansPerSecond);
-    
-    // mv = Math.sqrt(Math.pow(xv, 2) + Math.pow(yv, 2));
-    // dv = Math.atan2(yv, xv);
-
-    // // rate limit
-
-    // mv = m_magnitudeLimiter.calculate(mv);
-    // dv = m_directionalLimiter.calculate(dv);
-
-    // rv = m_rotationLimiter.calculate(rv);
-
-    // // convert back and store units
-
-    // xv = mv * Math.cos(dv);
-    // yv = mv * Math.sin(dv);
-    
-    // m_xVelocity = MetersPerSecond.of(xv);
-    // m_yVelocity = MetersPerSecond.of(xv);
-    // m_rotationalVelocity = RadiansPerSecond.of(xv);
-
-    // get chassis speeds
-
     ChassisSpeeds commandedChassisSpeeds;
     if (m_isFieldOriented){
       commandedChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(m_xVelocity, m_yVelocity, m_rotationalVelocity, getGyroYaw());
@@ -519,6 +494,33 @@ public class DriveSubsystem extends SubsystemAbstract {
     else
       commandedChassisSpeeds = new ChassisSpeeds(m_xVelocity, m_yVelocity, m_rotationalVelocity);
 
+
+    if (rateLimit) {
+      double xv, yv, rv, mv, dv;
+  
+      xv = commandedChassisSpeeds.vxMetersPerSecond;
+      yv = commandedChassisSpeeds.vyMetersPerSecond;
+      rv = commandedChassisSpeeds.omegaRadiansPerSecond;
+      
+      mv = Math.sqrt(Math.pow(xv, 2) + Math.pow(yv, 2));
+      dv = Math.atan2(yv, xv);
+  
+      // rate limit
+  
+      mv = m_magnitudeLimiter.calculate(mv);
+      rv = m_rotationLimiter.calculate(rv);
+  
+      // convert back and store units
+  
+      xv = mv * Math.cos(dv);
+      yv = mv * Math.sin(dv);
+      
+      commandedChassisSpeeds.vxMetersPerSecond = xv;
+      commandedChassisSpeeds.vyMetersPerSecond = yv;
+      commandedChassisSpeeds.omegaRadiansPerSecond = rv;
+    }
+
+    // get chassis speeds
     return commandedChassisSpeeds;
   }
 

@@ -130,7 +130,7 @@ public class CoralArmSubsystem extends SubsystemAbstract{
   public CoralState getState() {
     return m_targetState;
   }
-  
+
   public boolean atState() {
     boolean atPositionState = Units.Radians.of(getAngle().getRadians()).isNear(
         Units.Radians.of(m_targetState.getArmSetpoint().getRadians()), 
@@ -157,14 +157,14 @@ public class CoralArmSubsystem extends SubsystemAbstract{
 
     // SmartDashboard.putNumber("Coral Arm PID Voltage", pidCalculatedVoltage);
     // SmartDashboard.putNumber("Coral Arm FF Voltage", feedforwardCalculatedVoltage);
-    SmartDashboard.putNumber("Coral Arm Applied Voltage", calculatedVoltage);
+    // SmartDashboard.putNumber("Coral Arm Applied Voltage", calculatedVoltage);
 
     m_coralArmMotorController.setVoltage(calculatedVoltage);
   }
 
   protected void dashboardPeriodic() {
-    SmartDashboard.putNumber("Coral Arm Desired Angle", m_armDesiredAngle.getDegrees());
-    SmartDashboard.putNumber("Coral Arm Measured Angle", getAngle().getDegrees());
+    // SmartDashboard.putNumber("Coral Arm Desired Angle", m_armDesiredAngle.getDegrees());
+    // SmartDashboard.putNumber("Coral Arm Measured Angle", getAngle().getDegrees());
     // SmartDashboard.putNumber("Coral Arm Measured Degrees Raw", Rotation2d.fromRadians(m_coralArmEncoder.getPosition()).getDegrees());
   }
 

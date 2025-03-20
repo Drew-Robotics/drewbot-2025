@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.algae;
 
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
@@ -16,6 +17,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.Units;
@@ -27,6 +29,7 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
+import frc.robot.RobotContainer.subsystems;
 import frc.robot.constants.AlgaeConstants;
 import frc.robot.constants.CoralConstants;
 import frc.robot.subsystems.SubsystemAbstract;
@@ -41,6 +44,7 @@ public class AlgaeIntakeSubsystem extends SubsystemAbstract {
 
   private final SparkFlex m_algaeIntakeMotor;
   private TimeOfFlight m_tofSensor;
+  private double m_hasPieceTimer = Timer.getFPGATimestamp();
 
   // private AlgaeIntakeState m_algaeIntakeState = AlgaeIntakeState.Rest;
 
@@ -67,6 +71,11 @@ public class AlgaeIntakeSubsystem extends SubsystemAbstract {
     m_tofSensor = new TimeOfFlight(AlgaeConstants.CANIDs.kSensor);
   }
 
+  @Override
+  public void periodic() {
+    super.periodic();
+    hasPieceRaw();
+  }
 
   /* Getters and Setters */
 
@@ -74,8 +83,21 @@ public class AlgaeIntakeSubsystem extends SubsystemAbstract {
     return Units.Millimeters.of(m_tofSensor.getRange());
   }
 
+  public boolean hasPieceRaw() {
+    boolean hasPieceRawBool = getTOFReading().in(Units.Millimeters) <= AlgaeConstants.kAlgaeMaxTOFReading.in(Units.Millimeters) 
+      && subsystems.algaeArm.getAngle().getDegrees() <= AlgaeConstants.kMaxRestAngle.getDegrees();
+
+    if (hasPieceRawBool && m_hasPieceTimer == Double.MAX_VALUE) {
+      m_hasPieceTimer = Timer.getFPGATimestamp();
+    } else if (!hasPieceRawBool){
+      m_hasPieceTimer = Double.MAX_VALUE;
+    }
+
+    return hasPieceRawBool;
+  }
+
   public boolean hasPiece() {
-    return getTOFReading().in(Units.Millimeters) <= AlgaeConstants.kAlgaeMaxTOFReading.in(Units.Millimeters);
+    return Timer.getFPGATimestamp() - m_hasPieceTimer  > AlgaeConstants.kAlgaeTimerSeconds;
   }
 
   public void setVoltage(Voltage voltage) {
@@ -95,7 +117,11 @@ public class AlgaeIntakeSubsystem extends SubsystemAbstract {
   protected void dashboardInit() {}
 
   protected void dashboardPeriodic() {
-    SmartDashboard.putNumber("Algae Intake Current", getCurrent().in(Units.Amps));
+    // SmartDashboard.putNumber("Algae Intake Current", getCurrent().in(Units.Amps));
+    SmartDashboard.putBoolean("Algae Intake TOF Has Piece", hasPiece());
+    SmartDashboard.putBoolean("Algae Intake TOF Has Piece", hasPieceRaw());
+    SmartDashboard.putNumber("Algae Intake TOF Has Piece Timer", m_hasPieceTimer);
+    SmartDashboard.putNumber("Algae TOF Reading Inches", getTOFReading().in(Inches));
   }
 
   protected void publishInit() {}

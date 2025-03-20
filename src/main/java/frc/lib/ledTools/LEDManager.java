@@ -37,7 +37,6 @@ public class LEDManager {
         m_outputStrips.forEach(
           strip -> strip.setStripState(state.getStrip(strip))
         );
-      
     }
   }
 

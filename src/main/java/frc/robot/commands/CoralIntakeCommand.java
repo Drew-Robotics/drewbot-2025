@@ -8,6 +8,12 @@ import frc.robot.subsystems.coral.CoralState;
 import frc.robot.subsystems.coral.CoralIntakeSubsystem.CoralIntakeState;
 
 public class CoralIntakeCommand extends Command {
+  private CoralState m_restState = CoralStates.kRest;
+
+  public CoralIntakeCommand(CoralState restState) {
+    m_restState = restState;
+    addRequirements(subsystems.coralIntake);
+  }
 
   public CoralIntakeCommand() {
     addRequirements(subsystems.coralIntake);
@@ -17,8 +23,7 @@ public class CoralIntakeCommand extends Command {
   public void initialize() {
     // System.out.println("set coral instake intake");
     subsystems.coralIntake.setState(CoralIntakeState.Intake);
-    new SetCoralStateCommand(CoralStates.kStation)
-      .schedule();
+    new SetCoralStateCommand(CoralStates.kStation).schedule();
 
   }
 
@@ -28,12 +33,19 @@ public class CoralIntakeCommand extends Command {
   @Override
   public void end(boolean interrupted) {
     subsystems.coralIntake.setState(CoralIntakeState.Hold);
-    new SetCoralStateCommand(CoralStates.kRest).schedule();
+    new SetCoralStateCommand(m_restState).schedule();
+    // System.out.println("end " + interrupted);
+    // new SetCoralStateCommand(CoralStates.kRest).schedule();
   }
 
   @Override
   public boolean isFinished() {
-    // System.out.println("ended " + subsystems.coralIntake.hasPiece());
+    // System.out.println(subsystems.coralIntake.hasPiece() || 
+    // subsystems.elevator.getState() != CoralStates.kStation ||
+    // subsystems.coralArm.getState() != CoralStates.kStation);
+    // System.out.println("note " + subsystems.coralIntake.hasPiece());
+    // System.out.println("ele " + subsystems.elevator.getState().getName());
+    // System.out.println("arm " + subsystems.coralArm.getState().getName());
     return subsystems.coralIntake.hasPiece() || 
       subsystems.elevator.getState() != CoralStates.kStation ||
       subsystems.coralArm.getState() != CoralStates.kStation;

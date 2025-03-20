@@ -4,12 +4,14 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.units.Units;
 
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
@@ -17,10 +19,14 @@ import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 
 import frc.robot.subsystems.SubsystemAbstract;
 import frc.robot.constants.AlgaeConstants;
+import frc.robot.constants.CoralConstants;
 
 public class AlgaeArmSubsystem extends SubsystemAbstract {
     private final SparkFlex m_algaeArmMotorController;
     private final RelativeEncoder m_algaeArmEncoder;
+
+    private double m_restTimer = Timer.getFPGATimestamp();
+    private boolean m_restState = true;
 
     private final SparkClosedLoopController m_algaeArmClosedLoopController;
 
@@ -75,7 +81,18 @@ public class AlgaeArmSubsystem extends SubsystemAbstract {
 
     /* Getters and Setters */
     public void setDesiredAngle(Rotation2d angle) {
+        System.out.println("not rest");
+        m_restState = false;
         m_currentDesiredAngle = angle;
+
+        m_algaeArmClosedLoopController.setReference(m_currentDesiredAngle.getRadians(), SparkMax.ControlType.kPosition);
+    }
+
+    public void toRestState() {
+        System.out.println("rest");
+        m_restTimer = Timer.getFPGATimestamp();
+        m_restState = true;
+        m_algaeArmClosedLoopController.setReference(AlgaeConstants.kArmRestAngle.getRadians(), SparkMax.ControlType.kPosition);
     }
 
     public Rotation2d getAngle() {
@@ -86,15 +103,23 @@ public class AlgaeArmSubsystem extends SubsystemAbstract {
     @Override
     public void periodic() {
         super.periodic();
-        m_algaeArmClosedLoopController.setReference(m_currentDesiredAngle.getRadians(), SparkMax.ControlType.kPosition);
+
+        boolean restTimerActive = (Timer.getFPGATimestamp() - m_restTimer > AlgaeConstants.kRestTimerSeconds);
+
+        // SmartDashboard.putBoolean("Algae Arm Timer", restTimerActive);
+        // SmartDashboard.putBoolean("Algae Arm State", m_restState);
+        if (m_restState && restTimerActive) {
+            m_algaeArmClosedLoopController.setReference(AlgaeConstants.kArmRestVoltage.in(Units.Volts), ControlType.kVoltage);
+            setEncoderZero();
+        }
     }
 
     protected void dashboardInit() {}
 
     protected void dashboardPeriodic() {
-        SmartDashboard.putNumber("Algae Arm Desired Angle", m_currentDesiredAngle.getDegrees());
-        SmartDashboard.putNumber("Algae Arm Measured Angle", getAngle().getDegrees());
-        SmartDashboard.putNumber("Algae Arm Current", m_algaeArmMotorController.getOutputCurrent());
+        // SmartDashboard.putNumber("Algae Arm Desired Angle", m_currentDesiredAngle.getDegrees());
+        // SmartDashboard.putNumber("Algae Arm Measured Angle", getAngle().getDegrees());
+        // SmartDashboard.putNumber("Algae Arm Current", m_algaeArmMotorController.getOutputCurrent());
     }
 
     protected void publishInit() {}

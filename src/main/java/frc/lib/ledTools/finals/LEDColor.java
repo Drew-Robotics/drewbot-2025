@@ -40,21 +40,7 @@ public final class LEDColor extends Color {
     double aThis = (double) a / 255d;
     double aOther = (double) other.a / 255d;
 
-    // aThis *= 1 / (aThis + aOther);
-    // aOther *= 1 / (aThis + aOther);
-
-    // if (aThis + aOther > 1) {
-    //   aThis = 1;
-    //   aOther = aThis - 1;
-    // }
-
-    // if (aThis + aOther < 1) {
-    //   aThis *= 1 / (aThis + aOther);
-    //   aOther *= 1 / (aThis + aOther);
-    // }
-
     double aOut = aOther + aThis * (1 - aOther); // thanks chatgpt
-
 
     // bruh more chatgpt
     LEDColor returnColor = new LEDColor(

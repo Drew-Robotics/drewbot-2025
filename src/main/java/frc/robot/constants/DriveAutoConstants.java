@@ -1,13 +1,16 @@
 package frc.robot.constants;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.trajectory.ExponentialProfile.Constraints;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
+
+import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import java.util.List;
 
@@ -18,9 +21,14 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
 
 public class DriveAutoConstants {
-  
+  // from pathplanner
+  public static final Pose2d kFeedStationPose = new Pose2d(1.2, 7, Rotation2d.fromDegrees(130));
+  public static final LinearVelocity kTeleopCoralAlignVel = MetersPerSecond.of(0.75);
+  public static final LinearVelocity kAutoCoralAlignVel = MetersPerSecond.of(0.75);
+  public static final LinearVelocity kAutoFeedAlignVel = MetersPerSecond.of(2);
+
   public static final LinearVelocity kMaxVelocity = Units.MetersPerSecond.of(4.5);
-  public static final LinearAcceleration kMaxAcceleration = Units.MetersPerSecondPerSecond.of(9);
+  public static final LinearAcceleration kMaxAcceleration = Units.MetersPerSecondPerSecond.of(3);
   public static final AngularVelocity kMaxAngularVelocity = Units.DegreesPerSecond.of(180);
   public static final AngularAcceleration kMaxAngularAcceleration  = Units.DegreesPerSecondPerSecond.of(360);
 

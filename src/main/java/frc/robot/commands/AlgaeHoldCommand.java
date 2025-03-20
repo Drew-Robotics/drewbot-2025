@@ -20,7 +20,7 @@ public class AlgaeHoldCommand extends Command {
 
   @Override
   public void end(boolean interrupted) {
-    subsystems.algaeArm.setDesiredAngle(AlgaeConstants.kArmRestingAngle);
+    subsystems.algaeArm.toRestState();
     subsystems.algaeIntake.setVoltage(AlgaeConstants.kRestVoltage);
   }
 
