@@ -119,9 +119,9 @@ public class AlgaeIntakeSubsystem extends SubsystemAbstract {
   protected void dashboardPeriodic() {
     // SmartDashboard.putNumber("Algae Intake Current", getCurrent().in(Units.Amps));
     SmartDashboard.putBoolean("Algae Intake TOF Has Piece", hasPiece());
-    SmartDashboard.putBoolean("Algae Intake TOF Has Piece", hasPieceRaw());
-    SmartDashboard.putNumber("Algae Intake TOF Has Piece Timer", m_hasPieceTimer);
-    SmartDashboard.putNumber("Algae TOF Reading Inches", getTOFReading().in(Inches));
+    // SmartDashboard.putBoolean("Algae Intake TOF Has Piece Raw", hasPieceRaw());
+    // SmartDashboard.putNumber("Algae Intake TOF Has Piece Timer", m_hasPieceTimer);
+    // SmartDashboard.putNumber("Algae TOF Reading Inches", getTOFReading().in(Inches));
   }
 
   protected void publishInit() {}

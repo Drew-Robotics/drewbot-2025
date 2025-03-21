@@ -54,6 +54,10 @@ public class Camera {
 
   }
 
+  public boolean isLowStdDevs() {
+    return m_lowStdDevs;
+  }
+
   // public PhotonPipelineResult getLastestCameraResult() {
   //   // boolean isNewResult = true;
     

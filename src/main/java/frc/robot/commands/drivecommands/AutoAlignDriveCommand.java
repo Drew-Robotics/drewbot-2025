@@ -147,7 +147,7 @@ public class AutoAlignDriveCommand extends TurnToAngleCommand {
         // System.out.print("x " + radiansPerSecond + " | t ");
         // System.out.print(subsystems.drive.getPose().getX() + " | m ");
         // System.out.println(m_targetPose.getX());
-        System.out.println("Auto aligning");
+        // System.out.println("Auto aligning");
 
         // chassisSpeeds = subsystems.drive.fieldOrientChassisSpeeds(chassisSpeeds);
         subsystems.drive.setChassisSpeeds(chassisSpeeds);
@@ -156,8 +156,8 @@ public class AutoAlignDriveCommand extends TurnToAngleCommand {
     @Override
     public void end(boolean interrupted) {
         subsystems.drive.setChassisSpeeds(new ChassisSpeeds(0,0,0));
+        // System.out.println("auto align end, to rest state");
         subsystems.algaeArm.toRestState();
-        RobotContainer.algaeIntakeZeroFixCommand().schedule();
     }
 
     @Override

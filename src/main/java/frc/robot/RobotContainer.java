@@ -6,8 +6,6 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Micro;
-
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.Set;
@@ -133,8 +131,13 @@ public class RobotContainer {
 
     // NamedCommands.registerCommand("scoreCoral", m_scoreCommand.get());
 
+    NamedCommands.registerCommand("scoreCoralFirst", 
+      autoAlignCommand(DriveAutoConstants.kAutoCoralAlignVel).withTimeout(1.1)
+      .andThen(Commands.defer(m_scoreCommandL3Rest, Set.of()))
+    );
+
     NamedCommands.registerCommand("scoreCoral", 
-      autoAlignCommand(DriveAutoConstants.kAutoCoralAlignVel).withTimeout(3)
+      autoAlignCommand(DriveAutoConstants.kAutoCoralAlignVel).withTimeout(1.35)
       .andThen(Commands.defer(m_scoreCommandL3Rest, Set.of()))
     );
 
@@ -193,17 +196,17 @@ public class RobotContainer {
     autoChooser.setDefaultOption("defaultAuto", AutoBuilder.buildAuto("defaultAuto"));
   }
 
-  public static Command algaeIntakeZeroFixCommand() {
-    return Commands.defer(
-    () -> new InstantCommand(
-        () -> subsystems.algaeArm.setDesiredAngle(AlgaeConstants.kArmCorrectAngle)
-      )
-      .andThen(new WaitCommand(0.2))
-      .andThen(new InstantCommand(
-        subsystems.algaeArm::setEncoderZero
-      )), Set.of()
-    );
-  }
+  // public static Command algaeIntakeZeroFixCommand() {
+  //   return Commands.defer(
+  //   () -> new InstantCommand(
+  //       () -> subsystems.algaeArm.setDesiredAngle(AlgaeConstants.kArmCorrectAngle)
+  //     )
+  //     .andThen(new WaitCommand(0.2))
+  //     .andThen(new InstantCommand(
+  //       subsystems.algaeArm::setEncoderZero
+  //     )), Set.of()
+  //   );
+  // }
 
   public Command autoAlignCommand(){
     return Commands.defer(this::getAutoAlignCommand, Set.of());
@@ -310,6 +313,7 @@ public class RobotContainer {
 
     controllers.operator.getClimberUp().onTrue(new SetCoralStateCommand(CoralStates.kClimberUp));
     controllers.operator.getClimberHold().onTrue(new SetCoralStateCommand(CoralStates.kClimberHold));
+    controllers.operator.getClimberHoldArmUp().onTrue(new SetCoralStateCommand(CoralStates.kClimberHoldArmUp));
 
     // controllers.operator.getSetStateL1().onTrue(
     //   new SetCoralStateCommand(CoralStates.kL1)
@@ -364,9 +368,9 @@ public class RobotContainer {
       )
     );
 
-    controllers.operator.getDebugAlgaeIntakeBack().onTrue(
-      RobotContainer.algaeIntakeZeroFixCommand()
-    );
+    // controllers.operator.getDebugAlgaeIntakeBack().onTrue(
+    //   RobotContainer.algaeIntakeZeroFixCommand()
+    // );
   }
 
   public Command getAutonomousCommand() {
@@ -377,7 +381,7 @@ public class RobotContainer {
     //     .andThen(new CoralOuttakeCommand().withTimeout(1))
     //     .andThen(new SetCoralStateCommand(CoralStates.kRest))
     //   , Set.of());
-    return autoChooser.getSelected();
+    return autoChooser.getSelected().beforeStarting(subsystems.drive::resetGyroYaw, subsystems.drive);
   }
 
   public String getAutonomousName() {
@@ -389,6 +393,9 @@ public class RobotContainer {
 
   // gotta do what you gotta do
   public void loggingPeriodicCalledInElevator() {
+    SmartDashboard.putBoolean("Aligned Left", m_operatorReefBranch == ReefBranch.Left);
+    SmartDashboard.putBoolean("Aligned Right", m_operatorReefBranch == ReefBranch.Right);
+
     for (CoralState coralState : CoralStates.kLoggedStates) {
       SmartDashboard.putBoolean(
         coralState.getName(), 

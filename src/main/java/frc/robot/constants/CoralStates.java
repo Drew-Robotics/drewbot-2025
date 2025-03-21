@@ -72,13 +72,23 @@ public class CoralStates {
 
     public static final CoralState kClimberHold = new CoralState(
         Units.Inches.of(0),
-        Rotation2d.fromDegrees(90),
+        Rotation2d.fromDegrees(120),
         true,
         "Climber Hold"
     );
 
+    public static final CoralState kClimberHoldArmUp = new CoralState(
+        Units.Inches.of(0),
+        Rotation2d.fromDegrees(-60),
+        true,
+        "Climber Hold Arm Up"
+    );
+
+
     public static final List<CoralState> kLoggedStates = List.of(
-        kRest, kStation, kAlgaeL2, kAlgaeL3,
-        kL1, kL2, kL3, kL4, kClimberUp, kClimberHold
+        // kRest, kStation, 
+        kAlgaeL2, kAlgaeL3,
+        kL1, kL2, kL3, kL4
+        // kClimberUp, kClimberHold
     );
 }

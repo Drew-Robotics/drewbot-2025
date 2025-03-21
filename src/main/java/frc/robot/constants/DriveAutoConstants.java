@@ -23,8 +23,8 @@ import com.pathplanner.lib.path.PathConstraints;
 public class DriveAutoConstants {
   // from pathplanner
   public static final Pose2d kFeedStationPose = new Pose2d(1.2, 7, Rotation2d.fromDegrees(130));
-  public static final LinearVelocity kTeleopCoralAlignVel = MetersPerSecond.of(0.75);
-  public static final LinearVelocity kAutoCoralAlignVel = MetersPerSecond.of(0.75);
+  public static final LinearVelocity kTeleopCoralAlignVel = MetersPerSecond.of(0.6);
+  public static final LinearVelocity kAutoCoralAlignVel = MetersPerSecond.of(1.15);
   public static final LinearVelocity kAutoFeedAlignVel = MetersPerSecond.of(2);
 
   public static final LinearVelocity kMaxVelocity = Units.MetersPerSecond.of(4.5);

@@ -88,7 +88,9 @@ public class DriveSubsystem extends SubsystemAbstract {
 
   protected DriveSubsystem() {
     super();
-    m_gyro = new AHRS(NavXComType.kMXP_SPI);
+    // old version
+    // m_gyro = new AHRS(NavXComType.kMXP_SPI);
+    m_gyro = new AHRS(NavXComType.kUSB1);
 
     m_frontLeft = new SwerveModule(
       "Front Left",

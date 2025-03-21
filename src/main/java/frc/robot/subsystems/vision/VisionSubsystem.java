@@ -31,7 +31,7 @@ public class VisionSubsystem extends SubsystemAbstract {
     VisionConstants.CameraNames.kFrontRight,
     VisionConstants.CameraNames.kBackLeft,
     VisionConstants.CameraNames.kBackRight,
-    VisionConstants.CameraNames.kLLFront,
+    // VisionConstants.CameraNames.kLLFront,
     VisionConstants.CameraNames.kLLBack
   );
 
@@ -144,12 +144,12 @@ public class VisionSubsystem extends SubsystemAbstract {
       Camera camera = m_cameras.get(cameraIndex);
 
       Optional<EstimatedRobotPose> poseOptional = poses.get(cameraIndex);
-
-      SmartDashboard.putBoolean(m_cameraNames.get(cameraIndex) + " Present", poseOptional.isPresent());
+      if (camera.isLowStdDevs())
+        SmartDashboard.putBoolean(m_cameraNames.get(cameraIndex) + " Present", poseOptional.isPresent());
       
       if(poseOptional.isPresent()){
-        Pose2d pos = poseOptional.get().estimatedPose.toPose2d();
-        SmartDashboard.putString(m_cameraNames.get(cameraIndex) + " Pose", pos.toString());
+        // Pose2d pos = poseOptional.get().estimatedPose.toPose2d();
+        // SmartDashboard.putString(m_cameraNames.get(cameraIndex) + " Pose", pos.toString());
         
         poseStdDevs.add(Optional.ofNullable(camera.getEstimationStdDevs()));
       }

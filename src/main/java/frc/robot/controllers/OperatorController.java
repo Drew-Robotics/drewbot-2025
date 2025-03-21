@@ -58,6 +58,11 @@ public class OperatorController extends Controller {
     return povDown();
   }
 
+  public Trigger getClimberHoldArmUp() {
+    return povRight().or(povLeft());
+  }
+  
+
   public Trigger getAlgaeIntake() {
     return leftTrigger(0.5);
   }

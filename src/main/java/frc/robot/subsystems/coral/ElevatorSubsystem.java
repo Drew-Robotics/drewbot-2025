@@ -146,8 +146,7 @@ public class ElevatorSubsystem extends SubsystemAbstract{
 
         m_targetState = state;
 
-        // TODO : this
-        if (m_targetState == CoralStates.kClimberHold) {
+        if (m_targetState == CoralStates.kClimberHold || m_targetState == CoralStates.kClimberHoldArmUp) {
             m_elevatorClosedLoopController.setReference(
                 CoralConstants.kElevatorClimbVoltage.in(Units.Volts), // only time we're using rotations
                 ControlType.kVoltage
