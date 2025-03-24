@@ -93,7 +93,7 @@ public class DriveConstants {
   }
 
   public static final class SlewRate {
-    public static final double kMag = 7;
+    public static final double kMag = 40;
     public static final double kRot = 100;
   }
 

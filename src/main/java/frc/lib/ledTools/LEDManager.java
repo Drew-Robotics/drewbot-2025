@@ -32,11 +32,19 @@ public class LEDManager {
   }
 
   public void checkStates() {
+    // int i = 0;
     for (AnimationState state : m_states){
+      // i++;
       if (!state.isActive()) continue;
-        m_outputStrips.forEach(
-          strip -> strip.setStripState(state.getStrip(strip))
-        );
+
+      // System.out.println("active " + i);
+
+      m_outputStrips.forEach(
+        strip -> strip.setColor(state.getStrip(strip).colors[0])
+        // strip -> strip.setStripState(state.getStrip(strip))
+      );
+
+      return;
     }
   }
 

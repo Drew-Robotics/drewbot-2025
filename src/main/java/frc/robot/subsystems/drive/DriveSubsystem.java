@@ -191,12 +191,14 @@ public class DriveSubsystem extends SubsystemAbstract {
       (speeds, ignore) -> setChassisSpeeds(speeds),
       DriveAutoConstants.autoDriveController,
       DriveAutoConstants.robotConfig,
-      () -> {
-        Optional<Alliance> alliance = DriverStation.getAlliance();
-        return alliance.isPresent() ? alliance.get() == DriverStation.Alliance.Red : false;
-      },
+      this::isRedAlliance,
       this
     );
+  }
+
+  public boolean isRedAlliance() {
+    Optional<Alliance> alliance = DriverStation.getAlliance();
+    return alliance.isPresent() ? alliance.get() == DriverStation.Alliance.Red : false;
   }
 
   /* ------ GYRO ------ */

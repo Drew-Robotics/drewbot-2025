@@ -17,18 +17,23 @@ public class Strip {
     this.resolution = resolution;
   }
 
-  public void setStripState(StripState state) {
-    state = state.scale(resolution);
-
-    int ledIndex = startIndex;
-
-    for (LEDColor color : state.colors){
-      m_candle.setLEDs(
-        color.r, color.g, color.b, 
-        0, ledIndex, 1
-      );
-      ledIndex++;
-    }
+  public void setColor(LEDColor color) {
+    m_candle.setLEDs(color.r, color.g, color.b);
   }
+
+  // public void setStripState(StripState state) {
+  //   state = state.scale(resolution);
+
+  //   int ledIndex = startIndex;
+
+  //   for (LEDColor color : state.colors){
+  //     // System.out.println(color);
+  //     m_candle.setLEDs(
+  //       color.r, color.g, color.b, 
+  //       0, ledIndex, 1
+  //     );
+  //     ledIndex++;
+  //   }
+  // }
 
 }

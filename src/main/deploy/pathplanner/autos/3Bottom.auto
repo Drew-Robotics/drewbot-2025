@@ -25,7 +25,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "startToBLL"
+            "pathName": "startToBRR"
           }
         },
         {
@@ -41,7 +41,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "BLLToFeed"
+                  "pathName": "BRRToFeed"
                 }
               },
               {
@@ -57,7 +57,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "coralIntakeTop"
+                        "name": "coralIntakeBottom"
                       }
                     }
                   ]
@@ -75,7 +75,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "feedToFLL"
+            "pathName": "feedToFRL"
           }
         },
         {
@@ -91,7 +91,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "FLLToFeed"
+                  "pathName": "FRLToFeed"
                 }
               },
               {
@@ -107,7 +107,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "coralIntakeTop"
+                        "name": "coralIntakeBottom"
                       }
                     }
                   ]
@@ -125,7 +125,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "feedToFLR"
+            "pathName": "feedToFRR"
           }
         },
         {

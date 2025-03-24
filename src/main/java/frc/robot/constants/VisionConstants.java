@@ -24,7 +24,9 @@ import edu.wpi.first.units.measure.Distance;
 
 public class VisionConstants {
     public static final List<Integer> kBannedTagIDs = List.of(
-      1,2, 4, 5
+      4,5,14,15, // barge
+      1,2,3, // red side feed/pros
+      12,13,16 // blue side feed/pros
     );
 
     public static final class CameraNames {
@@ -77,7 +79,7 @@ public class VisionConstants {
         Units.Inches.of(5.59).in(Meters), // fb
         Units.Inches.of(8.54).in(Meters), // lr
         Units.Inches.of(13.02).in(Meters),
-        new Rotation3d(0, Units.Degree.of(5).in(Units.Radians), Units.Degree.of(25).in(Units.Radians))
+        new Rotation3d(0, Units.Degree.of(5).in(Units.Radians), Units.Degree.of(-25).in(Units.Radians))
       );
 
       public static final Transform3d kLLBack = new Transform3d(

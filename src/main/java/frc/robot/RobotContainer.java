@@ -58,6 +58,7 @@ import frc.robot.subsystems.coral.CoralIntakeSubsystem.CoralIntakeState;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.drive.ReefSide;
 import frc.robot.subsystems.drive.ReefSide.ReefBranch;
+import frc.robot.subsystems.leds.LEDSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
 public class RobotContainer {
@@ -74,6 +75,8 @@ public class RobotContainer {
     
     public static final AlgaeArmSubsystem algaeArm = AlgaeArmSubsystem.getInstance();
     public static final AlgaeIntakeSubsystem algaeIntake = AlgaeIntakeSubsystem.getInstance();
+
+    public static final LEDSubsystem leds = LEDSubsystem.getInstance();
   }
 
   private static CoralState m_operatorCoralState = CoralStates.kL2;
@@ -116,6 +119,9 @@ public class RobotContainer {
   }
 
   protected RobotContainer() {
+    // System.out.println("test test");
+    // subsystems.leds = LEDSubsystem.getInstance();
+
     SmartDashboard.putData("Set Elevator Zero", new InstantCommand(subsystems.elevator::setEncoderZero));
     SmartDashboard.putData("Set Algae Arm Zero", new InstantCommand(subsystems.algaeArm::setEncoderZero));
     configureDriverBindings();
@@ -123,21 +129,40 @@ public class RobotContainer {
 
     // Named commands for pathplanner
 
-    NamedCommands.registerCommand("coralIntake", 
-      Commands.defer(() -> new AutoAlignDriveCommand(DriveAutoConstants.kFeedStationPose, DriveAutoConstants.kAutoFeedAlignVel)
+    Supplier<Pose2d> topFeedSup = () -> subsystems.drive.isRedAlliance() ? 
+      DriveAutoConstants.kFeedStationTopPoseRed : 
+      DriveAutoConstants.kFeedStationTopPoseBlue;
+
+    NamedCommands.registerCommand("coralIntakeTop", 
+      Commands.defer(() -> new AutoAlignDriveCommand(topFeedSup.get(), DriveAutoConstants.kAutoFeedAlignVel)
         .withDeadline(new CoralIntakeCommand(CoralStates.kL3)), Set.of() // runs until we get a piece
       )
     );
 
+    Supplier<Pose2d> bottomFeedSup = () -> subsystems.drive.isRedAlliance() ? 
+      DriveAutoConstants.kFeedStationBottomPoseRed : 
+      DriveAutoConstants.kFeedStationBottomPoseBlue;
+
+    NamedCommands.registerCommand("coralIntakeBottom", 
+      Commands.defer(() -> new AutoAlignDriveCommand(bottomFeedSup.get(), DriveAutoConstants.kAutoFeedAlignVel)
+        .withDeadline(new CoralIntakeCommand(CoralStates.kL3)), Set.of() // runs until we get a piece
+      )
+    );
+
+    NetworkTableInstance.getDefault().getStructTopic("FeedTopBlue", Pose2d.struct).publish().accept(DriveAutoConstants.kFeedStationTopPoseBlue);
+    NetworkTableInstance.getDefault().getStructTopic("FeedBottomBlue", Pose2d.struct).publish().accept(DriveAutoConstants.kFeedStationBottomPoseBlue);
+    NetworkTableInstance.getDefault().getStructTopic("FeedTopRed", Pose2d.struct).publish().accept(DriveAutoConstants.kFeedStationTopPoseRed);
+    NetworkTableInstance.getDefault().getStructTopic("FeedBottomRed", Pose2d.struct).publish().accept(DriveAutoConstants.kFeedStationBottomPoseRed);
+
     // NamedCommands.registerCommand("scoreCoral", m_scoreCommand.get());
 
     NamedCommands.registerCommand("scoreCoralFirst", 
-      autoAlignCommand(DriveAutoConstants.kAutoCoralAlignVel).withTimeout(1.1)
+      autoAlignCommand(DriveAutoConstants.kAutoCoralAlignVel).withTimeout(2) // 1.1
       .andThen(Commands.defer(m_scoreCommandL3Rest, Set.of()))
     );
 
     NamedCommands.registerCommand("scoreCoral", 
-      autoAlignCommand(DriveAutoConstants.kAutoCoralAlignVel).withTimeout(1.35)
+      autoAlignCommand(DriveAutoConstants.kAutoCoralAlignVel).withTimeout(3.5) // 1.35
       .andThen(Commands.defer(m_scoreCommandL3Rest, Set.of()))
     );
 
@@ -393,6 +418,8 @@ public class RobotContainer {
 
   // gotta do what you gotta do
   public void loggingPeriodicCalledInElevator() {
+
+    // System.out.println("test test test");
     SmartDashboard.putBoolean("Aligned Left", m_operatorReefBranch == ReefBranch.Left);
     SmartDashboard.putBoolean("Aligned Right", m_operatorReefBranch == ReefBranch.Right);
 

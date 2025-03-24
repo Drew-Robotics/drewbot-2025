@@ -26,10 +26,12 @@ import frc.robot.constants.AlgaeConstants;
 import frc.robot.constants.DriveConstants;
 
 public class AutoAlignDriveCommand extends TurnToAngleCommand {
+    // static member on a command ooooohhhh
+    private static boolean m_aligning = false;
+    public static boolean getAligning() {return m_aligning;}
 
     private Pose2d m_targetPose;
     private LinearVelocity m_maxVelocity = DriveConstants.DrivingPID.kMaxVel;
-
 
     private StructPublisher<Pose2d> m_targetPoseStructPublisher = 
         NetworkTableInstance.getDefault().getStructTopic("AutoAlignTargetPose", Pose2d.struct).publish();
@@ -103,6 +105,8 @@ public class AutoAlignDriveCommand extends TurnToAngleCommand {
 
     @Override
     public void execute() {
+        m_aligning = true;
+
         double maxVel = m_maxVelocity.in(Units.MetersPerSecond);
 
         // ChassisSpeeds chassisSpeeds = new ChassisSpeeds();
@@ -155,6 +159,7 @@ public class AutoAlignDriveCommand extends TurnToAngleCommand {
 
     @Override
     public void end(boolean interrupted) {
+        m_aligning = false;
         subsystems.drive.setChassisSpeeds(new ChassisSpeeds(0,0,0));
         // System.out.println("auto align end, to rest state");
         subsystems.algaeArm.toRestState();

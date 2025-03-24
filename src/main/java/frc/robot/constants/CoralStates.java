@@ -65,7 +65,7 @@ public class CoralStates {
 
     public static final CoralState kClimberUp = new CoralState(
         Units.Inches.of(18.5),
-        Rotation2d.fromDegrees(90),
+        Rotation2d.fromDegrees(130),
         true,
         "Climber Up"
     );

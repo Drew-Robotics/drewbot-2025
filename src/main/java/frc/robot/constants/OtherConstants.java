@@ -12,5 +12,5 @@ public class OtherConstants {
     public static final double kDeadband = 0.2;
   }
 
-  public static final int kCandleCanID = 40;
+  public static final int kCandleCanID = 50;
 }

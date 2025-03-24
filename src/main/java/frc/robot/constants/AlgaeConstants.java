@@ -73,7 +73,7 @@ public class AlgaeConstants {
     public static final Rotation2d kArmEjectAngle = Rotation2d.fromDegrees(-10);
     // public static final Rotation2d kArmCorrectAngle = Rotation2d.fromDegrees(5); // relative
 
-    public static final Rotation2d kArmAlignAngle = Rotation2d.fromDegrees(-30); // bruh
+    public static final Rotation2d kArmAlignAngle = Rotation2d.fromDegrees(-35); // bruh
 
     public static final Rotation2d kMaxRestAngle = Rotation2d.fromDegrees(-30);
 

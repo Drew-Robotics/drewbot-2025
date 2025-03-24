@@ -3,9 +3,11 @@ package frc.robot.subsystems.vision;
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import java.util.ArrayList;
@@ -23,6 +25,7 @@ import frc.robot.subsystems.SubsystemAbstract;
 
 public class VisionSubsystem extends SubsystemAbstract {
   private final List<Camera> m_cameras;
+  private boolean m_islowStdDevReading = false;
 
   // private AprilTag[] m_fieldTags = VisionConstants.AprilTags.kTags.toArray(AprilTag[]::new);
 
@@ -31,7 +34,7 @@ public class VisionSubsystem extends SubsystemAbstract {
     VisionConstants.CameraNames.kFrontRight,
     VisionConstants.CameraNames.kBackLeft,
     VisionConstants.CameraNames.kBackRight,
-    // VisionConstants.CameraNames.kLLFront,
+    VisionConstants.CameraNames.kLLFront,
     VisionConstants.CameraNames.kLLBack
   );
 
@@ -59,7 +62,7 @@ public class VisionSubsystem extends SubsystemAbstract {
 
     m_cameras = List.of(
       m_frontLeft, m_frontRight, m_backLeft, m_backRight,
-      //m_llFront, 
+      m_llFront, 
       m_llBack
     );
     // m_cameras = List.of();
@@ -80,6 +83,11 @@ public class VisionSubsystem extends SubsystemAbstract {
 
   @Override
   public void publishInit() {
+    NetworkTableInstance.getDefault().getStructTopic("llfront transform", Transform3d.struct).publish().accept(VisionConstants.CameraTransforms.kLLFront);
+    NetworkTableInstance.getDefault().getStructTopic("llback transform", Transform3d.struct).publish().accept(VisionConstants.CameraTransforms.kLLBack);
+    NetworkTableInstance.getDefault().getStructTopic("fr transform", Transform3d.struct).publish().accept(VisionConstants.CameraTransforms.kFrontRight);
+    NetworkTableInstance.getDefault().getStructTopic("fl transform", Transform3d.struct).publish().accept(VisionConstants.CameraTransforms.kFrontLeft);
+
     // addTopicSup(
     //   new StructArrayTopicSup<AprilTag>(
     //     m_table.getStructArrayTopic("Field Tags", new AprilTagStruct()).publish(),
@@ -146,6 +154,7 @@ public class VisionSubsystem extends SubsystemAbstract {
       Optional<EstimatedRobotPose> poseOptional = poses.get(cameraIndex);
       if (camera.isLowStdDevs())
         SmartDashboard.putBoolean(m_cameraNames.get(cameraIndex) + " Present", poseOptional.isPresent());
+        m_islowStdDevReading = true;
       
       if(poseOptional.isPresent()){
         // Pose2d pos = poseOptional.get().estimatedPose.toPose2d();
@@ -158,5 +167,7 @@ public class VisionSubsystem extends SubsystemAbstract {
     }
     return poseStdDevs;
   }
-
+  public boolean isLowStdDevReading() {
+    return m_islowStdDevReading;
+  }
 }
