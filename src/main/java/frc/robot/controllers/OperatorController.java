@@ -50,18 +50,21 @@ public class OperatorController extends Controller {
 
   }
 
-  public Trigger getClimberUp() {
+  // public Trigger getClimberUp() {
+  //   return povUp();
+  // }
+
+  // public Trigger getClimberHold() {
+  //   return povDown();
+  // }
+
+  // public Trigger getClimberHoldArmUp() {
+  //   return povRight().or(povLeft());
+  // }
+
+  public Trigger getL2L3RestState() {
     return povUp();
   }
-
-  public Trigger getClimberHold() {
-    return povDown();
-  }
-
-  public Trigger getClimberHoldArmUp() {
-    return povRight().or(povLeft());
-  }
-  
 
   public Trigger getAlgaeIntake() {
     return leftTrigger(0.5);
@@ -72,7 +75,7 @@ public class OperatorController extends Controller {
   }
 
   public Trigger getStow() {
-    return leftStick().or(rightStick());
+    return leftStick().or(rightStick()).or(povDown());
   }
 
   public Trigger getDebugCoralEject() {

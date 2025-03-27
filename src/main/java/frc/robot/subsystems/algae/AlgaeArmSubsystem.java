@@ -81,7 +81,7 @@ public class AlgaeArmSubsystem extends SubsystemAbstract {
 
     /* Getters and Setters */
     public void setDesiredAngle(Rotation2d angle) {
-        System.out.println("not rest");
+        // System.out.println("not rest");
         m_restState = false;
         m_currentDesiredAngle = angle;
 
@@ -89,7 +89,7 @@ public class AlgaeArmSubsystem extends SubsystemAbstract {
     }
 
     public void toRestState() {
-        System.out.println("rest");
+        // System.out.println("rest");
         m_restTimer = Timer.getFPGATimestamp();
         m_restState = true;
         m_algaeArmClosedLoopController.setReference(AlgaeConstants.kArmRestAngle.getRadians(), SparkMax.ControlType.kPosition);

@@ -7,12 +7,6 @@
         {
           "type": "named",
           "data": {
-            "name": "setL3Force"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
             "name": "setL4"
           }
         },
@@ -31,7 +25,7 @@
         {
           "type": "named",
           "data": {
-            "name": "scoreCoralFirst"
+            "name": "scoreCoral"
           }
         },
         {

@@ -36,25 +36,25 @@ public class AutoAlignDriveCommand extends TurnToAngleCommand {
     private StructPublisher<Pose2d> m_targetPoseStructPublisher = 
         NetworkTableInstance.getDefault().getStructTopic("AutoAlignTargetPose", Pose2d.struct).publish();
 
-    // private ProfiledPIDController m_xController = new ProfiledPIDController(
-    private PIDController m_xController = new PIDController(
+    private ProfiledPIDController m_xController = new ProfiledPIDController(
+    // private PIDController m_xController = new PIDController(
         DriveConstants.DrivingPID.kP,
         DriveConstants.DrivingPID.kI,
-        DriveConstants.DrivingPID.kD
-        // new Constraints(
-        //     DriveConstants.DrivingPID.kMaxVel.in(Units.MetersPerSecond),
-        //     DriveConstants.DrivingPID.kMaxAccel.in(Units.MetersPerSecondPerSecond)
-        // )
+        DriveConstants.DrivingPID.kD,
+        new Constraints(
+            DriveConstants.DrivingPID.kMaxVel.in(Units.MetersPerSecond),
+            DriveConstants.DrivingPID.kMaxAccel.in(Units.MetersPerSecondPerSecond)
+        )
     );
-    // private ProfiledPIDController m_yController = new ProfiledPIDController(
-    private PIDController m_yController = new PIDController(
+    private ProfiledPIDController m_yController = new ProfiledPIDController(
+    // private PIDController m_yController = new PIDController(
         DriveConstants.DrivingPID.kP,
         DriveConstants.DrivingPID.kI,
-        DriveConstants.DrivingPID.kD
-        // new Constraints(
-        //     DriveConstants.DrivingPID.kMaxVel.in(Units.MetersPerSecond),
-        //     DriveConstants.DrivingPID.kMaxAccel.in(Units.MetersPerSecondPerSecond)
-        // )
+        DriveConstants.DrivingPID.kD,
+        new Constraints(
+            DriveConstants.DrivingPID.kMaxVel.in(Units.MetersPerSecond),
+            DriveConstants.DrivingPID.kMaxAccel.in(Units.MetersPerSecondPerSecond)
+        )
     );
 
     public AutoAlignDriveCommand(Pose2d target, LinearVelocity maxVel) {
@@ -167,10 +167,10 @@ public class AutoAlignDriveCommand extends TurnToAngleCommand {
 
     @Override
     public boolean isFinished() {
-        return false;
+        // return false;
         // System.out.println(m_xController.atSetpoint());
         // System.out.println(m_yController.atSetpoint());
         // System.out.println(subsystems.drive.atRotationSetpoint());
-        // return m_xController.atSetpoint() && m_yController.atSetpoint() && subsystems.drive.atRotationSetpoint();
+        return m_xController.atSetpoint() && m_yController.atSetpoint() && subsystems.drive.atRotationSetpoint();
     }
 }

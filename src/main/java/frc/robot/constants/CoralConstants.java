@@ -102,6 +102,7 @@ public class CoralConstants {
             public static Angle kPositionConversionFactor = Units.Rotations.of(1);
             public static AngularVelocity kVelocityConversionFactor = kPositionConversionFactor.per(Units.Seconds);
         };
+
         /*
         Say, can you see
         By the dawn's early light
@@ -129,6 +130,7 @@ public class CoralConstants {
         *        // _//\\\\
         *       ((` ((
         */
+        
         public static final class Intake {
             // public static Distance kWheelRadius = Units.Inches.of(1.5);
             // public static Distance kPositionConversionFactor = kWheelRadius.times(2 * Math.PI); 

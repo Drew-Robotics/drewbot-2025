@@ -128,11 +128,11 @@ public class DriveConstants {
 
   // this is for teleop non pathplanner
   public static final class DrivingPID {
-    public static final double kP = 20; // Meters -> Meters per second
+    public static final double kP = 5; // Meters -> Meters per second
     public static final double kI = 0;
     public static final double kD = 0;
-    public static final LinearVelocity kMaxVel = MetersPerSecond.of(0.5);
-    // public static final LinearAcceleration kMaxAccel = MetersPerSecondPerSecond.of(3);
+    public static final LinearVelocity kMaxVel = MetersPerSecond.of(Double.MAX_VALUE);
+    public static final LinearAcceleration kMaxAccel = MetersPerSecondPerSecond.of(Double.MAX_VALUE);
   }
 
   public static final class RotationPID {
@@ -143,8 +143,8 @@ public class DriveConstants {
     public static final AngularAcceleration kMaxAccel = DegreesPerSecondPerSecond.of(500);
   }
 
-  public static final Distance kPositionTolerance = Units.Inches.of(2);
-  public static final Angle kRotationTolerance = Units.Degrees.of(2);
+  public static final Distance kPositionTolerance = Units.Inches.of(0.5);
+  public static final Angle kRotationTolerance = Units.Degrees.of(1);
 
   public static final Current kDrivingMotorCurrentLimit = Amps.of(40);
   public static final Current kTurningMotorCurrentLimit = Amps.of(20);

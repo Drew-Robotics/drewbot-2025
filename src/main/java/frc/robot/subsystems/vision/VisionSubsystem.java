@@ -22,10 +22,11 @@ import org.photonvision.EstimatedRobotPose;
 import frc.robot.RobotContainer.subsystems;
 import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.SubsystemAbstract;
+import frc.robot.subsystems.vision.Camera.SpecialCameras;
 
 public class VisionSubsystem extends SubsystemAbstract {
   private final List<Camera> m_cameras;
-  private boolean m_islowStdDevReading = false;
+  private boolean m_isBackLLReading = false;
 
   // private AprilTag[] m_fieldTags = VisionConstants.AprilTags.kTags.toArray(AprilTag[]::new);
 
@@ -57,8 +58,8 @@ public class VisionSubsystem extends SubsystemAbstract {
     m_backLeft = new Camera(VisionConstants.CameraNames.kBackLeft, VisionConstants.CameraTransforms.kBackLeft);
     m_backRight = new Camera(VisionConstants.CameraNames.kBackRight, VisionConstants.CameraTransforms.kBackRight);
 
-    m_llFront = new Camera(VisionConstants.CameraNames.kLLFront, VisionConstants.CameraTransforms.kLLFront);
-    m_llBack = new Camera(VisionConstants.CameraNames.kLLBack, VisionConstants.CameraTransforms.kLLBack, true);
+    m_llFront = new Camera(VisionConstants.CameraNames.kLLFront, VisionConstants.CameraTransforms.kLLFront, SpecialCameras.LLFront);
+    m_llBack = new Camera(VisionConstants.CameraNames.kLLBack, VisionConstants.CameraTransforms.kLLBack, SpecialCameras.LLBack);
 
     m_cameras = List.of(
       m_frontLeft, m_frontRight, m_backLeft, m_backRight,
@@ -152,9 +153,9 @@ public class VisionSubsystem extends SubsystemAbstract {
       Camera camera = m_cameras.get(cameraIndex);
 
       Optional<EstimatedRobotPose> poseOptional = poses.get(cameraIndex);
-      if (camera.isLowStdDevs())
-        SmartDashboard.putBoolean(m_cameraNames.get(cameraIndex) + " Present", poseOptional.isPresent());
-        m_islowStdDevReading = true;
+      if (camera.kName == "llBack")
+        SmartDashboard.putBoolean(camera.kName + " Present", poseOptional.isPresent());
+        m_isBackLLReading = true;
       
       if(poseOptional.isPresent()){
         // Pose2d pos = poseOptional.get().estimatedPose.toPose2d();
@@ -167,7 +168,8 @@ public class VisionSubsystem extends SubsystemAbstract {
     }
     return poseStdDevs;
   }
-  public boolean isLowStdDevReading() {
-    return m_islowStdDevReading;
+
+  public boolean isBackLLReading() {
+    return m_isBackLLReading;
   }
 }

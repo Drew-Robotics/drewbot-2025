@@ -154,7 +154,7 @@ public class ElevatorSubsystem extends SubsystemAbstract{
             return;
         }
 
-        System.out.println("Elevator set : " + m_targetState.getName());
+        // System.out.println("Elevator set : " + m_targetState.getName());
         // set refrence and move the motor
         m_elevatorClosedLoopController.setReference(
             heightToRotations(m_targetState.getElevatorSetpoint()).getRotations(), // only time we're using rotations

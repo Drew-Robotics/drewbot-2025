@@ -29,8 +29,8 @@ public class DriveAutoConstants {
   public static final Pose2d kFeedStationBottomPoseRed = new Pose2d(8.775 * 2 - 1.1, 7.1, Rotation2d.fromDegrees(-125 + 180));
   public static final Pose2d kFeedStationTopPoseRed = new Pose2d(8.775 * 2 - 1.1, 0.9, Rotation2d.fromDegrees(125 + 180));
 
-  public static final LinearVelocity kTeleopCoralAlignVel = MetersPerSecond.of(0.6);
-  public static final LinearVelocity kAutoCoralAlignVel = MetersPerSecond.of(1);
+  public static final LinearVelocity kTeleopCoralAlignVel = MetersPerSecond.of(2);
+  public static final LinearVelocity kAutoCoralAlignVel = MetersPerSecond.of(2);
   public static final LinearVelocity kAutoFeedAlignVel = MetersPerSecond.of(2);
 
   public static final LinearVelocity kMaxVelocity = Units.MetersPerSecond.of(4.5);
@@ -38,13 +38,14 @@ public class DriveAutoConstants {
   public static final AngularVelocity kMaxAngularVelocity = Units.DegreesPerSecond.of(180);
   public static final AngularAcceleration kMaxAngularAcceleration  = Units.DegreesPerSecondPerSecond.of(360);
 
-  public static final List<Integer> kAutoAlignTagsIDs = List.of(0, 1, 2, 3);
-  public static final List<Integer> kAutoDriveTagsIDs = List.of(0, 1, 2, 3);
+  // public static final List<Integer> kAutoAlignTagsIDs = List.of(0, 1, 2, 3);
+  // public static final List<Integer> kAutoDriveTagsIDs = List.of(0, 1, 2, 3);
 
   /**
    * This is the distance that the robot's center should be from the edge of the reef while scoring.
    */
-  public static final Distance kRobotDistanceFromCenter = Units.Inches.of(17);
+  public static final Distance kRobotDistanceFromCenter = Units.Inches.of(18); // real is 17.5
+
 
   /**
    * This is the distance from the center of the side of a reef (between both branches), to the center of any of the branches

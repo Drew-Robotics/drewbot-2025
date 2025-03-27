@@ -68,14 +68,15 @@ public class DriveSubsystem extends SubsystemAbstract {
   private StructPublisher<Pose2d> m_visionPublisher = m_table.getStructTopic("VisionEstim", Pose2d.struct).publish();
   private StructPublisher<Pose2d> m_robotPosePublisher = m_table.getStructTopic("RobotPose", Pose2d.struct).publish();
 
-  private StructPublisher<ChassisSpeeds> m_setChassisSpeedPublisher = m_table.getStructTopic("SetChassisSpeed", ChassisSpeeds.struct).publish();
   private DoublePublisher m_rotationalSetpointPublisher = m_table.getDoubleTopic("RotationalSetpoint").publish();
   private DoublePublisher m_yawPublisher = m_table.getDoubleTopic("RobotYaw").publish();
 
-  private StructPublisher<Pose2d> m_targetTagPosePublisher = m_table.getStructTopic("TargetTagPose", Pose2d.struct).publish();
-  private StructPublisher<Pose2d> m_targetCenterPublisher = m_table.getStructTopic("TargetCenter", Pose2d.struct).publish();
-  private StructPublisher<Pose2d> m_targetLeftPublisher = m_table.getStructTopic("TargetLeft", Pose2d.struct).publish();
-  private StructPublisher<Pose2d> m_targetRightPublisher = m_table.getStructTopic("TargetRight", Pose2d.struct).publish();
+  private StructPublisher<Pose2d> m_targetTagPosePublisher = m_table.getStructTopic("TargetPoses/TargetTagPose", Pose2d.struct).publish();
+  private StructPublisher<Pose2d> m_targetCenterPublisher = m_table.getStructTopic("TargetPoses/TargetCenter", Pose2d.struct).publish();
+  private StructPublisher<Pose2d> m_targetLeftPublisher = m_table.getStructTopic("TargetPoses/TargetLeft", Pose2d.struct).publish();
+  private StructPublisher<Pose2d> m_targetRightPublisher = m_table.getStructTopic("TargetPoses/TargetRight", Pose2d.struct).publish();
+
+  private StructPublisher<ChassisSpeeds> m_commandedChassisSpeedsPublisher = m_table.getStructTopic("CommandedChassisSpeeds", ChassisSpeeds.struct).publish();
 
   private PIDController m_rotationController;
 
@@ -199,6 +200,11 @@ public class DriveSubsystem extends SubsystemAbstract {
   public boolean isRedAlliance() {
     Optional<Alliance> alliance = DriverStation.getAlliance();
     return alliance.isPresent() ? alliance.get() == DriverStation.Alliance.Red : false;
+  }
+
+  public boolean isBlueAlliance() {
+    Optional<Alliance> alliance = DriverStation.getAlliance();
+    return alliance.isPresent() ? alliance.get() == DriverStation.Alliance.Blue : false;
   }
 
   /* ------ GYRO ------ */
@@ -374,6 +380,7 @@ public class DriveSubsystem extends SubsystemAbstract {
   /* ----- SWERVE ----- */
 
   public void setPoseEstimator(Pose2d pose2d) {
+    if (pose2d == null) return;
     m_poseEstimator.resetPosition(getGyroYaw(), getModulePositions(), pose2d);
   }
 
@@ -383,6 +390,7 @@ public class DriveSubsystem extends SubsystemAbstract {
   }
   
   public void setChassisSpeeds(ChassisSpeeds chassisSpeeds) {
+    m_commandedChassisSpeedsPublisher.accept(chassisSpeeds);
     SwerveModuleState[] swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(chassisSpeeds);
     setModuleStates(swerveModuleStates);
   }
@@ -462,7 +470,6 @@ public class DriveSubsystem extends SubsystemAbstract {
     // chassisSpeeds.omegaRadiansPerSecond = Math.max(Math.min(maxVelocity, 1), -1);
     chassisSpeeds.omegaRadiansPerSecond = rot;
 
-    m_setChassisSpeedPublisher.accept(chassisSpeeds);
     return chassisSpeeds;
   }
 

@@ -21,6 +21,14 @@ public class CoralStates {
         "Feed Station"
     );
 
+    public static final CoralState kHasCoralRest = new CoralState(
+        Units.Inches.of(0),
+        Rotation2d.fromDegrees(130),
+        false,
+        "Has Coral Rest"
+    );
+
+
     public static final CoralState kAlgaeL2 = new CoralState(
         Units.Inches.of(0),
         Rotation2d.fromDegrees(-17.5),

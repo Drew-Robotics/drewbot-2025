@@ -1,5 +1,6 @@
 package frc.robot.subsystems.vision;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,26 +20,35 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import frc.robot.RobotContainer.subsystems;
 import frc.robot.constants.VisionConstants;
 
 public class Camera {
-  
+  public enum SpecialCameras {
+    LLFront,
+    LLBack,
+    None
+  }
+
+  public final String kName;
+
   private final PhotonCamera m_photonCamera;
   private final PhotonPoseEstimator m_poseEstimator;
   private final PhotonPoseEstimator m_singleTagPoseEstimator;
   private PhotonPipelineResult m_latestResult;
-  private final String m_cameraName;
   private Matrix<N3, N1> m_latestStdDevs;
-  private boolean m_lowStdDevs = false;
+  private SpecialCameras m_specialCamera;
+
+  private List<Integer> m_bannedTagIDs = new ArrayList<>(VisionConstants.kBannedTagIDs);
 
   public Camera(String name, Transform3d robotToCamera) {
-    this(name, robotToCamera, false);
+    this(name, robotToCamera, SpecialCameras.None);
   }
 
-  public Camera(String name, Transform3d robotToCamera, boolean lowStdDevs) {
-    m_cameraName = name;
+  public Camera(String name, Transform3d robotToCamera, SpecialCameras specialCamera) {
+    kName = name;
     m_photonCamera = new PhotonCamera(name);
-    m_lowStdDevs = lowStdDevs;
+    m_specialCamera = specialCamera;
     m_singleTagPoseEstimator = new PhotonPoseEstimator(
       VisionConstants.kAprilTagLayout,
       PoseStrategy.LOWEST_AMBIGUITY,
@@ -51,39 +61,20 @@ public class Camera {
       robotToCamera
     );
     m_poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
+    
+    if (subsystems.drive.isRedAlliance()) {
+      m_bannedTagIDs.addAll(VisionConstants.kBlueReefTagIDs);
+    }
+
+    if (subsystems.drive.isBlueAlliance()) {
+      m_bannedTagIDs.addAll(VisionConstants.kRedReefTagIDs);
+    }
 
   }
 
-  public boolean isLowStdDevs() {
-    return m_lowStdDevs;
+  public SpecialCameras getSpecialCamera() {
+    return m_specialCamera;
   }
-
-  // public PhotonPipelineResult getLastestCameraResult() {
-  //   // boolean isNewResult = true;
-    
-  //   // if (m_latestResult != null) {
-  //   //   double now = Timer.getFPGATimestamp(); // seconds
-  //   //   isNewResult = Math.abs(now - m_latestResult.getTimestampSeconds()) > 1e-5; // ask Drew about all this stuff 
-  //   // }
-  //   // // System.out.println("isNewResult" + isNewResult);
-
-  //   // if(!isNewResult)
-  //   //   return m_latestResult;
-    
-  //   List<PhotonPipelineResult> cameraResults = m_photonCamera.getAllUnreadResults();
-    
-  //   if (!cameraResults.isEmpty()){
-  //     PhotonPipelineResult result = cameraResults.get(cameraResults.size() - 1); // FIFO queue
-
-  //     if (!result.hasTargets())
-  //       return m_latestResult;
-
-  //     m_latestResult = result;
-  //     System.out.println("GOT RESULT " + cameraResults.size() + " " + m_cameraName);
-  //   }
-
-  //   return m_latestResult;
-  // }
 
   public Optional<EstimatedRobotPose> getEstimatedGlobalPose() { return getEstimatedGlobalPose(false);}
   
@@ -96,7 +87,7 @@ public class Camera {
       // TODO : this sucks do a steams thing when you have time
 
       for (PhotonTrackedTarget target : result.getTargets()) {
-        for (Integer bannedTarget : VisionConstants.kBannedTagIDs) {
+        for (Integer bannedTarget : m_bannedTagIDs) {
           if (bannedTarget == target.getFiducialId()) {
             // System.out.println("Tag being filtered");
             result = new PhotonPipelineResult();
@@ -112,25 +103,53 @@ public class Camera {
       } else {
         visionEst = m_poseEstimator.update(result);
       }
-      if (!m_lowStdDevs)
-        updateEstimationStdDevs(visionEst, result.getTargets());
+
+      switch (m_specialCamera) {
+        case LLBack:
+          m_latestStdDevs = updateEstimationStdDevs(
+            VisionConstants.StdDevs.kLLBackSingle,
+            VisionConstants.StdDevs.kLLFrontMulti,
+            visionEst, result.getTargets()
+          );
+          break;
+
+        case LLFront:
+          m_latestStdDevs = updateEstimationStdDevs(
+            VisionConstants.StdDevs.kLLFrontSingle,
+            VisionConstants.StdDevs.kLLFrontMulti,
+            visionEst, result.getTargets()
+          );
+          break;
+
+        default:
+          m_latestStdDevs = updateEstimationStdDevs(
+            VisionConstants.StdDevs.kSingle,
+            VisionConstants.StdDevs.kMulti,
+            visionEst, result.getTargets()
+          );
+          break;
+      }
+        
     }
 
     return visionEst;
   }
 
   public Matrix<N3, N1> getEstimationStdDevs() {
-    if (m_lowStdDevs)
-      return VisionConstants.StdDevs.kLow;
     return m_latestStdDevs;
   }
 
-  private void updateEstimationStdDevs(Optional<EstimatedRobotPose> estimatedPoseOp, List<PhotonTrackedTarget> targets) {
-    Matrix<N3, N1> estStdDevs = VisionConstants.StdDevs.kSingleTag;
+  private Matrix<N3,N1> updateEstimationStdDevs(
+      Matrix<N3,N1> singleTagStdDevs,
+      Matrix<N3,N1> multiTagStdDevs,
+      Optional<EstimatedRobotPose> estimatedPoseOp, 
+      List<PhotonTrackedTarget> targets
+    )
+  {
+    Matrix<N3, N1> estStdDevs = singleTagStdDevs;
 
     if (estimatedPoseOp.isEmpty()) {
-      m_latestStdDevs = estStdDevs;
-      return;
+      return estStdDevs;
     }
 
     Pose2d estimatedPose = estimatedPoseOp.get().estimatedPose.toPose2d();
@@ -151,23 +170,22 @@ public class Camera {
     }
     
     if (numTags == 0){
-      m_latestStdDevs = estStdDevs;
-      return;
+      return estStdDevs;
     }
 
     avgDist /= numTags;
 
     // Decrease std devs if multiple targets are visible
     if (numTags > 1)
-      estStdDevs = VisionConstants.StdDevs.kMultipleTags;
+      estStdDevs = multiTagStdDevs;
 
     // Increase std devs based on (average) distance
     if (numTags == 1 && avgDist > 4)
       estStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
     else
-      estStdDevs = estStdDevs.times(1 + (avgDist * avgDist / 30));
+      estStdDevs = estStdDevs.times(1 + (avgDist * avgDist / 100));
 
-    m_latestStdDevs = estStdDevs;
+    return estStdDevs;
   }
 
   public AprilTag[] getSeenTags() {
@@ -188,5 +206,49 @@ public class Camera {
     }
     return tags;
   }
-  
+ 
+  // private void updateEstimationStdDevs(Optional<EstimatedRobotPose> estimatedPoseOp, List<PhotonTrackedTarget> targets) {
+  //   Matrix<N3, N1> estStdDevs = VisionConstants.StdDevs.kSingleTag;
+
+  //   if (estimatedPoseOp.isEmpty()) {
+  //     m_latestStdDevs = estStdDevs;
+  //     return;
+  //   }
+
+  //   Pose2d estimatedPose = estimatedPoseOp.get().estimatedPose.toPose2d();
+
+  //   int numTags = 0;
+  //   double avgDist = 0;
+
+  //   for (var target : targets) {
+  //     Optional<Pose3d> tagPose = m_poseEstimator.getFieldTags().getTagPose(target.getFiducialId());
+
+  //     if (tagPose.isEmpty()) 
+  //       continue;
+
+  //     numTags++;
+
+  //     Translation2d tagTranslation = tagPose.get().toPose2d().getTranslation();
+  //     avgDist += tagTranslation.getDistance(estimatedPose.getTranslation());
+  //   }
+    
+  //   if (numTags == 0){
+  //     m_latestStdDevs = estStdDevs;
+  //     return;
+  //   }
+
+  //   avgDist /= numTags;
+
+  //   // Decrease std devs if multiple targets are visible
+  //   if (numTags > 1)
+  //     estStdDevs = VisionConstants.StdDevs.kMultipleTags;
+
+  //   // Increase std devs based on (average) distance
+  //   if (numTags == 1 && avgDist > 4)
+  //     estStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+  //   else
+  //     estStdDevs = estStdDevs.times(1 + (avgDist * avgDist / 30));
+
+  //   m_latestStdDevs = estStdDevs;
+  // }
 }

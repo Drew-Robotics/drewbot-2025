@@ -38,6 +38,7 @@ import frc.robot.commands.CoralIntakeCommand;
 import frc.robot.commands.CoralOuttakeCommand;
 import frc.robot.commands.RemoveAlgaeCommand;
 import frc.robot.commands.SetCoralStateCommand;
+import frc.robot.commands.WaitForCoralStateCommand;
 import frc.robot.commands.drivecommands.TagHeadingAlignDriveCommand;
 import frc.robot.commands.drivecommands.AutoAlignDriveCommand;
 import frc.robot.commands.drivecommands.DriveCommand;
@@ -84,12 +85,8 @@ public class RobotContainer {
   private static ReefBranch m_operatorReefBranch = ReefBranch.Left;
 
   private Supplier<Command> m_scoreCommand = () ->
-    new CoralOuttakeCommand().withTimeout(1)
+    new CoralOuttakeCommand()
     .andThen(new SetCoralStateCommand(CoralStates.kRest));
-
-  private Supplier<Command> m_scoreCommandL3Rest = () ->
-  new CoralOuttakeCommand().withTimeout(0.3)
-  .andThen(new SetCoralStateCommand(CoralStates.kL3));
 
   private Supplier<Command> m_setLeftCommand = () ->
     new InstantCommand(() -> RobotContainer.m_operatorReefBranch = ReefBranch.Left);
@@ -135,7 +132,9 @@ public class RobotContainer {
 
     NamedCommands.registerCommand("coralIntakeTop", 
       Commands.defer(() -> new AutoAlignDriveCommand(topFeedSup.get(), DriveAutoConstants.kAutoFeedAlignVel)
-        .withDeadline(new CoralIntakeCommand(CoralStates.kL3)), Set.of() // runs until we get a piece
+        .withDeadline(new CoralIntakeCommand(CoralStates.kHasCoralRest))
+        .andThen(new InstantCommand(() -> {subsystems.drive.setPoseEstimator(topFeedSup.get());})),
+        Set.of() // runs until we get a piece
       )
     );
 
@@ -144,27 +143,35 @@ public class RobotContainer {
       DriveAutoConstants.kFeedStationBottomPoseBlue;
 
     NamedCommands.registerCommand("coralIntakeBottom", 
-      Commands.defer(() -> new AutoAlignDriveCommand(bottomFeedSup.get(), DriveAutoConstants.kAutoFeedAlignVel)
-        .withDeadline(new CoralIntakeCommand(CoralStates.kL3)), Set.of() // runs until we get a piece
+      Commands.defer(
+        () -> new AutoAlignDriveCommand(bottomFeedSup.get(), DriveAutoConstants.kAutoFeedAlignVel)
+          .withDeadline(new CoralIntakeCommand(CoralStates.kHasCoralRest))
+          .andThen(new InstantCommand(() -> {subsystems.drive.setPoseEstimator(topFeedSup.get());})),
+        Set.of() // runs until we get a piece
       )
     );
 
-    NetworkTableInstance.getDefault().getStructTopic("FeedTopBlue", Pose2d.struct).publish().accept(DriveAutoConstants.kFeedStationTopPoseBlue);
-    NetworkTableInstance.getDefault().getStructTopic("FeedBottomBlue", Pose2d.struct).publish().accept(DriveAutoConstants.kFeedStationBottomPoseBlue);
-    NetworkTableInstance.getDefault().getStructTopic("FeedTopRed", Pose2d.struct).publish().accept(DriveAutoConstants.kFeedStationTopPoseRed);
-    NetworkTableInstance.getDefault().getStructTopic("FeedBottomRed", Pose2d.struct).publish().accept(DriveAutoConstants.kFeedStationBottomPoseRed);
+    // NetworkTableInstance.getDefault().getStructTopic("FeedTopBlue", Pose2d.struct).publish().accept(DriveAutoConstants.kFeedStationTopPoseBlue);
+    // NetworkTableInstance.getDefault().getStructTopic("FeedBottomBlue", Pose2d.struct).publish().accept(DriveAutoConstants.kFeedStationBottomPoseBlue);
+    // NetworkTableInstance.getDefault().getStructTopic("FeedTopRed", Pose2d.struct).publish().accept(DriveAutoConstants.kFeedStationTopPoseRed);
+    // NetworkTableInstance.getDefault().getStructTopic("FeedBottomRed", Pose2d.struct).publish().accept(DriveAutoConstants.kFeedStationBottomPoseRed);
 
     // NamedCommands.registerCommand("scoreCoral", m_scoreCommand.get());
 
-    NamedCommands.registerCommand("scoreCoralFirst", 
-      autoAlignCommand(DriveAutoConstants.kAutoCoralAlignVel).withTimeout(2) // 1.1
-      .andThen(Commands.defer(m_scoreCommandL3Rest, Set.of()))
+    NamedCommands.registerCommand("scoreCoral", 
+      autoAlignCommand(DriveAutoConstants.kAutoCoralAlignVel)
+      .andThen(Commands.defer(
+        () -> {
+          return new WaitForCoralStateCommand(m_operatorCoralState);
+        }, Set.of())) // 1.1
+      .andThen(Commands.defer(m_scoreCommand, Set.of()))
     );
 
-    NamedCommands.registerCommand("scoreCoral", 
-      autoAlignCommand(DriveAutoConstants.kAutoCoralAlignVel).withTimeout(3.5) // 1.35
-      .andThen(Commands.defer(m_scoreCommandL3Rest, Set.of()))
-    );
+    // NamedCommands.registerCommand("scoreCoral", 
+    //   autoAlignCommand(DriveAutoConstants.kAutoCoralAlignVel)
+    //   .andThen() // 1.35
+    //   .andThen(Commands.defer(m_scoreCommand, Set.of()))
+    // );
 
     NamedCommands.registerCommand("setLeftBranch", m_setLeftCommand.get());
     NamedCommands.registerCommand("setRightBranch", m_setRightCommand.get());
@@ -174,9 +181,9 @@ public class RobotContainer {
     NamedCommands.registerCommand("setL3", m_setL3Command.get());
     NamedCommands.registerCommand("setL4", m_setL4Command.get());
 
-    NamedCommands.registerCommand("setL3Force", Commands.defer(
+    NamedCommands.registerCommand("setHasCoral", Commands.defer(
       (Supplier<Command>) () -> {
-        return new SetCoralStateCommand(CoralStates.kL3);
+        return new SetCoralStateCommand(CoralStates.kHasCoralRest);
       }, Set.of()
     ));
     
@@ -309,7 +316,9 @@ public class RobotContainer {
       m_scoreCommand.get()
     );
 
-    controllers.driver.getScoreSetup().whileTrue(autoAlignCommand(DriveAutoConstants.kTeleopCoralAlignVel));
+    controllers.driver.getScoreSetup().whileTrue(autoAlignCommand(DriveAutoConstants.kTeleopCoralAlignVel)
+      // .andThen(m_scoreCommand.get())
+    );
     
     controllers.driver.getRemoveAlgae().onTrue(
       new RemoveAlgaeCommand(() -> RobotContainer.m_operatorAlgaeRMState)
@@ -326,7 +335,7 @@ public class RobotContainer {
     controllers.driver.getTurnToBackRightSide().whileTrue(turnToAngleCommand(Rotation2d.fromDegrees(180 -60)));
     
     controllers.driver.getSetStateStation().onTrue(
-      new CoralIntakeCommand()
+      new CoralIntakeCommand(CoralStates.kRest)
     );
   }
 
@@ -336,9 +345,11 @@ public class RobotContainer {
     controllers.operator.getSetStateL3().onTrue(m_setL3Command.get());
     controllers.operator.getSetStateL4().onTrue(m_setL4Command.get());
 
-    controllers.operator.getClimberUp().onTrue(new SetCoralStateCommand(CoralStates.kClimberUp));
-    controllers.operator.getClimberHold().onTrue(new SetCoralStateCommand(CoralStates.kClimberHold));
-    controllers.operator.getClimberHoldArmUp().onTrue(new SetCoralStateCommand(CoralStates.kClimberHoldArmUp));
+    // controllers.operator.getClimberUp().onTrue(new SetCoralStateCommand(CoralStates.kClimberUp));
+    // controllers.operator.getClimberHold().onTrue(new SetCoralStateCommand(CoralStates.kClimberHold));
+    // controllers.operator.getClimberHoldArmUp().onTrue(new SetCoralStateCommand(CoralStates.kClimberHoldArmUp));
+
+    controllers.operator.getL2L3RestState().onTrue(new SetCoralStateCommand(CoralStates.kHasCoralRest));
 
     // controllers.operator.getSetStateL1().onTrue(
     //   new SetCoralStateCommand(CoralStates.kL1)
@@ -406,7 +417,8 @@ public class RobotContainer {
     //     .andThen(new CoralOuttakeCommand().withTimeout(1))
     //     .andThen(new SetCoralStateCommand(CoralStates.kRest))
     //   , Set.of());
-    return autoChooser.getSelected().beforeStarting(subsystems.drive::resetGyroYaw, subsystems.drive);
+    return autoChooser.getSelected();
+
   }
 
   public String getAutonomousName() {
@@ -418,7 +430,6 @@ public class RobotContainer {
 
   // gotta do what you gotta do
   public void loggingPeriodicCalledInElevator() {
-
     // System.out.println("test test test");
     SmartDashboard.putBoolean("Aligned Left", m_operatorReefBranch == ReefBranch.Left);
     SmartDashboard.putBoolean("Aligned Right", m_operatorReefBranch == ReefBranch.Right);

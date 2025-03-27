@@ -29,6 +29,13 @@ public class VisionConstants {
       12,13,16 // blue side feed/pros
     );
 
+    public static final List<Integer> kBlueReefTagIDs = List.of(
+      17,18,19,20,21,22
+    );
+    public static final List<Integer> kRedReefTagIDs = List.of(
+      6,7,8,9,10,11
+    );
+
     public static final class CameraNames {
       public static final String kFrontLeft = "frontLeft";
       public static final String kFrontRight = "frontRight";
@@ -140,8 +147,13 @@ public class VisionConstants {
     public static final AprilTagFieldLayout kAprilTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
 
     public static final class StdDevs {
-      public static final Matrix<N3, N1> kSingleTag = VecBuilder.fill(4, 4, 8);
-      public static final Matrix<N3, N1> kMultipleTags = VecBuilder.fill(0.5, 0.5, 1);
-      public static final Matrix<N3, N1> kLow = VecBuilder.fill(0.2, 0.2, 0.4);
+      public static final Matrix<N3, N1> kSingle = VecBuilder.fill(4, 4, 8);
+      public static final Matrix<N3, N1> kMulti = VecBuilder.fill(0.5, 0.5, 1);
+
+      public static final Matrix<N3, N1> kLLBackSingle = VecBuilder.fill(0,0,1);
+      public static final Matrix<N3, N1> kLLBackMulti = VecBuilder.fill(0,0,1);
+
+      public static final Matrix<N3, N1> kLLFrontSingle = VecBuilder.fill(0.5,0.5,1);
+      public static final Matrix<N3, N1> kLLFrontMulti = VecBuilder.fill(0.5,0.5,1);
     }
   }

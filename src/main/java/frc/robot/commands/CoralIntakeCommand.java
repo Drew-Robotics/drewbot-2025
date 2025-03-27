@@ -32,6 +32,7 @@ public class CoralIntakeCommand extends Command {
 
   @Override
   public void end(boolean interrupted) {
+    System.out.println("end " + (subsystems.elevator.getState() != CoralStates.kStation) + ", " + (subsystems.coralArm.getState() != CoralStates.kStation));
     subsystems.coralIntake.setState(CoralIntakeState.Hold);
     new SetCoralStateCommand(m_restState).schedule();
     // System.out.println("end " + interrupted);
@@ -39,7 +40,7 @@ public class CoralIntakeCommand extends Command {
   }
 
   @Override
-  public boolean isFinished() {
+  public boolean isFinished() {    
     // System.out.println(subsystems.coralIntake.hasPiece() || 
     // subsystems.elevator.getState() != CoralStates.kStation ||
     // subsystems.coralArm.getState() != CoralStates.kStation);
