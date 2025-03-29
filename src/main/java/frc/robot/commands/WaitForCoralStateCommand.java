@@ -29,6 +29,8 @@ public class WaitForCoralStateCommand extends Command {
 
   @Override
   public boolean isFinished() {
+    System.out.println("elevator at state : " + subsystems.elevator.atState());
+    System.out.println("coralArm at state : " + subsystems.coralArm.atState());
     return subsystems.elevator.atState() && subsystems.coralArm.atState();
   }
 }

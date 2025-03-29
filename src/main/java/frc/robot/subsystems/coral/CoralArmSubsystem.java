@@ -163,6 +163,8 @@ public class CoralArmSubsystem extends SubsystemAbstract{
   }
 
   protected void dashboardPeriodic() {
+    SmartDashboard.putBoolean("Coral Arm At State", atState());
+
     // SmartDashboard.putNumber("Coral Arm Desired Angle", m_armDesiredAngle.getDegrees());
     // SmartDashboard.putNumber("Coral Arm Measured Angle", getAngle().getDegrees());
     // SmartDashboard.putNumber("Coral Arm Measured Degrees Raw", Rotation2d.fromRadians(m_coralArmEncoder.getPosition()).getDegrees());

@@ -172,9 +172,10 @@ public class ElevatorSubsystem extends SubsystemAbstract{
             CoralConstants.kElevatorAtStatePositionTolerance
         );
 
-        boolean atVelocityState = 
-            Math.abs(m_elevatorLeftEncoder.getVelocity()) < 
-            CoralConstants.kElevatorAtStateVelocityTolerance.in(Units.Rotations.per(Units.Minute));
+        boolean atVelocityState = true; // temp
+            // Math.abs(m_elevatorLeftEncoder.getVelocity()) < 
+            // CoralConstants.kElevatorAtStateVelocityTolerance.in(Units.Rotations.per(Units.Minute));
+        
 
         return atVelocityState && atPositionState;
     }
@@ -236,6 +237,8 @@ public class ElevatorSubsystem extends SubsystemAbstract{
     protected void dashboardInit() {}
 
     protected void dashboardPeriodic() {
+        SmartDashboard.putBoolean("Elevator At State", atState());
+
         // SmartDashboard.putNumber("Elevator Encoder Reading", getEncoderReading().getRotations());
         // SmartDashboard.putNumber("Encoder Velocity RPM", m_elevatorLeftEncoder.getVelocity());
 

@@ -32,7 +32,7 @@ public class CoralIntakeCommand extends Command {
 
   @Override
   public void end(boolean interrupted) {
-    System.out.println("end " + (subsystems.elevator.getState() != CoralStates.kStation) + ", " + (subsystems.coralArm.getState() != CoralStates.kStation));
+    // System.out.println("end " + (subsystems.elevator.getState() != CoralStates.kStation) + ", " + (subsystems.coralArm.getState() != CoralStates.kStation));
     subsystems.coralIntake.setState(CoralIntakeState.Hold);
     new SetCoralStateCommand(m_restState).schedule();
     // System.out.println("end " + interrupted);

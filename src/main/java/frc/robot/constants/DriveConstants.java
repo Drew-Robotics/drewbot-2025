@@ -143,7 +143,7 @@ public class DriveConstants {
     public static final AngularAcceleration kMaxAccel = DegreesPerSecondPerSecond.of(500);
   }
 
-  public static final Distance kPositionTolerance = Units.Inches.of(0.5);
+  public static final Distance kPositionTolerance = Units.Inches.of(0.6);
   public static final Angle kRotationTolerance = Units.Degrees.of(1);
 
   public static final Current kDrivingMotorCurrentLimit = Amps.of(40);

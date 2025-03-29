@@ -22,7 +22,7 @@ public class CoralConstants {
     public static AngularVelocity kElevatorRestVelocity = Units.Rotations.per(Units.Minutes).of(50);
     public static double kRestTimerSeconds = 0.5;
 
-    public static Distance kElevatorAtStatePositionTolerance = Units.Centimeter.of(1);
+    public static Distance kElevatorAtStatePositionTolerance = Units.Inches.of(2);
     public static AngularVelocity kElevatorAtStateVelocityTolerance = Units.Rotations.per(Units.Minutes).of(40);
 
     public static Voltage kElevatorClimbVoltage = Units.Volts.of(-1);
@@ -50,8 +50,8 @@ public class CoralConstants {
         .minus(kCoralWidth)
         .times(0.5);
 
-    public static Angle kCoralArmAtStatePositionTolerance = Units.Degrees.of(10);
-    public static AngularVelocity kCoralArmAtStateVelocityTolerance = Units.DegreesPerSecond.of(10);
+    public static Angle kCoralArmAtStatePositionTolerance = Units.Degrees.of(3);
+    public static AngularVelocity kCoralArmAtStateVelocityTolerance = Units.DegreesPerSecond.of(5);
     
     public static final class IdleModes {
         public static final IdleMode kArm = IdleMode.kBrake;
@@ -130,7 +130,7 @@ public class CoralConstants {
         *        // _//\\\\
         *       ((` ((
         */
-        
+
         public static final class Intake {
             // public static Distance kWheelRadius = Units.Inches.of(1.5);
             // public static Distance kPositionConversionFactor = kWheelRadius.times(2 * Math.PI); 

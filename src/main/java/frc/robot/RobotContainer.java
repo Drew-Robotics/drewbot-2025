@@ -119,8 +119,8 @@ public class RobotContainer {
     // System.out.println("test test");
     // subsystems.leds = LEDSubsystem.getInstance();
 
-    SmartDashboard.putData("Set Elevator Zero", new InstantCommand(subsystems.elevator::setEncoderZero));
-    SmartDashboard.putData("Set Algae Arm Zero", new InstantCommand(subsystems.algaeArm::setEncoderZero));
+    // SmartDashboard.putData("Set Elevator Zero", new InstantCommand(subsystems.elevator::setEncoderZero));
+    // SmartDashboard.putData("Set Algae Arm Zero", new InstantCommand(subsystems.algaeArm::setEncoderZero));
     configureDriverBindings();
     configureOperatorBindings();
 
@@ -159,7 +159,7 @@ public class RobotContainer {
     // NamedCommands.registerCommand("scoreCoral", m_scoreCommand.get());
 
     NamedCommands.registerCommand("scoreCoral", 
-      autoAlignCommand(DriveAutoConstants.kAutoCoralAlignVel)
+      autoAlignCommand(DriveAutoConstants.kAutoCoralAlignVel).withTimeout(1.5)
       .andThen(Commands.defer(
         () -> {
           return new WaitForCoralStateCommand(m_operatorCoralState);
@@ -316,9 +316,7 @@ public class RobotContainer {
       m_scoreCommand.get()
     );
 
-    controllers.driver.getScoreSetup().whileTrue(autoAlignCommand(DriveAutoConstants.kTeleopCoralAlignVel)
-      // .andThen(m_scoreCommand.get())
-    );
+    controllers.driver.getScoreSetup().whileTrue(autoAlignCommand(DriveAutoConstants.kTeleopCoralAlignVel));
     
     controllers.driver.getRemoveAlgae().onTrue(
       new RemoveAlgaeCommand(() -> RobotContainer.m_operatorAlgaeRMState)
